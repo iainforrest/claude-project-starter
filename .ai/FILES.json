@@ -1,0 +1,52 @@
+{
+  "meta": {
+    "projectName": "[TO BE FILLED DURING BOOTSTRAP]",
+    "lastUpdated": "[TO BE FILLED]",
+    "totalFiles": 0,
+    "description": "Smart file index with cross-references and quick navigation"
+  },
+  "byPurpose": {
+    "_comment": "Organize files by their functional purpose",
+    "_example_authentication": {
+      "primary": ["AuthService.ext:45", "TokenManager.ext:123"],
+      "support": ["UserModel.ext", "AuthMiddleware.ext"],
+      "tests": ["AuthService.test.ext"]
+    },
+    "_example_dataProcessing": {
+      "primary": ["DataProcessor.ext:67"],
+      "support": ["Validator.ext", "Transformer.ext"],
+      "tests": ["DataProcessor.test.ext"]
+    }
+  },
+  "byLayer": {
+    "_comment": "Organize files by architectural layer",
+    "_example_presentation": {
+      "files": ["components/", "views/", "screens/"],
+      "pattern": "Component-based UI / MVVM"
+    },
+    "_example_business": {
+      "files": ["services/", "managers/", "use-cases/"],
+      "pattern": "Service layer / Business logic"
+    },
+    "_example_data": {
+      "files": ["repositories/", "models/", "database/"],
+      "pattern": "Repository pattern / Data access"
+    }
+  },
+  "dependencies": {
+    "_comment": "Map file relationships and dependencies",
+    "_example_AuthService.ext": {
+      "uses": ["TokenManager.ext", "UserRepository.ext"],
+      "usedBy": ["LoginController.ext", "RegisterController.ext"],
+      "tests": "AuthService.test.ext"
+    }
+  },
+  "keyInterfaces": {
+    "_comment": "Document critical interfaces and contracts",
+    "_example": {
+      "file": "interfaces/IAuthService.ext",
+      "implementations": ["AuthService.ext", "MockAuthService.ext"],
+      "methods": ["login", "logout", "register", "validateToken"]
+    }
+  }
+}
