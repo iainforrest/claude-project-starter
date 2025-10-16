@@ -687,7 +687,7 @@ Based on existing codebase analysis:
 
 ### File Requirements
 - **Format**: Markdown (.md)
-- **Location**: `/tasks/`
+- **Location**: `/sprints/`
 - **Filename**: `tasks-[prd-file-name].md` (kebab-case)
 - **Memory References**: Include file paths and line numbers from FILES.json
 - **Pattern Templates**: Copy-paste ready code from PATTERNS.md
