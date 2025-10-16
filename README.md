@@ -263,6 +263,15 @@ The system is designed to be self-documenting and self-explanatory.
 
 This is a generic, project-agnostic version of a proven development system. It will be customized to your specific project during bootstrap.
 
+## Credits & Inspiration
+
+This project was originally inspired by the work of **Ryan Carson** and his approach to AI-assisted development workflows. I discovered Ryan's work through **How to AI with Claire Vo**.
+
+### Related Resources
+
+- [Ryan Carson's AI Dev Tasks Repository](https://github.com/snarktank/ai-dev-tasks)
+- [How to AI with Claire Vo - YouTube](https://youtu.be/fD4ktSkNCw4?si=lhr5Rj3-JGIxVpWa)
+
 ---
 
 **Ready to start?** Open `BOOTSTRAP.md` with Claude Code and begin the setup process!
