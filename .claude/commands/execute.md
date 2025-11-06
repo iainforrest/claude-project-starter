@@ -78,6 +78,177 @@ to:
 
 Execute tasks with **architectural precision** using the AI memory system for instant pattern application, dependency resolution, and quality assurance. Every implementation follows established patterns with zero architectural drift.
 
+## Code Documentation Standards
+
+### 🚨 MANDATORY: High-Quality, Extensive Comments
+
+**CRITICAL REQUIREMENT**: Every implementation MUST include extensive, high-quality comments throughout the codebase.
+
+**Objective**: Code should be **immediately understandable** when revisited months later. Comments should eliminate ambiguity and dramatically increase readability.
+
+### Comment Quality Guidelines
+
+**HIGH-QUALITY comments explain:**
+- ✅ **WHY** the code exists (business logic reasoning)
+- ✅ **WHAT** the code does (at a high level)
+- ✅ **HOW** complex logic works (step-by-step for algorithms)
+- ✅ **WHEN** code runs (lifecycle, triggers, conditions)
+- ✅ **WHAT** assumptions are made (preconditions, postconditions)
+- ✅ **WHAT** edge cases are handled (and why)
+- ✅ **HOW** the code integrates with other components
+- ✅ **WHAT** performance considerations exist
+
+**LOW-QUALITY comments to AVOID:**
+- ❌ Restating what the code obviously does: `// increment counter` for `counter++`
+- ❌ Outdated comments that don't match current code
+- ❌ Vague comments: `// fix bug` or `// TODO: handle this`
+- ❌ Commented-out code without explanation
+
+### Where to Comment (Be Excessive)
+
+**1. File-Level Documentation**
+```javascript
+/**
+ * UserAuthenticationService
+ *
+ * Handles all user authentication operations including login, logout,
+ * token refresh, and session management. Integrates with SessionManager
+ * for session persistence and JWTService for token generation.
+ *
+ * Security: All passwords are hashed using bcrypt with 12 rounds.
+ * Tokens expire after 24 hours and require refresh.
+ *
+ * Performance: Target <500ms for authentication operations.
+ * Uses in-memory cache for active sessions.
+ */
+```
+
+**2. Function/Method Documentation**
+```javascript
+/**
+ * Authenticates user with email and password
+ *
+ * @param email - User's email address (must be valid format)
+ * @param password - Plain text password (will be hashed for comparison)
+ * @returns JWT token and user profile on success
+ * @throws AuthenticationError if credentials invalid
+ * @throws RateLimitError if too many attempts (>5 in 15 min)
+ *
+ * Process:
+ * 1. Validates email format and rate limit check
+ * 2. Retrieves user from database by email
+ * 3. Compares hashed password using bcrypt
+ * 4. Generates JWT token with 24hr expiration
+ * 5. Creates session entry in SessionManager
+ * 6. Returns token and sanitized user profile
+ *
+ * Security: Password never logged or returned in response
+ * Performance: Typically completes in 200-300ms
+ */
+async login(email: string, password: string): Promise<AuthResponse> {
+```
+
+**3. Complex Logic Blocks**
+```javascript
+// Rate limiting: Check if user has exceeded 5 login attempts in 15 minutes
+// This prevents brute force attacks. We use a sliding window approach
+// stored in Redis with automatic expiration. If limit exceeded, we return
+// a 429 error and require a 15-minute cooldown before allowing retry.
+const attempts = await this.rateLimiter.getAttempts(email);
+if (attempts > 5) {
+  throw new RateLimitError('Too many login attempts. Try again in 15 minutes.');
+}
+```
+
+**4. Business Logic Explanations**
+```javascript
+// Business rule: Free tier users limited to 10 projects, Pro users get 100
+// This limit is enforced at project creation time, not at display time,
+// to ensure consistent UX. We check against projectCount in user profile
+// which is updated via database trigger on project insert/delete.
+if (user.tier === 'free' && user.projectCount >= 10) {
+  throw new BusinessLogicError('Free tier limit reached. Upgrade to Pro for more projects.');
+}
+```
+
+**5. Integration Points**
+```javascript
+// Integration with SessionManager: We must call createSession AFTER
+// successful password verification but BEFORE returning token to client.
+// This ensures session exists in database for subsequent API calls that
+// validate the token. SessionManager handles automatic cleanup of expired
+// sessions via background job running every 1 hour.
+await this.sessionManager.createSession(userId, token);
+```
+
+**6. Error Handling**
+```javascript
+try {
+  await this.database.saveUser(user);
+} catch (error) {
+  // Database constraint violation: Most likely duplicate email
+  // We catch this specifically to provide user-friendly error message
+  // rather than exposing internal database error details
+  if (error.code === 'SQLITE_CONSTRAINT') {
+    throw new ValidationError('Email already registered');
+  }
+  // Unexpected database error: Log for debugging and throw generic error
+  logger.error('Failed to save user', { error, userId: user.id });
+  throw new DatabaseError('Failed to create user account');
+}
+```
+
+**7. Performance Optimizations**
+```javascript
+// Performance optimization: We cache user profiles in Redis for 5 minutes
+// to avoid repeated database queries on every API call. Cache is invalidated
+// when user profile is updated. This reduced average API response time
+// from 250ms to 50ms in production testing.
+const cachedProfile = await this.cache.get(`user:${userId}`);
+if (cachedProfile) {
+  return JSON.parse(cachedProfile);
+}
+```
+
+**8. Edge Cases and Assumptions**
+```javascript
+// Edge case: Handle scenario where token is valid but session was
+// manually deleted by admin (account suspension). In this case, token
+// verification passes but session lookup fails. We treat this as
+// unauthorized and force re-authentication.
+const session = await this.sessionManager.findSession(tokenData.sessionId);
+if (!session) {
+  // Assumption: Missing session means account action taken, not system error
+  throw new UnauthorizedError('Session no longer valid. Please login again.');
+}
+```
+
+### Comment Frequency Guidelines
+
+**Target: 1 comment block every 5-15 lines of code**
+- Simple code: 1 comment per 10-15 lines
+- Complex code: 1 comment per 5-10 lines
+- Critical security/business logic: 1 comment per 3-5 lines
+
+### Comment During Implementation
+
+**IMPORTANT**: Write comments **as you code**, not after:
+1. Write function/method documentation FIRST
+2. Add inline comments as you implement each logic block
+3. Document edge cases when you handle them
+4. Explain integration points when you connect components
+
+### Comments as Documentation
+
+**Remember**: Comments are **living documentation** that:
+- Help future developers (including yourself) understand code quickly
+- Serve as onboarding material for new team members
+- Explain business logic without requiring external documentation
+- Capture architectural decisions and trade-offs
+- Document performance optimizations and why they were needed
+
+**If you're unsure whether to add a comment: ADD IT.** Too many high-quality comments is infinitely better than too few.
+
 ## Pre-Execution Memory Preparation
 
 ### 1. **Task Analysis with Memory Context**

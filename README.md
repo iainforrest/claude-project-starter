@@ -40,10 +40,18 @@ A self-bootstrapping development system that sets up a complete AI-assisted deve
 
 ### During Bootstrap
 
-- **`.claude/` folder** - Customized rule files:
-  - `PRD_GENERATION.md` - Rules for creating Product Requirement Documents
-  - `TASK_GENERATION.md` - Rules for breaking PRDs into tasks
-  - `TASK_EXECUTION.md` - Rules for systematic implementation
+- **`.claude/` folder** - Slash commands and specialized agents:
+  - **`commands/`** - Workflow commands (use `/command-name`):
+    - `prd.md` - `/prd` - Generate Product Requirement Documents
+    - `tasks.md` - `/tasks` - Break PRDs into implementation tasks
+    - `execute.md` - `/execute` - Systematically execute task lists
+    - `commit.md` - `/commit` - Intelligent git commits
+    - `update.md` - `/update` - Update AI memory system
+  - **`agents/`** - Specialized AI agents (invoked via Task tool):
+    - `update-memory-agent.md` - Analyzes git diffs and updates memory
+    - `cto-technical-advisor.md` - Strategic technical guidance
+    - `security-auditor.md` - Comprehensive security audits
+    - `ui-ux-expert.md` - UI/UX design expertise
 
 - **`.ai/` folder** - Memory system for project knowledge:
   - `ARCHITECTURE.json` - Architecture patterns and data flows
@@ -116,9 +124,11 @@ After running `claude init`, you'll want to add:
 [Your build commands]
 
 ## Development Workflow
-1. Create PRD (`.claude/PRD_GENERATION.md`)
-2. Generate Tasks (`.claude/TASK_GENERATION.md`)
-3. Execute (`.claude/TASK_EXECUTION.md`)
+1. Create PRD (`/prd` command)
+2. Generate Tasks (`/tasks` command)
+3. Execute (`/execute` command)
+4. Commit changes (`/commit` command)
+5. Update memory (`/update` command)
 
 ## Architecture
 [Your architecture patterns]
@@ -158,51 +168,76 @@ If you chose to set up git during bootstrap:
 
 ## Using the Development Workflow
 
-Once bootstrap is complete, use this workflow to build features:
+Once bootstrap is complete, use this **slash command workflow** to build features:
 
 ### Step 1: Create a PRD
 
-Tag `@.claude/PRD_GENERATION.md` and describe your feature idea:
+Use the `/prd` command with your feature idea:
 
 ```
-@.claude/PRD_GENERATION.md
-
-I want to add user authentication with email/password login.
+/prd Add user authentication with email/password login
 ```
 
-Claude will ask clarifying questions and generate a complete PRD file in the `/prds/` folder.
+Claude will ask clarifying questions and generate a complete PRD file saved to `/tasks/prd-user-authentication.md`.
 
 ### Step 2: Generate Tasks
 
-Tag `@.claude/TASK_GENERATION.md` and reference the PRD:
+Use the `/tasks` command and reference the PRD:
 
 ```
-@.claude/TASK_GENERATION.md
-
-Please generate tasks for @prds/prd-user-authentication.md
+/tasks @tasks/prd-user-authentication.md
 ```
 
-Claude will create a detailed task list in the `/tasks/` folder with complexity ratings, file references, and pattern templates.
+Claude will create a detailed task list saved to `/tasks/tasks-user-authentication.md` with complexity ratings, file references, and pattern templates.
 
 ### Step 3: Execute Tasks
 
-Tag `@.claude/TASK_EXECUTION.md` and reference the tasks file:
+Use the `/execute` command with the tasks file:
 
 ```
-@.claude/TASK_EXECUTION.md
-
-Start work on @tasks/tasks-user-authentication.md
+/execute @tasks/tasks-user-authentication.md
 ```
 
-Claude will systematically execute each task, mark progress, run builds, and update the memory system.
+Claude will systematically execute each task, mark progress in real-time, run builds, and verify completion.
+
+### Step 4: Commit Changes
+
+Use the `/commit` command when work is complete:
+
+```
+/commit
+```
+
+Claude will analyze changes, create logical grouped commits, and push to GitHub.
+
+### Step 5: Update Memory System
+
+Use the `/update` command to keep memory current:
+
+```
+/update
+```
+
+Claude will analyze git diffs and update the `.ai/` memory system with new patterns and changes.
 
 ### The Complete Flow
 
 ```
-Feature Idea → PRD Generation → Task Generation → Task Execution → Memory Update
+/prd → /tasks → /execute → /commit → /update
 ```
 
-Each step leverages the memory system (`.ai/` files) for context, patterns, and file references - ensuring consistent, high-quality implementation.
+Each command leverages the memory system (`.ai/` files) for context, patterns, and file references - ensuring consistent, high-quality implementation.
+
+### Specialized Agents
+
+Beyond workflow commands, the system includes specialized agents for expert guidance:
+
+- **CTO Technical Advisor**: Strategic technical decisions and feasibility assessments
+- **Security Auditor**: Comprehensive security reviews before production releases
+- **UI/UX Expert**: Design guidance for user interfaces and experience flows
+- **Update Memory Agent**: Automatically analyzes git diffs to keep memory current
+
+Agents are invoked automatically by Claude when their expertise is needed, or you can request them explicitly.
 
 ## Customization
 
@@ -255,9 +290,19 @@ This development system is built on the principle that **AI works best with pers
 This is a self-contained system. Everything you need is in:
 - This README (getting started)
 - `.ai/README.md` (memory system guide)
-- `.claude/*.md` (rule files with inline guidance)
+- `.claude/commands/*.md` (slash command documentation)
+- `.claude/agents/*.md` (specialized agent expertise)
+- `.claude/SLASH_COMMAND_MIGRATION.md` (migration guide from v1.0)
 
 The system is designed to be self-documenting and self-explanatory.
+
+### What's New in v2.0
+
+- ✨ **Slash Commands**: Modern `/command` syntax replaces old `@.claude/FILE.md` approach
+- 🤖 **Specialized Agents**: Expert AI agents for security, technical decisions, and UI/UX
+- 📦 **Better Organization**: Separated commands and agents into dedicated directories
+- 🚀 **Enhanced Workflow**: New `/commit` and `/update` commands automate common tasks
+- 📖 **Improved Documentation**: Clearer structure and migration guide
 
 ## Version
 
