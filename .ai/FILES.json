@@ -1,52 +1,96 @@
 {
   "meta": {
-    "projectName": "[TO BE FILLED DURING BOOTSTRAP]",
-    "lastUpdated": "[TO BE FILLED]",
-    "totalFiles": 0,
+    "projectName": "claude-project-starter",
+    "lastUpdated": "2025-12-07",
+    "totalFiles": 15,
     "description": "Smart file index with cross-references and quick navigation"
   },
   "byPurpose": {
     "_comment": "Organize files by their functional purpose",
-    "_example_authentication": {
-      "primary": ["AuthService.ext:45", "TokenManager.ext:123"],
-      "support": ["UserModel.ext", "AuthMiddleware.ext"],
-      "tests": ["AuthService.test.ext"]
+    "commandWorkflow": {
+      "primary": [
+        ".claude/commands/prd.md",
+        ".claude/commands/tasks.md",
+        ".claude/commands/execute.md",
+        ".claude/commands/bugs.md"
+      ],
+      "support": [
+        ".claude/commands/commit.md",
+        ".claude/commands/update.md",
+        ".claude/commands/feature.md"
+      ],
+      "documentation": [".claude/WORKFLOW.md"]
     },
-    "_example_dataProcessing": {
-      "primary": ["DataProcessor.ext:67"],
-      "support": ["Validator.ext", "Transformer.ext"],
-      "tests": ["DataProcessor.test.ext"]
+    "agents": {
+      "primary": [
+        ".claude/agents/prd-writer.md",
+        ".claude/agents/task-writer.md",
+        ".claude/agents/update-memory-agent.md"
+      ],
+      "support": [
+        ".claude/agents/cto-technical-advisor.md",
+        ".claude/agents/security-auditor.md",
+        ".claude/agents/ui-ux-expert.md"
+      ]
+    },
+    "memorySystem": {
+      "primary": [
+        ".ai/ARCHITECTURE.json",
+        ".ai/BUSINESS.json",
+        ".ai/FILES.json",
+        ".ai/PATTERNS.md"
+      ],
+      "support": [
+        ".ai/QUICK.md",
+        ".ai/TODO.md",
+        ".ai/SPRINT_UPDATE.md",
+        ".ai/README.md"
+      ]
     }
   },
   "byLayer": {
     "_comment": "Organize files by architectural layer",
-    "_example_presentation": {
-      "files": ["components/", "views/", "screens/"],
-      "pattern": "Component-based UI / MVVM"
+    "commands": {
+      "files": [".claude/commands/"],
+      "pattern": "Interactive commands with user Q&A"
     },
-    "_example_business": {
-      "files": ["services/", "managers/", "use-cases/"],
-      "pattern": "Service layer / Business logic"
+    "agents": {
+      "files": [".claude/agents/"],
+      "pattern": "Autonomous document generation agents"
     },
-    "_example_data": {
-      "files": ["repositories/", "models/", "database/"],
-      "pattern": "Repository pattern / Data access"
+    "memory": {
+      "files": [".ai/"],
+      "pattern": "AI memory system (8 core files)"
     }
   },
   "dependencies": {
     "_comment": "Map file relationships and dependencies",
-    "_example_AuthService.ext": {
-      "uses": ["TokenManager.ext", "UserRepository.ext"],
-      "usedBy": ["LoginController.ext", "RegisterController.ext"],
-      "tests": "AuthService.test.ext"
+    ".claude/commands/prd.md": {
+      "uses": [".ai/ARCHITECTURE.json", ".ai/BUSINESS.json", ".ai/FILES.json", ".ai/PATTERNS.md"],
+      "invokes": [".claude/agents/prd-writer.md"],
+      "outputs": ["/tasks/prd-[name].md"]
+    },
+    ".claude/commands/tasks.md": {
+      "uses": [".ai/ARCHITECTURE.json", ".ai/FILES.json", ".ai/PATTERNS.md"],
+      "invokes": [".claude/agents/task-writer.md"],
+      "inputs": ["/tasks/prd-[name].md"],
+      "outputs": ["/tasks/tasks-[name].md"]
+    },
+    ".claude/commands/bugs.md": {
+      "uses": [".ai/ARCHITECTURE.json", ".ai/FILES.json", ".ai/PATTERNS.md", ".ai/BUSINESS.json"],
+      "outputs": ["/tasks/tasks-[bug].md", "/tasks/prd-[bug].md"]
+    },
+    ".claude/commands/execute.md": {
+      "uses": [".ai/PATTERNS.md", ".ai/FILES.json", ".ai/QUICK.md"],
+      "inputs": ["/tasks/tasks-[name].md"]
     }
   },
   "keyInterfaces": {
     "_comment": "Document critical interfaces and contracts",
-    "_example": {
-      "file": "interfaces/IAuthService.ext",
-      "implementations": ["AuthService.ext", "MockAuthService.ext"],
-      "methods": ["login", "logout", "register", "validateToken"]
+    "agentHandoff": {
+      "description": "Context passed from commands to agents",
+      "format": "YAML structure with FEATURE_NAME, PROBLEM, MUST_HAVE, etc.",
+      "usedBy": [".claude/commands/prd.md", ".claude/commands/tasks.md"]
     }
   }
 }

@@ -2,6 +2,22 @@
 
 *Commands, file locations, and debugging shortcuts*
 
+---
+
+## Memory Loading Guide
+
+**Start here for any task.** Load additional files based on what you're doing:
+
+| Task | Also Load |
+|------|-----------|
+| Quick lookup | This file only |
+| New feature | ARCHITECTURE.json, PATTERNS.md |
+| Bug fix | FILES.json |
+| Business logic | BUSINESS.json |
+| Full context | All .ai/ files |
+
+---
+
 ## Build Commands
 
 ```bash
@@ -18,9 +34,11 @@
 [LINT_COMMAND]               # e.g., "npm run lint", "./gradlew lint"
 ```
 
+---
+
 ## Critical File Locations
 
-*Add file references as your project grows*
+*Add file references with line numbers as your project grows*
 
 ```
 [Feature]Service.ext:line    # Description of what's here
@@ -28,6 +46,8 @@
 config.ext:line              # Configuration file
 routes.ext:line              # Route definitions
 ```
+
+---
 
 ## Debugging Commands
 
@@ -42,6 +62,8 @@ routes.ext:line              # Route definitions
 [TEST_FILE_COMMAND]          # e.g., "npm test -- path/to/test"
 ```
 
+---
+
 ## Performance Monitoring
 
 ```bash
@@ -51,6 +73,8 @@ routes.ext:line              # Route definitions
 # Analyze bundle/build
 [ANALYZE_COMMAND]            # e.g., "npm run analyze"
 ```
+
+---
 
 ## Common Issues & Fixes
 
@@ -66,7 +90,7 @@ routes.ext:line              # Route definitions
 
 ---
 
-## Development Workflow Shortcuts
+## Development Workflow
 
 ```bash
 # Quick rebuild
@@ -79,9 +103,43 @@ routes.ext:line              # Route definitions
 [CLEAN_BUILD]                # e.g., "npm run clean && npm run build"
 ```
 
+---
+
+## Slash Commands
+
+```bash
+/prd [idea]        # Generate PRD from feature idea
+/tasks [prd-file]  # Generate tasks from PRD
+/execute           # Execute task list
+/bugs [issue]      # Investigate and fix bugs
+/commit            # Group and commit changes
+/update            # Update memory system
+/review-memory     # Analyze and optimize memory structure
+```
+
+---
+
+## Memory System Navigation
+
+```
+.ai/
+├── QUICK.md          ← YOU ARE HERE (start point)
+├── ARCHITECTURE.json   → System patterns, data flows
+├── BUSINESS.json       → Features, rules, requirements
+├── FILES.json          → File index, dependencies
+├── PATTERNS.md         → Pattern index (lightweight)
+├── patterns/           → Domain-specific patterns
+│   └── _TEMPLATE.md    → How to add new patterns
+├── TODO.md             → Current sprint tasks
+└── SPRINT_UPDATE.md    → Update procedures
+```
+
+---
+
 ## Notes
 
 - Update this file with commands as you discover them
 - Add debugging techniques that work
 - Document solutions to problems encountered
-- Keep it concise for quick reference
+- Keep it concise - this is for quick reference
+- Use `File.ext:line` format for file references

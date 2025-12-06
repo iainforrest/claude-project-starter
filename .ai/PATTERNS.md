@@ -1,133 +1,161 @@
-# Implementation Patterns
+# Pattern Index
 
-*Copy-paste templates for consistent implementation*
+*Quick reference for finding implementation patterns*
 
-## Overview
+## How to Use This Index
 
-This file contains reusable implementation patterns discovered in this project. Each pattern includes:
-- **When to Use**: Guidance on when to apply the pattern
-- **Template**: Copy-paste ready code
-- **Implementation Checklist**: Steps to follow
-- **Pattern Reference**: Link to actual implementation in codebase
+1. **Find your need** in the Quick Pattern Lookup table below
+2. **Load the domain file** from `patterns/[DOMAIN].md`
+3. **Copy the template** and adapt to your use case
+4. **Reference the codebase** location for working examples
 
-## Architectural Patterns
+## Pattern Domains
 
-### Example: Service Layer Pattern
+Create domain-specific pattern files as your project grows:
 
-**When to Use:**
-- Business logic that doesn't belong in controllers
-- Logic used by multiple endpoints
-- Complex operations requiring multiple data sources
+| Domain | File | Description | Status |
+|--------|------|-------------|--------|
+| Template | `patterns/_TEMPLATE.md` | How to create new domain files | Ready |
+| [YOUR_DOMAIN] | `patterns/[NAME].md` | Add as needed | - |
 
-**Template:**
-```[language]
-class ExampleService {
-  constructor(private repository: ExampleRepository) {}
+**Common domains to create:**
+- `WEB.md` - Frontend patterns (components, state, routing)
+- `API.md` - Backend patterns (endpoints, middleware, auth)
+- `DATABASE.md` - Data access patterns (queries, repos, migrations)
+- `TESTING.md` - Test patterns (unit, integration, e2e)
+- `INFRASTRUCTURE.md` - DevOps patterns (deploy, logging, monitoring)
 
-  async createItem(data: CreateItemDTO): Promise<Item> {
-    // 1. Validate input
-    this.validateItemData(data);
+---
 
-    // 2. Business logic
-    const item = await this.repository.create(data);
+## Quick Pattern Lookup
 
-    // 3. Side effects (notifications, logging, etc.)
-    await this.notificationService.sendNotification(item);
+Find the right pattern for your task:
 
-    return item;
-  }
+| Need | Pattern | Domain File |
+|------|---------|-------------|
+| Service with business logic | Service Layer Pattern | patterns/API.md |
+| API endpoint | Controller Pattern | patterns/API.md |
+| Database queries | Repository Pattern | patterns/DATABASE.md |
+| Error handling | Result Type Pattern | patterns/API.md |
+| Input validation | Validation Pattern | patterns/API.md |
+| Component structure | Component Pattern | patterns/WEB.md |
+| State management | State Pattern | patterns/WEB.md |
+| Unit tests | Unit Test Pattern | patterns/TESTING.md |
+| Integration tests | Integration Test Pattern | patterns/TESTING.md |
+| Authentication | Auth Pattern | patterns/AUTH.md |
+| Logging | Logging Pattern | patterns/INFRASTRUCTURE.md |
+| Agent delegation | Command-Agent Pattern | (below) |
 
-  private validateItemData(data: CreateItemDTO): void {
-    // Validation logic
-  }
-}
+*Table expands as you add patterns. Update when adding new domain files.*
+
+---
+
+## Built-in Pattern: Command-Agent Delegation
+
+This pattern is core to the claude-project-starter workflow.
+
+### When to Use
+- Heavy document generation (PRDs, task lists)
+- Work requiring isolated context
+- Autonomous processing without interactive Q&A
+- Pattern matching across entire codebase
+
+### Command Structure
+```yaml
+---
+description: Short description for command list
+---
+
+# Command Role and Instructions
+
+[Command gathers context through batched Q&A]
+[Confirms summary with user]
+[Invokes agent with structured context]
 ```
 
-**Implementation Checklist:**
-- [ ] Dependency injection for all dependencies
-- [ ] Input validation before processing
-- [ ] Error handling with appropriate error types
-- [ ] Logging at key decision points
-- [ ] Unit tests with mocked dependencies
-
-**Pattern Reference**: `services/ExampleService.ext:45`
-
+### Agent Structure
+```yaml
+---
+name: agent-name
+description: When to invoke with examples
+model: sonnet
+color: blue
 ---
 
-## Code Templates
+# Agent Role and Instructions
 
-*Add specific code templates as you discover patterns in your project*
-
-### Example: Error Handling Pattern
-
-**Template:**
-```[language]
-try {
-  const result = await this.someOperation();
-  return { success: true, data: result };
-} catch (error) {
-  logger.error('Operation failed', error);
-  return { success: false, error: error.message };
-}
+[Reads memory system for context]
+[Processes input autonomously]
+[Generates output to /tasks/]
+[Returns confirmation summary]
 ```
 
----
-
-## Testing Patterns
-
-*Add testing patterns as you establish testing approaches*
-
-### Example: Unit Test Pattern
-
-**Template:**
-```[language]
-describe('ExampleService', () => {
-  let service: ExampleService;
-  let mockRepository: MockRepository;
-
-  beforeEach(() => {
-    mockRepository = {
-      create: jest.fn(),
-      findById: jest.fn(),
-    };
-    service = new ExampleService(mockRepository);
-  });
-
-  it('should create item with valid data', async () => {
-    const itemData = { name: 'Test', value: 123 };
-    mockRepository.create.mockResolvedValue({ id: 1, ...itemData });
-
-    const result = await service.createItem(itemData);
-
-    expect(result.id).toBe(1);
-    expect(mockRepository.create).toHaveBeenCalledWith(itemData);
-  });
-});
+### Context Handoff Format
+```yaml
+FEATURE_NAME: kebab-case-name
+PROBLEM: One sentence problem statement
+MUST_HAVE:
+- Requirement 1
+- Requirement 2
+NICE_TO_HAVE:
+- Optional requirement
+USER_FLOWS:
+  HAPPY_PATH:
+    - Step 1
+    - Step 2
+  ERROR_FLOWS:
+    - Error scenario
+SUCCESS_CRITERIA: How we know it's done
+COMPLEXITY: Low/Medium/High
 ```
 
----
-
-## UI Patterns
-
-*Add UI component patterns as you discover them*
+**Reference**: `.claude/commands/prd.md` → `.claude/agents/prd-writer.md`
 
 ---
 
-## Data Patterns
+## Adding New Patterns
 
-*Add data access and repository patterns as needed*
+### 1. Create Domain File
+```bash
+cp .ai/patterns/_TEMPLATE.md .ai/patterns/[DOMAIN].md
+```
+
+### 2. Update This Index
+- Add row to Pattern Domains table
+- Add entries to Quick Pattern Lookup table
+
+### 3. Pattern Format
+Each pattern in domain files should have:
+- **When to Use** - Trigger conditions
+- **Template** - Copy-paste code
+- **Checklist** - Implementation steps
+- **Reference** - `FileName.ext:lineNumber`
 
 ---
 
-## Integration Patterns
+## Token Efficiency
 
-*Add API integration and external service patterns*
+| Load | Tokens |
+|------|--------|
+| This index only | ~1,000 |
+| Index + 1 domain file | ~3,500 |
+| Index + 2 domain files | ~6,000 |
+
+**Strategy**: Load index first, then only the domain file(s) you need.
 
 ---
 
-## Notes
+## Maintenance
 
-- Update this file as you discover new patterns
-- Include working code examples from actual implementation
-- Reference real file locations for pattern examples
-- Keep patterns condensed and focused on core concepts
+### After Each Sprint
+- Add patterns discovered during implementation
+- Update file:line references if code moved
+- Remove patterns that didn't work well
+
+### When Patterns Exceed ~400 Lines
+- Split into more specific domain files
+- Keep each domain file focused
+
+---
+
+*This is an index. Detailed patterns live in `patterns/[DOMAIN].md` files.*
