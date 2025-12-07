@@ -9,12 +9,12 @@ Generate implementation-ready task lists from PRD documents.
 ## Usage
 
 ```
-/tasks [prd-name]
+/TaskGen [prd-name]
 ```
 
 **Example:**
 ```
-/tasks prd-email-notifications
+/TaskGen prd-email-notifications
 ```
 
 ## Process

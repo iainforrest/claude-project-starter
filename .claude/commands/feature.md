@@ -342,7 +342,7 @@ Follow the PRD generation template from `.claude/commands/prd.md` with these ada
 
 **Save to:** `/tasks/prd-[feature-name].md`
 
-**Then tell user:** "PRD generated. Run `/tasks` to generate implementation tasks."
+**Then tell user:** "PRD generated. Run `/TaskGen` to generate implementation tasks."
 
 ---
 

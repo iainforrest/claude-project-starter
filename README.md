@@ -34,14 +34,14 @@ A self-bootstrapping development system that sets up a complete AI-assisted work
 
 3. **Start building**:
    ```
-   /prd → /tasks → /execute → /commit → /update
+   /prd → /TaskGen → /execute → /commit → /update
    ```
 
 ## Key Architecture (v2.0)
 
 ```
 .claude/                    # Generic (syncs across projects)
-├── commands/               # Workflow commands (/prd, /tasks, /execute, etc.)
+├── commands/               # Workflow commands (/prd, /TaskGen, /execute, etc.)
 ├── agents/                 # Specialized AI agents (CTO, Security, UI/UX, etc.)
 └── WORKFLOW.md             # Command/agent documentation
 
@@ -65,7 +65,7 @@ A self-bootstrapping development system that sets up a complete AI-assisted work
 
 ```
 /prd [feature idea]     → Generate Product Requirements Document
-/tasks [prd-file]       → Break PRD into implementation tasks
+/TaskGen [prd-file]     → Break PRD into implementation tasks
 /execute [tasks-file]   → Systematically execute tasks
 /commit                 → Intelligent grouped git commits
 /update                 → Update .ai/ memory from git diffs
@@ -83,7 +83,7 @@ A self-bootstrapping development system that sets up a complete AI-assisted work
 | Command | Purpose | Output |
 |---------|---------|--------|
 | `/prd` | Generate requirements from feature idea | `/tasks/prd-[name].md` |
-| `/tasks` | Convert PRD to implementation tasks | `/tasks/tasks-[name].md` |
+| `/TaskGen` | Convert PRD to implementation tasks | `/tasks/tasks-[name].md` |
 | `/execute` | Execute tasks with build verification | Implemented code |
 | `/commit` | Group and commit changes intelligently | Git commits |
 | `/update` | Update memory system from git diffs | Updated `.ai/` files |
@@ -165,7 +165,7 @@ your-project/
 ├── .claude/
 │   ├── commands/           # Workflow commands
 │   │   ├── prd.md
-│   │   ├── tasks.md
+│   │   ├── TaskGen.md
 │   │   ├── execute.md
 │   │   ├── commit.md
 │   │   ├── update.md

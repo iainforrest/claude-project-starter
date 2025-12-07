@@ -6,9 +6,9 @@ Quick reference for the custom command workflow in this project.
 
 | Command | Purpose | Output | Next Step |
 |---------|---------|--------|-----------|
-| `/prd` | Plan new features | PRD document | → `/tasks` |
-| `/bugs` | Explore & fix bugs | Tasks OR PRD | → `/execute` OR `/tasks` |
-| `/tasks` | Generate task list | Task document | → `/execute` |
+| `/prd` | Plan new features | PRD document | → `/TaskGen` |
+| `/bugs` | Explore & fix bugs | Tasks OR PRD | → `/execute` OR `/TaskGen` |
+| `/TaskGen` | Generate task list | Task document | → `/execute` |
 | `/execute` | Implement tasks | Code changes | → `/commit` |
 | `/commit` | Commit & push | Git commits | Done |
 | `/update` | Update memory system | Updated .ai/ files | → `/commit` |
@@ -29,7 +29,7 @@ Commands run in the main conversation context and can ask questions:
 ### Agents (Autonomous)
 Agents run in isolated context windows for heavy generation work:
 - **prd-writer** - Generates PRD documents (invoked by `/prd` after Q&A)
-- **task-writer** - Generates task lists (invoked by `/tasks`)
+- **task-writer** - Generates task lists (invoked by `/TaskGen`)
 - **update-memory-agent** - Updates .ai/ files (invoked by `/update`)
 
 **Why this split?**
@@ -52,7 +52,7 @@ User describes feature idea
     ↓
 prd-writer agent → PRD saved to /tasks/prd-[name].md
     ↓
-/tasks prd-[name] → task-writer agent → Tasks saved
+/TaskGen prd-[name] → task-writer agent → Tasks saved
     ↓
 /execute → Implementation → Code complete
     ↓
@@ -69,7 +69,7 @@ You: "I want to add email notifications when a report is finalized"
 [Confirms summary]
 → PRD saved to /tasks/prd-email-notifications.md
 
-/tasks prd-email-notifications
+/TaskGen prd-email-notifications
 → Tasks saved to /tasks/tasks-email-notifications.md
 
 /execute
@@ -120,7 +120,7 @@ User reports bug
     ↓
 Bug PRD generated (complexity ≥7)
     ↓
-/tasks [bug-prd-name] → /execute → /commit
+/TaskGen [bug-prd-name] → /execute → /commit
 ```
 
 **When to use:** Bug requires significant refactoring or architectural changes
@@ -133,7 +133,7 @@ You: "The algorithm assigns items incorrectly"
 → Creates PRD for algorithm refactor (complex fix)
 → Saves to /tasks/prd-fix-algorithm.md
 
-/tasks prd-fix-algorithm
+/TaskGen prd-fix-algorithm
 → Creates detailed task breakdown
 
 /execute
@@ -173,7 +173,7 @@ You: "Change the header font size to 18px"
 ```
 Is this a new feature or bug fix?
 ├─ NEW FEATURE
-│  └─ /prd → /tasks → /execute → /commit
+│  └─ /prd → /TaskGen → /execute → /commit
 │
 ├─ BUG or EXISTING CODE FIX
 │  └─ /bugs
@@ -181,7 +181,7 @@ Is this a new feature or bug fix?
 │     │  └─ Creates tasks → /execute → /commit
 │     │
 │     └─ Complex fix (≥7 complexity)
-│        └─ Creates PRD → /tasks → /execute → /commit
+│        └─ Creates PRD → /TaskGen → /execute → /commit
 │
 └─ TINY CHANGE (1-2 lines)
    └─ Just ask → /commit
@@ -235,7 +235,7 @@ Is this a new feature or bug fix?
 
 **Output:**
 - Tasks file (complexity ≤6) → ready for /execute
-- Bug PRD (complexity ≥7) → needs /tasks first
+- Bug PRD (complexity ≥7) → needs /TaskGen first
 
 **Complexity threshold:**
 - ≤6: Single file/component, clear fix, <6 hours
@@ -243,7 +243,7 @@ Is this a new feature or bug fix?
 
 ---
 
-### `/tasks` - Task Generation from PRD
+### `/TaskGen` - Task Generation from PRD
 
 **Purpose:** Break down PRD into implementation-ready tasks
 
@@ -365,7 +365,7 @@ Commands and agents automatically:
 - Trust the investigation process
 - Pick the fix option that fits your timeline/risk tolerance
 
-### For `/tasks`:
+### For `/TaskGen`:
 - Just provide the PRD name
 - The task-writer agent does everything else
 - Review task breakdown before /execute
@@ -397,7 +397,7 @@ Commands and agents automatically:
 → PRD saved: /tasks/prd-sms-notifications.md
 
 # Step 2: Generate tasks
-/tasks prd-sms-notifications
+/TaskGen prd-sms-notifications
 → task-writer agent generates tasks
 → Tasks saved: /tasks/tasks-sms-notifications.md
 
@@ -468,7 +468,7 @@ Commands and agents automatically:
 /bugs "description of bug"
 
 # Generate tasks from PRD
-/tasks prd-name
+/TaskGen prd-name
 
 # Implement tasks
 /execute
@@ -487,7 +487,7 @@ Commands and agents automatically:
 | Agent | Purpose | Invoked By |
 |-------|---------|------------|
 | `prd-writer` | Generate PRD documents | `/prd` (after Q&A) |
-| `task-writer` | Generate task lists | `/tasks` |
+| `task-writer` | Generate task lists | `/TaskGen` |
 | `update-memory-agent` | Update .ai/ files | `/update` |
 | `cto-technical-advisor` | Technical guidance | Manual invocation |
 | `security-auditor` | Security reviews | Manual invocation |
@@ -495,4 +495,4 @@ Commands and agents automatically:
 
 ---
 
-**Pro Tip:** The commands are designed to work together as a flow. Start with `/prd` or `/bugs`, flow through `/tasks` (if needed), then `/execute`, then `/commit`. Each command sets up the next one perfectly. The agent-based architecture keeps heavy generation work in isolated contexts while commands handle user interaction.
+**Pro Tip:** The commands are designed to work together as a flow. Start with `/prd` or `/bugs`, flow through `/TaskGen` (if needed), then `/execute`, then `/commit`. Each command sets up the next one perfectly. The agent-based architecture keeps heavy generation work in isolated contexts while commands handle user interaction.

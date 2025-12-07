@@ -352,7 +352,7 @@ Does this look accurate? Anything I missed or got wrong?
 3. **Start using the workflow**:
    ```
    /prd [new feature]
-   /tasks [prd file]
+   /TaskGen [prd file]
    /execute [tasks file]
    ```
 

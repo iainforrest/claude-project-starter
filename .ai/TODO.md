@@ -37,7 +37,7 @@ Synchronized enhanced command and agent system from coach-ops battle-tested impl
 
 **Enhanced:**
 - [x] `.claude/commands/prd.md` - Added decision frameworks, red flags, 3-phase questioning, agent handoff
-- [x] `.claude/commands/tasks.md` - Restructured to delegate to task-writer agent
+- [x] `.claude/commands/TaskGen.md` - Renamed from tasks.md (avoids conflict with Claude's built-in /tasks), delegates to task-writer agent
 - [x] `.claude/commands/execute.md` - Verified code documentation standards (8 example categories)
 
 **Removed:**

@@ -109,7 +109,7 @@ routes.ext:line              # Route definitions
 
 ```bash
 /prd [idea]        # Generate PRD from feature idea
-/tasks [prd-file]  # Generate tasks from PRD
+/TaskGen [prd-file]  # Generate tasks from PRD
 /execute           # Execute task list
 /bugs [issue]      # Investigate and fix bugs
 /commit            # Group and commit changes

@@ -13,7 +13,7 @@
    - This is where all your project knowledge will live
 
 3. **Ready to Build**
-   - Commands like `/prd`, `/tasks`, `/execute` will read from `.ai/`
+   - Commands like `/prd`, `/TaskGen`, `/execute` will read from `.ai/`
    - Everything works out of the box
 
 ## Key Concept: Generic Commands + Project-Specific Memory
@@ -340,7 +340,7 @@ Your development system is ready.
 
 2. **Generate tasks**:
    ```
-   /tasks @tasks/prd-[feature-name].md
+   /TaskGen @tasks/prd-[feature-name].md
    ```
 
 3. **Execute**:

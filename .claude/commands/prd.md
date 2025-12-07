@@ -292,7 +292,7 @@ PRD saved to /tasks/prd-[feature-name].md
 
 Would you like me to:
 1. Review the PRD with you
-2. Generate implementation tasks (/tasks prd-[feature-name])
+2. Generate implementation tasks (/TaskGen prd-[feature-name])
 3. Make changes to the PRD
 4. Update memory system with new patterns
 ```

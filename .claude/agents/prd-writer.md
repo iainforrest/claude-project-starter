@@ -541,7 +541,7 @@ Summary:
 
 Next steps:
 1. Review the PRD
-2. Run /tasks prd-[feature-name] to generate implementation tasks
+2. Run /TaskGen prd-[feature-name] to generate implementation tasks
 3. Make changes if needed
 ```
 
