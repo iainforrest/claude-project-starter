@@ -1,63 +1,73 @@
 ---
-description: Pull latest changes from claude-project-starter into this project
+description: Pull latest commands and agents from claude-project-starter
 ---
 
 # Pull Claude Project Starter Updates
 
-You are pulling the latest updates from the claude-project-starter repository into this project.
+Pull the latest generic commands and agents from the central starter repository.
 
-## Configuration
+## Key Principle
 
-- **Source repo**: `iainforrest/claude-project-starter` (GitHub)
-- **Branch**: `master`
-- **Target directory**: `.claude/` in current project
+**Commands and agents are fully generic** - they reference `.ai/` memory files for project-specific context. No customization or templating is needed when pulling updates.
+
+## What Gets Synced
+
+| Syncs | Never Syncs |
+|-------|-------------|
+| `.claude/commands/*.md` | `.ai/*` (project-specific memory) |
+| `.claude/agents/*.md` | `.claude/settings.local.json` (machine-specific) |
+| `.claude/WORKFLOW.md` | `pull-cps.md`, `push-cps.md` (sync commands) |
 
 ## Steps
 
-### 1. Fetch the latest from the starter repo
+### 1. Clone starter repo
 
 ```bash
-# Create a temp directory and clone the starter repo (shallow clone for speed)
 TEMP_DIR=$(mktemp -d)
 git clone --depth 1 https://github.com/iainforrest/claude-project-starter.git "$TEMP_DIR"
+echo "Cloned to $TEMP_DIR"
 ```
 
-### 2. Compare and show differences
+### 2. Compare files
 
-Compare the following directories between the cloned starter and this project:
-- `.claude/commands/` - slash commands
-- `.claude/settings.json` - settings (if exists)
-- `.ai/` - memory system templates (structure only, not project data)
+Compare these directories:
+- `.claude/commands/` (excluding pull-cps.md and push-cps.md)
+- `.claude/agents/`
+- `.claude/WORKFLOW.md` (if exists)
 
-Use `diff -rq` or similar to identify changed files, then show the actual diff content for each changed file.
+For each file, determine:
+- **New**: Exists in starter but not locally
+- **Updated**: Exists in both, content differs
+- **Same**: No changes needed
 
-**Important exclusions** - Do NOT overwrite these project-specific files:
-- `.ai/*.json` files containing project-specific data
-- Any file that has been customized for this specific project
-- The pull-cps.md and push-cps.md commands themselves (to avoid overwriting local copies)
+Use `diff` to show what changed in updated files.
 
-**Safe to update**:
-- `.claude/commands/*.md` - command templates (except sync commands)
-- `.ai/PATTERNS.md` - generic patterns
-- `.ai/QUICK.md` - quick reference
-
-### 3. Present changes for review
+### 3. Present changes
 
 Show the user:
-1. List of files that would be updated
-2. For each file, show a readable diff of what would change
-3. Highlight any files that might have project-specific customizations
+```
+Files to update:
+- commands/prd.md (updated - 15 lines changed)
+- commands/execute.md (updated - 8 lines changed)
+- agents/new-agent.md (new)
 
-### 4. Ask for confirmation
+Files unchanged:
+- commands/commit.md
+- commands/update.md
+```
 
-Before applying any changes, ask:
+For updated files, show the diff.
+
+### 4. Confirm
+
+Ask the user:
 - "Apply all changes?"
-- "Apply selectively?" (then ask about each file)
+- "Apply selectively?" (then confirm each file)
 - "Cancel"
 
-### 5. Apply approved changes
+### 5. Apply changes
 
-Copy the approved files from the temp directory to this project.
+Copy approved files from temp directory to this project's `.claude/` directory.
 
 ### 6. Cleanup
 
@@ -67,8 +77,17 @@ rm -rf "$TEMP_DIR"
 
 ### 7. Report
 
-Summarize what was updated and note any new commands or features added.
+```
+Updated:
+- commands/prd.md
+- commands/execute.md
+
+Added:
+- agents/new-agent.md
+
+Your commands and agents are now in sync with claude-project-starter.
+```
 
 ---
 
-**Execute this workflow now.** Start by cloning the starter repo to a temp directory.
+**Execute this workflow now.**

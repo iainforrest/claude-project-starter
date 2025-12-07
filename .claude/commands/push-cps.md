@@ -1,82 +1,107 @@
 ---
-description: Push improvements from this project back to claude-project-starter as a PR
+description: Push command/agent improvements back to claude-project-starter as a PR
 ---
 
 # Push Improvements to Claude Project Starter
 
-You are pushing improvements made in this project back to the claude-project-starter repository as a pull request.
+Push improved commands or agents back to the central starter repository as a pull request.
 
-**CRITICAL**: This is a public open-source repo. You MUST generalize all content and remove ANY project-specific information before pushing.
+## Key Principle
 
-## Configuration
+**Commands and agents should already be generic** - they should reference `.ai/` memory files for project-specific context rather than hardcoding values. This command validates that principle before pushing.
 
-- **Target repo**: `iainforrest/claude-project-starter` (GitHub)
-- **Method**: Pull request via GitHub CLI (`gh`)
+## What Can Be Pushed
 
-## User Input Required
-
-Ask the user: "What improvements do you want to push back to the starter? (e.g., 'the updated /prd command', 'the new review workflow', 'changes to execute.md')"
+| Can Push | Cannot Push |
+|----------|-------------|
+| `.claude/commands/*.md` | `.ai/*` (project-specific) |
+| `.claude/agents/*.md` | `.claude/settings.local.json` |
+| `.claude/WORKFLOW.md` | Project-specific commands |
 
 ## Steps
 
-### 1. Identify what to push
+### 1. Ask what to push
 
-Based on user input, identify the specific files in `.claude/` or `.ai/` that contain the improvements.
+Ask the user: "What improvements do you want to push back to the starter?"
 
-Read each file and understand what has changed or been added.
+Examples:
+- "the updated /prd command"
+- "the new review-memory command"
+- "changes to execute.md and task-writer agent"
 
-### 2. Generalize the content
+### 2. Read and validate files
 
-**This step is critical for security and privacy.**
+For each file the user wants to push, read it and scan for project-specific content.
 
-For each file being pushed, remove or replace:
+**Red Flags (BLOCK the push):**
+- Project names (MyVoi, CoachOps, RealNZ, etc.)
+- Absolute paths (`/root/projects/...`, `/Users/...`, `C:\...`)
+- Service account emails or API keys
+- Hardcoded commands (should say "from QUICK.md" not `./gradlew build`)
+- Specific URLs (firebase project URLs, production domains)
+- Company or personal names
 
-- **Project names** → use generic terms like "the project" or "your application"
-- **Company/business names** → remove entirely or use "[Company]"
-- **URLs and API endpoints** → remove or use `https://example.com`
-- **User names, team names** → remove
-- **Business-specific terminology** → generalize to common terms
-- **Project-specific file paths** → use generic examples like `src/components/`
-- **Proprietary business logic** → remove or abstract
-- **Configuration values** → use placeholders
+**Acceptable content:**
+- References to `.ai/` files (ARCHITECTURE.json, BUSINESS.json, etc.)
+- Placeholders like `[BUILD_COMMAND]`, `[PROJECT_NAME]`
+- Generic examples in code blocks (e.g., `npm test` as an illustration)
+- Pattern descriptions without specific implementations
 
-**Preserve**:
-- Generic best practices and patterns
-- Command structure and workflow logic
-- Technical approaches that work across any project
-- Helpful comments and documentation
+### 3. Report validation results
 
-### 3. Show generalized version for approval
+If clean:
+```
+✅ Files are generic and ready to push:
+- commands/prd.md
+- agents/task-writer.md
+```
 
-Present the generalized version of each file to the user:
-- Show the full content that will be pushed
-- Highlight what was changed during generalization
-- Ask: "Does this look properly generalized? Any sensitive info remaining?"
+If issues found:
+```
+❌ Found project-specific content:
 
-**Do not proceed until user explicitly confirms the content is safe to push publicly.**
+commands/feature.md:32
+  "MyVoi - Android voice-to-text application"
+  → Should reference: "Load project context from .ai/BUSINESS.json"
 
-### 4. Clone and create branch
+commands/feature.md:38
+  "/root/projects/MyVoi/services/functions/"
+  → Should remove or use relative paths
+
+Fix these issues before pushing, or confirm you want to proceed anyway.
+```
+
+### 4. Confirm before proceeding
+
+If issues were found, ask:
+- "Fix issues first?" (recommended)
+- "Push anyway?" (user takes responsibility)
+- "Cancel"
+
+If clean, ask:
+- "Ready to create PR?"
+
+### 5. Clone and create branch
 
 ```bash
 TEMP_DIR=$(mktemp -d)
 git clone https://github.com/iainforrest/claude-project-starter.git "$TEMP_DIR"
 cd "$TEMP_DIR"
 
-# Create a descriptive branch name based on the changes
-BRANCH_NAME="update/descriptive-name-here"
+BRANCH_NAME="update/[descriptive-name]"
 git checkout -b "$BRANCH_NAME"
 ```
 
-### 5. Apply changes
+### 6. Copy files
 
-Copy the generalized files to the appropriate locations in the cloned repo.
+Copy the validated files from this project to the temp clone.
 
-### 6. Commit and push
+### 7. Commit and push
 
 ```bash
 cd "$TEMP_DIR"
 git add .
-git commit -m "feat: Description of the improvement
+git commit -m "feat: [Description of improvement]
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 
@@ -85,40 +110,40 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 git push -u origin "$BRANCH_NAME"
 ```
 
-### 7. Create PR
+### 8. Create PR
 
 ```bash
 cd "$TEMP_DIR"
 gh pr create \
   --repo iainforrest/claude-project-starter \
-  --title "feat: Title describing the improvement" \
+  --title "feat: [Title]" \
   --body "## Summary
 
-Brief description of what this PR adds or improves.
+[Brief description]
 
-## Changes
+## Files Changed
 
-- List of files changed
+- [List files]
 
-## Generalization checklist
+## Validation
 
-- [x] Project-specific names removed
-- [x] URLs and endpoints removed or replaced with placeholders
-- [x] No sensitive or proprietary information
+- [x] No project-specific names
+- [x] No hardcoded paths
+- [x] References .ai/ for project context
 - [x] Tested in source project
 
 ---
 🤖 Generated with [Claude Code](https://claude.com/claude-code)"
 ```
 
-### 8. Cleanup and report
+### 9. Cleanup and report
 
 ```bash
 rm -rf "$TEMP_DIR"
 ```
 
-Provide the PR URL so the user can review it on GitHub.
+Provide the PR URL to the user.
 
 ---
 
-**Execute this workflow now.** Start by asking what improvements the user wants to push.
+**Execute this workflow now.** Start by asking what the user wants to push.
