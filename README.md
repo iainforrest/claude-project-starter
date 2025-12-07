@@ -8,6 +8,35 @@ A self-bootstrapping development system that sets up a complete AI-assisted work
 - **AI Memory System**: Persistent project knowledge in `.ai/` that prevents context loss
 - **Sync System**: Keep your projects up-to-date with `/pull-cps` and `/push-cps`
 
+## Installation
+
+### Choose Your Path
+
+| Scenario | Use This | What It Does |
+|----------|----------|--------------|
+| **New project** (empty or minimal code) | `INSTALL-NEW.md` | Asks questions, populates `.ai/` from your answers |
+| **Existing project** (has code already) | `INSTALL-EXISTING.md` | Explores your codebase, extracts knowledge into `.ai/` |
+| **Upgrading from CPS v1.x** | `upgrade-to-cps-v2.md` | Migrates existing setup to v2.0 architecture |
+
+### Quick Start
+
+1. **Copy the files** into your project:
+   ```bash
+   git clone https://github.com/iainforrest/claude-project-starter.git
+   cp -r claude-project-starter/.claude your-project/
+   cp -r claude-project-starter/.ai your-project/
+   cp claude-project-starter/INSTALL-*.md your-project/
+   ```
+
+2. **Run the appropriate installer** with Claude Code:
+   - For new projects: `@INSTALL-NEW.md`
+   - For existing projects: `@INSTALL-EXISTING.md`
+
+3. **Start building**:
+   ```
+   /prd → /tasks → /execute → /commit → /update
+   ```
+
 ## Key Architecture (v2.0)
 
 ```
@@ -30,32 +59,6 @@ A self-bootstrapping development system that sets up a complete AI-assisted work
 - Updates can be synced without customization
 - Project knowledge lives in one place (`.ai/`)
 
-## Quick Start
-
-### For New Projects
-
-1. **Clone this repo** into your project:
-   ```bash
-   git clone https://github.com/iainforrest/claude-project-starter.git
-   cp -r claude-project-starter/.claude your-project/
-   cp -r claude-project-starter/.ai your-project/
-   ```
-
-2. **Run bootstrap** with Claude Code:
-   - Open your project in Claude Code
-   - Run: `@BOOTSTRAP.md` or paste its contents
-   - Answer 6-8 rounds of questions
-   - Claude customizes your `.ai/` memory files
-
-3. **Start building**:
-   ```
-   /prd → /tasks → /execute → /commit → /update
-   ```
-
-### For Existing Projects (Upgrade to v2.0)
-
-See the upgrade guide: Copy `upgrade-to-cps-v2.md` into your project and run it.
-
 ## Development Workflow
 
 ### The Command Flow
@@ -68,7 +71,7 @@ See the upgrade guide: Copy `upgrade-to-cps-v2.md` into your project and run it.
 /update                 → Update .ai/ memory from git diffs
 ```
 
-### Sync Commands (New in v2.0)
+### Sync Commands
 
 ```
 /pull-cps               → Pull latest commands/agents from this repo
@@ -102,7 +105,7 @@ Agents provide domain expertise and are invoked automatically or on request:
 
 ## Memory System (`.ai/`)
 
-The memory system is your project's brain. It's created during bootstrap and grows with your project.
+The memory system is your project's brain. It's populated during installation and grows with your project.
 
 | File | Purpose |
 |------|---------|
@@ -115,7 +118,7 @@ The memory system is your project's brain. It's created during bootstrap and gro
 | `SPRINT_UPDATE.md` | Process for updating memory |
 | `README.md` | Guide to the memory system |
 
-**Key rule**: Commands reference `.ai/` for context. Keep it updated.
+**Key rule**: Commands reference `.ai/` for context. Keep it updated with `/update`.
 
 ## Keeping in Sync
 
@@ -152,10 +155,10 @@ This validates your changes are generic (no project-specific content), then crea
 - **Sync System**: `/pull-cps` and `/push-cps` commands for keeping projects updated
 - **Cleaner Architecture**: Commands/agents are now fully generic
 - **Memory-First Design**: All project context lives in `.ai/`
-- **Simplified Bootstrap**: Focuses on populating `.ai/` files
+- **Dual Installation**: Separate paths for new vs existing projects
 - **Better Agents**: Enhanced prd-writer and task-writer with structured output
 
-## Project Structure After Bootstrap
+## Project Structure After Installation
 
 ```
 your-project/
@@ -210,4 +213,6 @@ Originally inspired by **Ryan Carson** and his approach to AI-assisted developme
 
 ---
 
-**Ready to start?** Run `BOOTSTRAP.md` with Claude Code to customize for your project.
+**Ready to start?** Choose your installation path:
+- New project → `INSTALL-NEW.md`
+- Existing project → `INSTALL-EXISTING.md`
