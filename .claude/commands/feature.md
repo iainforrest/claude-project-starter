@@ -77,107 +77,104 @@ Perform **thorough feature analysis** through autonomous code exploration, then 
 
 ---
 
-### Phase 2: Memory System Consultation
+### Phase 2: Deep Feature Analysis (Explore Agent)
 
-**ALWAYS check memory system before code exploration:**
+**Delegate comprehensive analysis to Explore agent for context efficiency.**
 
-```bash
-1. Read ARCHITECTURE.json → Understand integration points and constraints
-2. Read FILES.json → Identify relevant files and dependencies
-3. Read PATTERNS.md → Review applicable implementation patterns
-4. Read BUSINESS.json → Check existing features and performance targets
-5. Read QUICK.md → Get development commands and file references
+Use the Task tool with `subagent_type=Explore`:
+
+```
+Perform comprehensive feature analysis for: [FEATURE_REQUEST]
+Clarifications from user: [Any Phase 1 answers]
+
+THOROUGHNESS: very thorough
+
+## Starting Points (Memory Files)
+1. Read `.ai/QUICK.md` for file locations and commands
+2. Read `.ai/FILES.json` completely for file dependencies
+3. Read `.ai/ARCHITECTURE.json` for patterns and data flows
+4. Read `.ai/BUSINESS.json` for features and performance targets
+5. Read `.ai/PATTERNS.md` then relevant `patterns/[DOMAIN].md`
+
+## Exploration Tasks
+1. **Find Similar Features:** Search existing functionality, read implementations completely
+2. **Map Integration Points:** Which managers/services/UI need updates?
+3. **Identify Implementation Files:** Exact files with line numbers and extension points
+4. **Check Constraints:** Performance targets, architectural constraints, security
+5. **Assess Complexity:** Count affected components, estimate effort
+
+## Return Format (max 600 words)
+**Feature Classification:**
+- Complexity Score: [1-10]
+- Effort Estimate: [hours]
+- Risk Level: [Low/Medium/High]
+
+**Architecture Integration:**
+- Pattern: [from PATTERNS.md with file reference]
+- Components Affected: [managers/services/UI]
+
+**Similar Feature Reference:**
+- File: [file:line]
+- What to copy/adapt: [description]
+
+**Implementation Files (Prioritized):**
+1. [file:line] - [what changes] - [pattern to follow]
+2. [file:line] - [what changes] - [pattern to follow]
+[5-10 files total]
+
+**Decision Recommendation:** [Tasks directly / PRD first] - [rationale]
 ```
 
-**Extract:**
-- Which components/files likely affected?
-- What patterns apply to this feature?
-- Are there existing similar features to reference?
-- What integration points are needed?
-- What performance targets apply?
+**After Explore returns, store findings as `EXPLORE_CONTEXT` for use in subsequent phases.**
+
+**Benefit:** Memory files and code exploration happen in Explore's context window - only the focused summary (max 600 words) returns to main context.
 
 ---
 
-### Phase 3: Autonomous Code Exploration
+### Phase 3: Implementation Design (Using Explore Output)
 
-**You have full authority to explore the codebase without asking.**
-
-**Investigation Approach:**
-
-1. **Identify Similar Features**
-   - Search for existing related functionality
-   - Understand how similar features work
-   - Find reusable patterns and components
-   - Check how they integrate with the system
-
-2. **Read Relevant Files**
-   - Actually READ the code, don't just search
-   - Understand the current implementation
-   - Identify extension points
-   - Check for constraints or dependencies
-
-3. **Map Integration Points**
-   - Where does this fit in the architecture?
-   - Which services/managers need updates?
-   - What state changes are required?
-   - How does UI need to change?
-
-4. **Check Constraints**
-   - Architectural pattern requirements
-   - State management integration
-   - API/database limitations
-   - Performance targets
-
-**Tools at Your Disposal:**
-- **Grep**: Search for function names, patterns, similar features
-- **Read**: Read entire files to understand context
-- **Glob**: Find files by pattern
-- **Bash**: Run git log, git blame, build commands, etc.
-
----
-
-### Phase 4: Implementation Design
-
-**Document your design:**
+**Present the design using EXPLORE_CONTEXT findings:**
 
 ```markdown
 ## Feature Analysis
 
 **Feature:** [Clear feature description]
 
-**Architecture Integration:**
-- **Pattern:** [Pattern from PATTERNS.md]
-- **Components:** [Affected services/managers/UI]
-- **Files:** [Specific files from FILES.json:line]
-- **Integration Points:** [State management, APIs, etc.]
+**Architecture Integration (from EXPLORE_CONTEXT):**
+- **Pattern:** [EXPLORE_CONTEXT.pattern]
+- **Components:** [EXPLORE_CONTEXT.components_affected]
+- **Files:** [EXPLORE_CONTEXT.implementation_files]
+- **Integration Points:** [EXPLORE_CONTEXT.integration_points]
 
-**Similar Features:**
-- **Reference:** [Existing feature that's similar]
-- **Location:** [file.ext:line]
+**Similar Features (from EXPLORE_CONTEXT):**
+- **Reference:** [EXPLORE_CONTEXT.similar_feature]
+- **Location:** [EXPLORE_CONTEXT.similar_feature_file]
 - **Reusable Patterns:** [What can be copied/adapted]
 
 **Implementation Scope:**
-- **Business Layer:** [New/modified services]
+- **Business Layer:** [New/modified services from EXPLORE_CONTEXT]
 - **Data Layer:** [Database/API changes if needed]
 - **UI Layer:** [UI component changes]
 - **State Management:** [State changes if needed]
 
 **Performance Impact:**
-- **Target:** [Performance requirement from BUSINESS.json]
+- **Target:** [From EXPLORE_CONTEXT.performance_targets]
 - **Estimated Impact:** [Expected performance change]
 - **Optimization Strategy:** [How to maintain performance]
 ```
 
+**Note:** Most of this information comes directly from EXPLORE_CONTEXT - you're presenting and expanding on the Explore agent's findings.
+
 ---
 
-### Phase 5: Complexity Assessment & Decision
+### Phase 4: Complexity Assessment & Decision (Using Explore Output)
 
-**Assess feature complexity:**
+**Use EXPLORE_CONTEXT.complexity_score as baseline, validate and expand:**
 
 ```markdown
 ## Complexity Assessment
 
-**Overall Complexity:** [Score 1-10]
+**Overall Complexity:** [EXPLORE_CONTEXT.complexity_score] (validate or adjust)
 
 **Breakdown:**
 - **Business Logic:** [1-10] - [Reason]
@@ -185,15 +182,17 @@ Perform **thorough feature analysis** through autonomous code exploration, then 
 - **UI Changes:** [1-10] - [Reason]
 - **Integration:** [1-10] - [Reason]
 
-**Effort Estimate:**
+**Effort Estimate:** [EXPLORE_CONTEXT.effort_estimate] (validate or adjust)
 - **Implementation:** [Hours]
 - **Testing:** [Hours]
 - **Total:** [Hours]
 
-**Risk Level:** [Low/Medium/High]
+**Risk Level:** [EXPLORE_CONTEXT.risk_level]
 - **Risks:** [List risks]
 - **Mitigations:** [How to mitigate]
 ```
+
+**Explore provides baseline assessment - validate against your understanding.**
 
 **Complexity Scoring Guide:**
 - **1-3 (Simple):** Single component, straightforward pattern application
@@ -203,7 +202,9 @@ Perform **thorough feature analysis** through autonomous code exploration, then 
 
 ---
 
-### Phase 6: Output Decision & Generation
+### Phase 5: Output Decision & Generation
+
+**Use EXPLORE_CONTEXT.decision_recommendation as starting point.**
 
 **Decision Rules:**
 
@@ -229,41 +230,59 @@ Perform **thorough feature analysis** through autonomous code exploration, then 
 
 **If creating tasks directly (complexity ≤ 6):**
 
-**Invoke the task-writer agent** with your feature analysis context. Use the Task tool with `subagent_type=task-writer`:
+```markdown
+# Task List: [Feature Name]
 
-```
-FEATURE_CONTEXT:
+**Generated from:** Feature implementation analysis
+**Date:** [Current Date]
+**Complexity:** [Score]/10
+**Estimated Effort:** [Hours]
+**Architecture Pattern:** [Pattern from PATTERNS.md]
+**Reference Implementation:** [Similar feature file:line]
 
-Feature: [Feature name]
-Complexity: [Score]/10
-Estimated Effort: [Hours]
-
-## Feature Analysis
-[Your complete feature analysis from Phase 4]
+## Feature Summary
+[Brief description of what's being implemented]
 
 ## Architecture Integration
-- Pattern: [Pattern from PATTERNS.md]
-- Files: [Target files from FILES.json with line numbers]
-- Integration: [State management, APIs, etc.]
-- Performance Target: [Target from BUSINESS.json]
+- **Pattern:** [Pattern from PATTERNS.md]
+- **Files:** [Target files from FILES.json]
+- **Integration:** [State management, APIs, etc.]
+- **Performance Target:** [Target from BUSINESS.json]
 
-## Similar Features
-- Reference: [Existing feature that's similar]
-- Location: [file.ext:line]
-- Reusable Patterns: [What can be copied/adapted]
+## Implementation Strategy
+[Brief description of approach, referencing similar features]
 
-## Implementation Scope
-- Business Layer: [New/modified services]
-- Data Layer: [Database/API changes if needed]
-- UI Layer: [UI component changes]
-- State Management: [State changes if needed]
+## Build & Test Commands
 
----
+# From QUICK.md - project-specific commands
+[BUILD_COMMAND]
+[TEST_COMMAND]
 
-Generate implementation-ready tasks for this feature using the memory system for architectural context. Save to /tasks/tasks-[feature-name].md
+## Tasks
+
+### 1.0 [Component Implementation] ([Pattern Name])
+**Goal:** [Specific implementation goal]
+**Files:** [Exact files from FILES.json:line]
+**Pattern:** [Template from PATTERNS.md]
+**Reference:** [Similar feature implementation]
+
+- [ ] 1.1 - complexity [X]/5 - [Specific task]
+  - **File:** [Exact file from FILES.json:line]
+  - **Pattern Template:** [Reference to PATTERNS.md template]
+  - **Similar Implementation:** [Existing feature to copy/adapt from]
+  - **Testing:** [How to verify]
+  - **Verification:** [Success criteria]
+
+[Continue with pattern-specific tasks following task.md structure...]
+
+### 2.0 Testing & Verification
+[Test tasks following established patterns]
+
+### 3.0 Update Memory System (if applicable)
+[Memory update tasks if new patterns discovered]
 ```
 
-This ensures all task files follow the same comprehensive format with proper memory system integration, consistent complexity calibration, and mandatory memory update tasks.
+**Save to:** `/tasks/tasks-[feature-name].md`
 
 ---
 
@@ -334,12 +353,12 @@ Follow the PRD generation template from `.claude/commands/prd.md` with these ada
 
 Before presenting design:
 - [ ] **Feature understood** - clear on what user wants
-- [ ] **Memory consulted** - checked all relevant memory files
-- [ ] **Code explored** - actually read relevant implementations
-- [ ] **Pattern identified** - found applicable pattern from PATTERNS.md
-- [ ] **Integration mapped** - know all integration points
-- [ ] **Complexity assessed** - honest difficulty rating
-- [ ] **Approach designed** - clear implementation strategy
+- [ ] **Explore invoked** - ran Explore agent with "very thorough" level
+- [ ] **EXPLORE_CONTEXT reviewed** - understood agent's findings
+- [ ] **Pattern identified** - using pattern from EXPLORE_CONTEXT
+- [ ] **Integration mapped** - using integration points from EXPLORE_CONTEXT
+- [ ] **Complexity validated** - confirmed EXPLORE_CONTEXT.complexity_score
+- [ ] **Approach designed** - clear implementation strategy using Explore findings
 - [ ] **Decision made** - tasks vs PRD based on complexity
 
 ### Output Checklist
@@ -390,31 +409,33 @@ Before presenting design:
 
 1. **Clarification:** (Seems clear - save action, feedback to user)
 
-2. **Memory Check:**
-   - ARCHITECTURE.json → DataService handles save operations
-   - FILES.json → DataService.ext, NotificationUtil.ext (if exists)
-   - PATTERNS.md → Service pattern, notification pattern
-   - BUSINESS.json → No specific feedback requirements
+2. **Invoke Explore Agent:**
+   ```
+   Task tool with subagent_type=Explore:
+   "Analyze feature: Add confirmation feedback when save completes"
+   THOROUGHNESS: very thorough
+   ```
 
-3. **Code Exploration:**
-   - Search for "save" methods in DataService
-   - Check if notification/feedback already exists elsewhere
-   - Look for notification or toast utilities in use
-   - Check existing user feedback patterns
+   **EXPLORE_CONTEXT returned:**
+   - Pattern: Service pattern (DataService)
+   - Similar Feature: Button click feedback at UI/FeedbackUtil.kt:45
+   - Implementation Files: DataService.kt:148, FeedbackUtil.kt:45
+   - Complexity: 2/10, Effort: 1-2 hours
+   - Decision: Tasks directly
 
-4. **Design:**
+3. **Design (using EXPLORE_CONTEXT):**
    - Simple addition to save completion handler
    - Use existing notification pattern
    - Trigger on successful save
    - Follow existing pattern from similar UI feedback
 
-5. **Complexity Assessment:** 2/10 (Simple)
+4. **Complexity Assessment:** 2/10 (from EXPLORE_CONTEXT, validated)
    - Logic addition: Simple
    - API usage: Standard
    - Testing: Straightforward
    - Effort: 1-2 hours
 
-6. **Present Design:**
+5. **Present Design & Generate Tasks:**
 
 ```markdown
 ## Feature Analysis
@@ -435,16 +456,17 @@ Before presenting design:
 **Estimated Effort:** 1-2 hours
 
 **Decision:** Create tasks directly (complexity below threshold)
+
+---
+
+# Task List: Save Confirmation Feedback
+
+[Full task list generated and saved to /tasks/tasks-save-confirmation-feedback.md]
 ```
 
-7. **Invoke task-writer agent:**
-   - Use Task tool with `subagent_type=task-writer`
-   - Pass the feature analysis context (feature name, architecture integration, similar features, implementation scope)
-   - Agent generates and saves tasks to `/tasks/tasks-save-confirmation-feedback.md`
-
-8. **Confirm & Proceed:**
-   - Report: "Tasks generated by task-writer agent"
-   - Ask user: "Should I proceed with implementation?"
+6. **Save & Proceed:**
+   - Tasks saved to `/tasks/tasks-save-confirmation-feedback.md`
+   - Ask user: "Tasks generated. Should I proceed with implementation?"
 
 ---
 
@@ -452,35 +474,36 @@ Before presenting design:
 
 **DON'T:**
 - ❌ Start coding before understanding requirements
-- ❌ Skip memory system consultation
-- ❌ Guess at implementation without exploring code
+- ❌ Skip the Explore agent context discovery
+- ❌ Ignore EXPLORE_CONTEXT findings
 - ❌ Create PRD for trivial features
 - ❌ Create tasks for complex features without PRD
-- ❌ Generate task files directly - always use task-writer agent
-- ❌ Ignore existing similar features
+- ❌ Ignore similar features identified by Explore
 - ❌ Propose patterns not in PATTERNS.md
 - ❌ Skip complexity assessment
 
 **DO:**
 - ✅ Clarify requirements upfront
-- ✅ Always check memory system first
-- ✅ Read actual implementation code
-- ✅ Reference similar existing features
+- ✅ Invoke Explore agent for comprehensive analysis
+- ✅ Use EXPLORE_CONTEXT for design decisions
+- ✅ Reference similar features from Explore
 - ✅ Use established patterns
-- ✅ Honest complexity assessment
-- ✅ Use task-writer agent for all task generation
+- ✅ Validate Explore's complexity assessment
+- ✅ Save tasks/PRD to files
 - ✅ Clear next steps
 
 ---
 
 ## Memory System Integration
 
-**Throughout analysis:**
-- **ARCHITECTURE.json** - Understand component relationships and patterns
-- **FILES.json** - Target files quickly
-- **PATTERNS.md** - Use established implementation templates
-- **BUSINESS.json** - Check feature context and performance targets
-- **QUICK.md** - Get commands and debugging approaches
+**The Explore agent handles memory consultation automatically.**
+
+The agent reads and analyzes:
+- **ARCHITECTURE.json** - Component relationships and patterns
+- **FILES.json** - Target files with line numbers
+- **PATTERNS.md** - Implementation templates
+- **BUSINESS.json** - Feature context and performance targets
+- **QUICK.md** - Commands and debugging approaches
 
 **After implementation:**
 - Update FILES.json if new files created

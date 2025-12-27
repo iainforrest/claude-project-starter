@@ -34,25 +34,23 @@ Gather **deeply understood requirements** through thorough idea exploration, whi
 ### Layer 1: Raw User Request
 User provides initial feature idea (text, notes, rough thoughts, links)
 
-### Layer 2: Structured Memory Data (You Retrieve)
+### Layer 2: Architectural Context (Explore Agent Retrieves)
 
-**Memory Structure Detection:**
+**The Explore agent handles memory and codebase exploration in its own context window.**
 
-1. **Check for mono-repo structure:** Does `.ai/MONOREPO.json` exist?
-   - If YES: This is a mono-repo. Read MONOREPO.json to identify apps.
-   - Ask user: "Which app is this feature for?" before deep dive.
-   - Load root memory + app-specific memory from `.ai/[app]/`
+The agent automatically:
+1. Checks for mono-repo structure (`.ai/MONOREPO.json`)
+2. Reads memory files: `ARCHITECTURE.json`, `BUSINESS.json`, `FILES.json`, `PATTERNS.md`
+3. Explores codebase for similar features and integration points
+4. Returns focused summary (max 400 words) with:
+   - Similar existing features
+   - Applicable architectural patterns
+   - Key files with line numbers
+   - Integration constraints
+   - Red flags to address
+   - Suggested questions for discovery
 
-2. **Single-app structure:** No MONOREPO.json
-   - Load standard memory files from `.ai/`
-
-**Memory Files to Load:**
-- `ARCHITECTURE.json` → Patterns, integration points, constraints
-- `BUSINESS.json` → Existing features, performance targets, core models
-- `FILES.json` → Relevant files, dependencies, implementations
-- `PATTERNS.md` → Pattern index (then load specific `patterns/[DOMAIN].md` if needed)
-
-**Extract:** What patterns exist? Similar features? Integration points? Performance benchmarks? Relevant files?
+**Benefit:** Main context stays clean - only the summary is returned, not full file contents.
 
 ### Layer 3: Implicit Constraints (You Identify)
 From memory and user request: Technical constraints (language, platform), resource constraints (team size, timeline), compliance needs (security, privacy), existing limitations
@@ -142,14 +140,41 @@ For each assumption: Document **Risk if Wrong**, **Validation Method**, **Confid
 
 ### Execution Steps
 
-**1. Memory Review (Silent)**
-- Check if `.ai/` exists
-- Check if `.ai/MONOREPO.json` exists (mono-repo detection)
-  - If mono-repo: Note apps available, prepare to ask which app
-- If yes: Read ARCHITECTURE, BUSINESS, FILES, PATTERNS files
-  - For mono-repo: Load root + app-specific memory after app selection
-- Identify: What memory answers, what needs clarification, any conflicts
-- Prepare context-informed questions
+**1. Context Discovery (Explore Agent)**
+
+**IMMEDIATELY invoke the Explore agent to gather architectural context.**
+
+Use the Task tool with `subagent_type=Explore`:
+
+```
+Explore this codebase for context relevant to this feature idea: [USER'S FEATURE IDEA]
+
+THOROUGHNESS: very thorough
+
+## Starting Points (Memory Files)
+1. Read `.ai/QUICK.md` for file quick lookup
+2. Read `.ai/FILES.json` section "byPurpose" for relevant files
+3. Read `.ai/ARCHITECTURE.json` for patterns and data flows
+4. Read `.ai/BUSINESS.json` section "features" for similar features
+5. Read `.ai/PATTERNS.md` to identify applicable patterns
+
+## Exploration Tasks
+1. Find 3-5 similar existing features in the codebase
+2. Identify the primary architectural pattern this would follow
+3. List 5-10 most relevant files with line numbers
+4. Note integration constraints or dependencies
+5. Identify red flags (breaking changes, security, complexity)
+
+## Return Format (max 400 words)
+**Similar Features:** [feature at file:line - relevance]
+**Applicable Pattern:** [pattern name from PATTERNS.md]
+**Key Files:** [file:line - purpose]
+**Integration Points:** [system - how it connects]
+**Red Flags:** [issue - why it matters]
+**Suggested Questions:** [questions to ask user based on findings]
+```
+
+**After Explore returns, store findings as `EXPLORE_CONTEXT` for use in questioning.**
 
 **2. Batched Questioning**
 
@@ -157,24 +182,25 @@ For each assumption: Document **Risk if Wrong**, **Validation Method**, **Confid
 
 **Round 1: Core Understanding (3 questions max)**
 
-Without memory:
+Without Explore context:
 - "What problem does this feature solve for the user?"
 - "Who is the primary user and their main goal?"
 - "Must-have vs nice-to-have functionalities?"
 
-With memory:
-- "Related to [EXISTING_FEATURE]? Enhancement or separate?"
-- "What problem doesn't [EXISTING_SYSTEM] solve that this does?"
-- "Should this work like [SIMILAR_FEATURE] or differently?"
+With Explore context (use EXPLORE_CONTEXT findings):
+- "Your feature relates to [EXPLORE_CONTEXT.similar_feature]. Enhancement or separate?"
+- "This would use the [EXPLORE_CONTEXT.pattern] pattern. Follow it exactly or adapt?"
+- "[EXPLORE_CONTEXT.red_flag] was identified - how should we address this?"
+- Include any questions from EXPLORE_CONTEXT.suggested_questions
 
 **Round 2: Scope & User Experience (3 questions max)**
 - "Walk me through typical user flow step-by-step"
 - "What happens when things go wrong? (errors, edge cases)"
 - "What should this NOT do? Boundaries?"
 
-With memory:
-- "Follow [UI_PATTERN] or introduce new pattern?"
-- "Integrate with [EXISTING_COMPONENT] or standalone?"
+With Explore context:
+- "Follow [EXPLORE_CONTEXT.pattern] pattern or introduce new pattern?"
+- "Integrate with [EXPLORE_CONTEXT.integration_point] or standalone?"
 
 **Round 3+: Deep Dive & Integration (3 per round)**
 
@@ -304,19 +330,20 @@ Would you like me to:
 **DON'T:**
 - Ask >3 questions per batch (overwhelming)
 - Continue past stopping criteria (use score)
-- Skip memory review if exists
+- Skip the Explore agent context discovery
 - Skip confirmation before generating
 - Generate PRD without questions (unless trivial)
-- Ignore red flags
+- Ignore red flags from Explore
 - Forget assumptions with validation
 
 **DO:**
+- Invoke Explore agent FIRST for context discovery
 - Batch questions (max 3)
 - Use decision frameworks
-- Surface red flags proactively
+- Surface red flags proactively (including from Explore)
 - Document assumptions with risk
 - Stop at 100% stopping criteria score
-- Leverage memory for context
+- Reference Explore findings in questions
 - Confirm understanding before handoff
 - Use prd-writer agent for document generation
 
