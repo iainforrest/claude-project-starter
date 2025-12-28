@@ -456,6 +456,51 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 - `chore`: Maintenance tasks
 - `style`: Code style changes
 
+## Code Review Phase (Before Memory Update)
+
+**MANDATORY**: Before updating memory, run a thorough code review of all changes.
+
+### Code Review Process
+
+1. **Invoke Code Review Agent**
+   ```
+   Use Task tool with subagent_type='code-review-agent'
+   ```
+
+   The agent will:
+   - Analyze all uncommitted changes and recent commits
+   - Review against `.ai/PATTERNS.md` and `ARCHITECTURE.json`
+   - Check security, testing, error handling, performance
+   - Output structured findings with severity levels
+
+2. **Review Findings**
+   - **CRITICAL**: Must fix before proceeding
+   - **HIGH**: Should fix before proceeding
+   - **MEDIUM**: Create tasks for next sprint
+   - **LOW**: Note for future improvement
+
+3. **Generate Fix Tasks**
+   If CRITICAL or HIGH findings exist:
+   - Extract tasks from the "Tasks for Task Generation" section
+   - Add to current task list as new parent task
+   - Execute fix tasks following standard execution rules
+   - Re-run code review if fixes were significant
+
+4. **Proceed When Clean**
+   Only proceed to Memory Update when:
+   - [ ] Zero CRITICAL findings remain
+   - [ ] Zero HIGH findings remain (or explicitly deferred with justification)
+   - [ ] MEDIUM/LOW findings documented for future action
+
+### Code Review Checklist
+- [ ] Code review agent invoked with full context
+- [ ] All CRITICAL findings addressed
+- [ ] All HIGH findings addressed or justified
+- [ ] Fix tasks executed and verified
+- [ ] Ready for memory update
+
+---
+
 ## Memory System Update (Final Task)
 
 **CRITICAL RULE**: Do NOT create separate sprint completion files.
