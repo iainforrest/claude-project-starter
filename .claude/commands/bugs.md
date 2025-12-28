@@ -76,88 +76,95 @@ Perform **thorough root cause investigation** through autonomous code exploratio
 
 ---
 
-### Phase 2: Memory System Consultation
+### Phase 2: Root Cause Investigation (Explore Agent)
 
-**ALWAYS check memory system before code exploration:**
+**Delegate systematic investigation to Explore agent for context efficiency.**
 
-```bash
-1. Read ARCHITECTURE.json → Understand system structure and integration points
-2. Read FILES.json → Identify likely files involved
-3. Read PATTERNS.md → Review relevant implementation patterns
-4. Read BUSINESS.json → Check if this affects known features/workflows
-5. Read QUICK.md → Get debugging approaches
+Use the Task tool with `subagent_type=Explore`:
+
+```
+Investigate the root cause of this bug:
+- Description: [BUG_DESCRIPTION]
+- Observed: [What's happening]
+- Expected: [What should happen]
+- Context: [Any Phase 1 clarifications]
+
+THOROUGHNESS: very thorough
+
+## Starting Points (Memory Files)
+1. Read `.ai/QUICK.md` for debugging commands and file locations
+2. Read `.ai/FILES.json` for files in affected area
+3. Read `.ai/ARCHITECTURE.json` for data flows and integration points
+4. Read `.ai/BUSINESS.json` for feature specifications
+5. Read `.ai/PATTERNS.md` for expected implementation patterns
+
+## Investigation Tasks
+1. **Locate Symptom:** Find UI/handler code, entry point where bug triggers
+2. **Trace Data Flow:** Follow UI → business logic → data layer
+3. **Find Root Cause:** Check edge cases, error handling, logic flaws, race conditions
+4. **Check Related Code:** Compare with similar working features, check tests, recent changes
+5. **Assess Impact:** Who affected, data risk, workarounds available
+
+## Return Format (max 700 words)
+**Root Cause:**
+- Location: [file:line]
+- Problem: [clear explanation]
+- Why It Happens: [logic flaw or missing case]
+
+**Impact Assessment:**
+- Severity: [Critical/High/Medium/Low]
+- Affected Scope: [All users / Subset / Edge case]
+- Workaround: [Available / Not available]
+
+**Evidence:**
+```[language]
+// Problematic code at [file:line]
+[code snippet]
 ```
 
-**Extract:**
-- Which components/files likely involved?
-- What patterns are used in that area?
-- Are there known constraints or performance targets affected?
-- What integration points might be failing?
+**Fix Options:**
+1. [Quick Fix]: File [file:line], Change [what], Effort [hours], Risk [level]
+2. [Proper Fix]: File [file:line], Change [what], Effort [hours], Risk [level]
+
+**Recommended:** [which option and why]
+**Complexity Score:** [1-10]
+**Output Recommendation:** [Tasks directly / Bug PRD first]
+```
+
+**After Explore returns, store findings as `EXPLORE_CONTEXT` for use in subsequent phases.**
+
+**Benefit:** Memory files and code investigation happen in Explore's context window - only the focused summary (max 700 words) returns to main context.
 
 ---
 
-### Phase 3: Autonomous Code Exploration
+### Phase 3: Present Root Cause Analysis (Using Explore Output)
 
-**You have full authority to explore the codebase without asking.**
-
-**Investigation Approach:**
-
-1. **Start Broad → Narrow Down**
-   - Search for UI handlers related to behavior
-   - Find data flow from UI → business logic → data layer
-   - Identify state management involvement
-   - Check integration points
-
-2. **Read Relevant Files**
-   - Don't just search - actually READ the code
-   - Understand the logic flow
-   - Look for edge cases not handled
-   - Check error handling
-
-3. **Follow the Data**
-   - Where does data come from? (Database, API, user input)
-   - How is it transformed? (parsing, mapping, filtering)
-   - Where does it go? (state, UI, output)
-   - What could break along the way?
-
-4. **Check Related Areas**
-   - Similar features that work correctly (for comparison)
-   - Tests that might reveal expected behavior
-   - Recent changes that might have introduced issue
-
-**Tools at Your Disposal:**
-- **Grep**: Search for function names, variable names, error messages
-- **Read**: Read entire files to understand context
-- **Glob**: Find files by pattern
-- **Bash**: Run git log, git blame, etc. to see change history
-
----
-
-### Phase 4: Root Cause Analysis
-
-**Document your findings:**
+**Present EXPLORE_CONTEXT findings to user:**
 
 ```markdown
 ## Root Cause Analysis
 
-**Location:** [file.ext:line]
+**Location:** [EXPLORE_CONTEXT.root_cause.location]
 
-**Problem:** [Clear explanation of what's actually wrong in the code]
+**Problem:** [EXPLORE_CONTEXT.root_cause.problem]
 
-**Why This Happens:** [Explain the logic flaw, missing case, or integration issue]
+**Why This Happens:** [EXPLORE_CONTEXT.root_cause.why_it_happens]
 
 **Symptom vs Root Cause:**
-- Symptom: [What user sees]
-- Root Cause: [Actual code problem]
+- Symptom: [What user reported]
+- Root Cause: [EXPLORE_CONTEXT.root_cause.problem]
 
-**Impact Assessment:**
-- **Severity:** [Critical/High/Medium/Low]
-- **Affected Users:** [All/Some/Edge case]
-- **Affected Features:** [List features]
-- **Data Risk:** [Any risk of data corruption/loss?]
-- **Workaround Available:** [Yes/No - describe if yes]
+**Evidence (from Explore):**
+```[language]
+[EXPLORE_CONTEXT.evidence code snippet]
+```
 
-**Architecture Context:** [How this relates to system architecture from memory]
+**Impact Assessment (from Explore):**
+- **Severity:** [EXPLORE_CONTEXT.impact.severity]
+- **Affected Scope:** [EXPLORE_CONTEXT.impact.affected_scope]
+- **Workaround:** [EXPLORE_CONTEXT.impact.workaround]
+
+**Architecture Context:** [How this relates to system architecture from Explore findings]
 ```
 
 **Severity Levels:**
@@ -166,11 +173,13 @@ Perform **thorough root cause investigation** through autonomous code exploratio
 - **Medium:** Feature degraded, affects some users, workaround exists
 - **Low:** Cosmetic, rare edge case, minimal impact
 
+**Note:** Most of this comes directly from EXPLORE_CONTEXT - you're presenting and expanding on the Explore agent's investigation.
+
 ---
 
-### Phase 5: Solution Options
+### Phase 4: Solution Options (Using Explore Output)
 
-**Generate 2-4 fix options with honest trade-offs.**
+**Expand on EXPLORE_CONTEXT.fix_options with detailed trade-offs.**
 
 ```markdown
 ## Fix Options
@@ -220,9 +229,9 @@ Perform **thorough root cause investigation** through autonomous code exploratio
 
 ---
 
-### Phase 6: Recommendation & Next Steps
+### Phase 5: Recommendation & Next Steps (Using Explore Output)
 
-**Make a clear recommendation:**
+**Use EXPLORE_CONTEXT.recommended and EXPLORE_CONTEXT.complexity_score as starting point.**
 
 ```markdown
 ## Recommendation
@@ -442,15 +451,15 @@ Perform **thorough root cause investigation** through autonomous code exploratio
 ### Investigation Checklist
 
 Before presenting findings:
-- [ ] **Root cause identified** - not just symptom
-- [ ] **Can explain WHY** - understand the logic flaw
-- [ ] **Impact assessed** - know severity and scope
+- [ ] **Explore invoked** - ran Explore agent with "very thorough" level
+- [ ] **EXPLORE_CONTEXT reviewed** - understood agent's investigation
+- [ ] **Root cause identified** - using EXPLORE_CONTEXT.root_cause
+- [ ] **Can explain WHY** - understand the logic flaw from Explore
+- [ ] **Impact assessed** - using EXPLORE_CONTEXT.impact
 - [ ] **Reproduction understood** - know when/how it happens
-- [ ] **Code explored** - actually read relevant files
-- [ ] **Memory consulted** - checked architectural context
-- [ ] **Multiple options** - presented 2-4 fix approaches
+- [ ] **Multiple options** - using EXPLORE_CONTEXT.fix_options as base
 - [ ] **Trade-offs honest** - pros AND cons for each option
-- [ ] **Recommendation clear** - specific suggestion with rationale
+- [ ] **Recommendation clear** - using EXPLORE_CONTEXT.recommended
 
 ### Output Checklist
 
@@ -495,22 +504,22 @@ Before presenting findings:
 ## Anti-Patterns to Avoid
 
 **DON'T:**
-- Present findings before actually exploring code
-- Guess at root cause without reading actual code
-- Propose fixes that don't address root cause
+- Present findings before Explore agent completes
+- Ignore EXPLORE_CONTEXT findings
+- Propose fixes that don't address the identified root cause
 - Present only one option (unless trivial)
 - Sugarcoat risks or effort estimates
 - Create PRD for simple fixes
-- Skip memory system consultation
+- Skip the Explore agent investigation
 - Ask user technical questions they can't answer
 - Present options you know are bad ideas (just to have more options)
 
 **DO:**
-- Read actual code files thoroughly
-- Identify root cause with specific file:line
-- Present honest trade-off analysis
-- Make clear recommendations
-- Use memory system for context
+- Invoke Explore agent for systematic investigation
+- Use EXPLORE_CONTEXT for root cause presentation
+- Present honest trade-off analysis based on Explore findings
+- Make clear recommendations using EXPLORE_CONTEXT.recommended
+- Validate Explore's complexity assessment
 - Create appropriate output (tasks vs PRD)
 - Ask only essential clarifying questions
 - Show your reasoning
@@ -520,12 +529,14 @@ Before presenting findings:
 
 ## Memory System Integration
 
-**Throughout investigation:**
-- **ARCHITECTURE.json** - Understand component relationships and integration points
+**The Explore agent handles memory consultation automatically.**
+
+The agent reads and analyzes:
+- **ARCHITECTURE.json** - Component relationships and integration points
 - **FILES.json** - Target likely files quickly
 - **PATTERNS.md** - Propose fixes using established patterns
 - **BUSINESS.json** - Assess impact on features and performance
-- **QUICK.md** - Use debugging commands and file references
+- **QUICK.md** - Debugging commands and file references
 
 **After fix implementation:**
 - Update FILES.json if new files created
