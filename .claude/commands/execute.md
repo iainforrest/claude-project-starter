@@ -573,6 +573,16 @@ Every implementation must:
 - [ ] Pass build verification from QUICK.md (mandatory)
 ```
 
+### 5. **Future Proof**
+```
+AFTER all tasks complete:
+1. Run code review agent (Task tool with subagent_type='code-review-agent')
+2. Address any CRITICAL or HIGH findings
+3. Run memory update (Task tool with subagent_type='update-memory-agent')
+4. Commit all changes with proper commit message
+5. Verify memory system integrity (8 core files only)
+```
+
 ## Example: Memory-Driven Task Execution
 
 **Task**: Implement user authentication service
