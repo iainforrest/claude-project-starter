@@ -111,6 +111,7 @@ routes.ext:line              # Route definitions
 /prd [idea]        # Generate PRD from feature idea
 /TaskGen [prd-file]  # Generate tasks from PRD
 /execute           # Execute task list
+/code-review       # Run thorough code review on recent changes
 /bugs [issue]      # Investigate and fix bugs
 /commit            # Group and commit changes
 /update            # Update memory system

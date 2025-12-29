@@ -79,27 +79,27 @@ Each finding includes:
 
 **Full pipeline:**
 ```
-/execute → /review → (fix tasks if needed) → /update → /commit
+/execute → /code-review → (fix tasks if needed) → /update → /commit
 ```
 
 **Standalone:**
 ```
-/review → assess findings → take action as needed
+/code-review → assess findings → take action as needed
 ```
 
 ## Example Usage
 
 **End of sprint:**
 ```
-"Run /review to check all changes before we update memory and commit"
+"Run /code-review to check all changes before we update memory and commit"
 ```
 
 **After feature completion:**
 ```
-"Run /review on the authentication feature I just finished"
+"Run /code-review on the authentication feature I just finished"
 ```
 
 **Scoped review:**
 ```
-"Run /review on commits since abc123"
+"Run /code-review on commits since abc123"
 ```
