@@ -206,144 +206,114 @@ THOROUGHNESS: very thorough
 
 **Use EXPLORE_CONTEXT.decision_recommendation as starting point.**
 
-**Decision Rules:**
+**Decision Rules (Three-Tier):**
 
-**Create Tasks Directly (Complexity ≤ 6)** when:
-- Single component or tightly related components
-- Follows existing patterns exactly
-- Clear implementation path
-- Estimated effort < 6 hours
-- Low to medium risk
-- No architectural changes needed
-
-**Create PRD First (Complexity ≥ 7)** when:
-- Multiple loosely coupled components
-- Requires new patterns or architectural changes
-- Complex integration requirements
-- Estimated effort ≥ 6 hours
-- Medium to high risk
-- Breaking changes possible
+| Complexity | Action | Rationale |
+|------------|--------|-----------|
+| **1-2 (Very Simple)** | Implement inline | Single file, trivial change, <30 min |
+| **3-6 (Moderate)** | Hand off to task-writer | Multiple files, clear patterns, needs structured tasks |
+| **7+ (Complex)** | Hand off to prd-writer | Architectural changes, needs full PRD first |
 
 ---
 
-## Task List Generation (Simple Features)
+## Very Simple Features (Complexity 1-2)
 
-**If creating tasks directly (complexity ≤ 6):**
+**Handle inline** - no agent handoff needed.
 
-```markdown
-# Task List: [Feature Name]
+- Single file change or trivial addition
+- Follows existing pattern exactly
+- Can be completed in <30 minutes
+- Example: Adding a config option, simple UI tweak
 
-**Generated from:** Feature implementation analysis
-**Date:** [Current Date]
-**Complexity:** [Score]/10
-**Estimated Effort:** [Hours]
-**Architecture Pattern:** [Pattern from PATTERNS.md]
-**Reference Implementation:** [Similar feature file:line]
-
-## Feature Summary
-[Brief description of what's being implemented]
-
-## Architecture Integration
-- **Pattern:** [Pattern from PATTERNS.md]
-- **Files:** [Target files from FILES.json]
-- **Integration:** [State management, APIs, etc.]
-- **Performance Target:** [Target from BUSINESS.json]
-
-## Implementation Strategy
-[Brief description of approach, referencing similar features]
-
-## Build & Test Commands
-
-# From QUICK.md - project-specific commands
-[BUILD_COMMAND]
-[TEST_COMMAND]
-
-## Tasks
-
-### 1.0 [Component Implementation] ([Pattern Name])
-**Goal:** [Specific implementation goal]
-**Files:** [Exact files from FILES.json:line]
-**Pattern:** [Template from PATTERNS.md]
-**Reference:** [Similar feature implementation]
-
-- [ ] 1.1 - complexity [X]/5 - [Specific task]
-  - **File:** [Exact file from FILES.json:line]
-  - **Pattern Template:** [Reference to PATTERNS.md template]
-  - **Similar Implementation:** [Existing feature to copy/adapt from]
-  - **Testing:** [How to verify]
-  - **Verification:** [Success criteria]
-
-[Continue with pattern-specific tasks following task.md structure...]
-
-### 2.0 Testing & Verification
-[Test tasks following established patterns]
-
-### 3.0 Update Memory System (if applicable)
-[Memory update tasks if new patterns discovered]
-```
-
-**Save to:** `/tasks/tasks-[feature-name].md`
+**Process:** Implement directly, then offer to commit.
 
 ---
 
-## PRD Generation (Complex Features)
+## Moderate Features (Complexity 3-6)
 
-**If creating PRD (complexity ≥ 7):**
+**Hand off to task-writer agent** with feature context as mini-PRD.
 
-Follow the PRD generation template from `.claude/commands/prd.md` with these adaptations:
+Use the Task tool with `subagent_type=task-writer`:
 
-```markdown
-# PRD: [Feature Name]
+```yaml
+---
+PRD_FILE: inline-feature-[feature-name]
+INLINE_CONTEXT: true
+FEATURE_NAME: [kebab-case-name]
+PROBLEM: [One sentence problem statement]
+MUST_HAVE:
+- [Requirement 1]
+- [Requirement 2]
+IMPLEMENTATION_APPROACH: [From EXPLORE_CONTEXT - pattern and strategy]
+KEY_FILES:
+- [file:line from EXPLORE_CONTEXT]
+- [file:line from EXPLORE_CONTEXT]
+SIMILAR_FEATURE: [Reference from EXPLORE_CONTEXT]
+PATTERN: [Pattern name from EXPLORE_CONTEXT]
+COMPLEXITY: [Score]/10
+ESTIMATED_EFFORT: [Hours]
+EXPLORE_CONTEXT: |
+  [Full EXPLORE_CONTEXT summary - paste complete output]
+---
 
-**Generated:** [Date]
-**Status:** Draft
-**Version:** v1.0
-**Complexity:** [High/Very High] (Score: X/10)
-**Architecture Pattern:** [Primary pattern from PATTERNS.md]
-
-## Overview
-
-[2-3 sentences describing the feature]
-
-**Implementation Strategy:** [High-level approach]
-**Architecture Impact:** [Components affected]
-**Performance Target:** [Target from BUSINESS.json]
-
-## Feature Requirements
-
-[Detailed requirements using PRD structure]
-
-## Implementation Plan
-
-[Structured like standard PRD Feature Components section]
-
-## Technical Considerations
-
-### Architecture Alignment
-[Pattern compliance, integration approach]
-
-### Pattern Compliance
-[Specific patterns from PATTERNS.md]
-
-### Performance Integration
-[Targets from BUSINESS.json]
-
-## Testing Requirements
-
-[Test scenarios and strategies]
-
-## Acceptance Criteria
-
-[Clear success criteria]
-
-## Risk Analysis
-
-[Risks and mitigations]
+Generate implementation tasks for this feature. Use EXPLORE_CONTEXT for architectural details.
+Save to /tasks/tasks-[feature-name].md
 ```
 
-**Save to:** `/tasks/prd-[feature-name].md`
+**The task-writer agent will:**
+1. Use provided context (skip memory file reads - EXPLORE_CONTEXT has it)
+2. Generate implementation-ready tasks with file:line references
+3. Include pattern templates from PATTERNS.md
+4. Save to `/tasks/tasks-[feature-name].md`
 
-**Then tell user:** "PRD generated. Run `/TaskGen` to generate implementation tasks."
+**After task-writer returns:** "Tasks generated. Run `/execute` to implement, or review first."
+
+---
+
+## Complex Features (Complexity 7+)
+
+**Hand off to prd-writer agent** for full PRD generation.
+
+Use the Task tool with `subagent_type=prd-writer`:
+
+```yaml
+---
+FEATURE_NAME: [kebab-case-name-for-filename]
+PROBLEM: [One sentence problem statement]
+USERS: [Primary users and their goals]
+MUST_HAVE:
+- [Requirement 1]
+- [Requirement 2]
+- [Requirement 3]
+NICE_TO_HAVE:
+- [Optional requirement 1]
+USER_FLOWS:
+  HAPPY_PATH:
+    - [Step 1]
+    - [Step 2]
+  ERROR_FLOWS:
+    - [Error scenario 1]
+INTEGRATION_POINTS: [From EXPLORE_CONTEXT]
+SUCCESS_CRITERIA: [How we know it's done]
+COMPLEXITY: High (Score: [X]/10)
+RED_FLAGS: [From EXPLORE_CONTEXT or "None identified"]
+ASSUMPTIONS:
+- [Assumption 1]: Risk if wrong: [risk], Validation: [method]
+KEY_FILES:
+- [From EXPLORE_CONTEXT]
+EXPLORE_CONTEXT: |
+  [Full EXPLORE_CONTEXT summary - paste complete output]
+---
+
+Generate the PRD document using this context. Use EXPLORE_CONTEXT for architectural details.
+```
+
+**The prd-writer agent will:**
+1. Use EXPLORE_CONTEXT for architectural context (skips redundant memory file reads)
+2. Generate complete 17-section PRD
+3. Save to `/tasks/prd-[feature-name].md`
+
+**After prd-writer returns:** "PRD generated. Run `/TaskGen prd-[feature-name]` to generate implementation tasks."
 
 ---
 
@@ -421,52 +391,51 @@ Before presenting design:
    - Similar Feature: Button click feedback at UI/FeedbackUtil.kt:45
    - Implementation Files: DataService.kt:148, FeedbackUtil.kt:45
    - Complexity: 2/10, Effort: 1-2 hours
-   - Decision: Tasks directly
 
 3. **Design (using EXPLORE_CONTEXT):**
    - Simple addition to save completion handler
    - Use existing notification pattern
-   - Trigger on successful save
-   - Follow existing pattern from similar UI feedback
+   - Complexity: 2/10 → **Very Simple (handle inline)**
 
-4. **Complexity Assessment:** 2/10 (from EXPLORE_CONTEXT, validated)
-   - Logic addition: Simple
-   - API usage: Standard
-   - Testing: Straightforward
-   - Effort: 1-2 hours
+4. **Decision:** Complexity 2/10 = Very Simple → Implement inline
 
-5. **Present Design & Generate Tasks:**
-
-```markdown
-## Feature Analysis
-
-**Feature:** Add confirmation feedback on save completion
-
-**Architecture Integration:**
-- **Pattern:** Service pattern (DataService)
-- **Files:** DataService.ext:148
-- **Integration:** Notification utility
-- **Performance:** Negligible impact
-
-**Similar Features:**
-- Button click feedback (if exists in app)
-- Standard notification patterns
-
-**Complexity:** 2/10 (Simple)
-**Estimated Effort:** 1-2 hours
-
-**Decision:** Create tasks directly (complexity below threshold)
+5. **Implement & Complete:**
+   - Make the simple change directly
+   - Offer to commit: "Feature implemented. Want me to commit?"
 
 ---
 
-# Task List: Save Confirmation Feedback
+### Example 2: Moderate Feature (Complexity 4)
 
-[Full task list generated and saved to /tasks/tasks-save-confirmation-feedback.md]
-```
+**User:** `/feature "Add user preference for notification frequency"`
 
-6. **Save & Proceed:**
-   - Tasks saved to `/tasks/tasks-save-confirmation-feedback.md`
-   - Ask user: "Tasks generated. Should I proceed with implementation?"
+1. **Explore Agent returns:** Complexity 4/10, affects Settings + NotificationService
+
+2. **Decision:** Complexity 4 = Moderate → Hand off to task-writer
+
+3. **Hand off:**
+   ```
+   Task tool with subagent_type=task-writer with EXPLORE_CONTEXT
+   ```
+
+4. **Result:** "Tasks saved to /tasks/tasks-notification-frequency.md. Run `/execute` to implement."
+
+---
+
+### Example 3: Complex Feature (Complexity 8)
+
+**User:** `/feature "Add real-time collaboration editing"`
+
+1. **Explore Agent returns:** Complexity 8/10, requires WebSocket, state sync, conflict resolution
+
+2. **Decision:** Complexity 8 = Complex → Hand off to prd-writer
+
+3. **Hand off:**
+   ```
+   Task tool with subagent_type=prd-writer with EXPLORE_CONTEXT
+   ```
+
+4. **Result:** "PRD saved to /tasks/prd-realtime-collaboration.md. Run `/TaskGen prd-realtime-collaboration` to generate tasks."
 
 ---
 
@@ -476,21 +445,20 @@ Before presenting design:
 - ❌ Start coding before understanding requirements
 - ❌ Skip the Explore agent context discovery
 - ❌ Ignore EXPLORE_CONTEXT findings
-- ❌ Create PRD for trivial features
-- ❌ Create tasks for complex features without PRD
-- ❌ Ignore similar features identified by Explore
+- ❌ Generate tasks inline for moderate features (use task-writer)
+- ❌ Generate PRD inline for complex features (use prd-writer)
+- ❌ Hand off without passing EXPLORE_CONTEXT
 - ❌ Propose patterns not in PATTERNS.md
 - ❌ Skip complexity assessment
 
 **DO:**
 - ✅ Clarify requirements upfront
 - ✅ Invoke Explore agent for comprehensive analysis
-- ✅ Use EXPLORE_CONTEXT for design decisions
-- ✅ Reference similar features from Explore
+- ✅ Use three-tier decision: inline (1-2) / task-writer (3-6) / prd-writer (7+)
+- ✅ Pass EXPLORE_CONTEXT in all agent handoffs
 - ✅ Use established patterns
 - ✅ Validate Explore's complexity assessment
-- ✅ Save tasks/PRD to files
-- ✅ Clear next steps
+- ✅ Clear next steps after agent returns
 
 ---
 

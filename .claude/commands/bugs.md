@@ -274,175 +274,117 @@ THOROUGHNESS: very thorough
 
 ## Output Generation Rules
 
-### Decision: Tasks vs Bug PRD
+### Decision: Three-Tier Approach
 
-**Create Tasks Directly** when:
-- Single file or tightly related files
-- Clear fix with minimal architectural impact
-- Follows existing patterns exactly
-- Complexity ≤ 6/10
-- Estimated effort < 6 hours
+| Complexity | Action | Rationale |
+|------------|--------|-----------|
+| **1-2 (Trivial)** | Fix inline | Single line change, obvious fix, <15 min |
+| **3-6 (Moderate)** | Hand off to task-writer | Multiple files, needs structured tasks |
+| **7+ (Complex)** | Hand off to prd-writer | Architectural impact, needs full Bug PRD |
 
-**Create Bug PRD First** when:
-- Multiple components affected
-- Requires architectural changes
-- New patterns needed
-- Breaking changes to APIs/data models
-- Complexity ≥ 7/10
-- Estimated effort ≥ 6 hours
-- Significant refactoring involved
+---
 
-### Task List Generation (Simple Fixes)
+## Trivial Fixes (Complexity 1-2)
 
-**If creating tasks directly:**
+**Fix inline** - no agent handoff needed.
 
-```markdown
-# Task List: Fix [Bug Name]
+- Single line or obvious fix
+- Root cause is clear, fix is straightforward
+- Can be completed in <15 minutes
+- Example: Null check, off-by-one error, typo fix
 
-**Generated from:** Bug investigation
-**Date:** [Current Date]
-**Root Cause:** [file.ext:line]
-**Severity:** [Level]
-**Estimated Effort:** [Hours]
+**Process:** Apply fix directly, test, offer to commit.
 
-## Root Cause Summary
-[Brief summary linking to investigation]
+---
 
-## Fix Approach
-[Selected option summary]
+## Moderate Fixes (Complexity 3-6)
 
-## Tasks
+**Hand off to task-writer agent** with bug context as mini-PRD.
 
-### 1.0 Implement Fix ([Pattern Name])
-**Goal:** [Specific fix goal]
-**Files:** [file.ext:line]
-**Pattern:** [From PATTERNS.md]
+Use the Task tool with `subagent_type=task-writer`:
 
-- [ ] 1.1 - complexity [X]/5 - [Specific fix task]
-  - **File:** [file.ext:line]
-  - **Change:** [What to change]
-  - **Pattern:** [Template reference]
-  - **Testing:** [How to verify]
+```yaml
+---
+PRD_FILE: inline-bugfix-[bug-name]
+INLINE_CONTEXT: true
+BUG_NAME: [kebab-case-name]
+ROOT_CAUSE: [file.ext:line - brief explanation]
+SEVERITY: [Critical/High/Medium/Low]
+FIX_APPROACH: [Selected option from Phase 4]
+AFFECTED_FILES:
+- [file:line from EXPLORE_CONTEXT]
+- [file:line from EXPLORE_CONTEXT]
+PATTERN: [Pattern name from EXPLORE_CONTEXT]
+COMPLEXITY: [Score]/10
+ESTIMATED_EFFORT: [Hours]
+TESTING_STRATEGY: [How to verify fix]
+EXPLORE_CONTEXT: |
+  [Full EXPLORE_CONTEXT summary - paste complete output including
+   root cause, evidence, impact assessment, and fix options]
+---
 
-[Continue with standard task structure from tasks.md rules]
-
-### 2.0 Testing & Verification
-[Test tasks]
-
-### 3.0 Update Memory System (if new patterns discovered)
-[Memory update tasks]
+Generate implementation tasks for this bug fix. Use EXPLORE_CONTEXT for architectural details.
+Save to /tasks/tasks-fix-[bug-name].md
 ```
 
-### Bug PRD Template (Complex Fixes)
+**The task-writer agent will:**
+1. Use provided context (skip memory file reads - EXPLORE_CONTEXT has it)
+2. Generate fix tasks with file:line references
+3. Include testing/verification tasks
+4. Save to `/tasks/tasks-fix-[bug-name].md`
 
-**If creating bug PRD:**
+**After task-writer returns:** "Tasks generated. Run `/execute` to implement the fix."
 
-```markdown
-# Bug PRD: Fix [Bug Name]
+---
 
-**Generated:** [Date]
-**Status:** Draft
-**Version:** v1.0
-**Severity:** [Critical/High/Medium/Low]
-**Complexity:** [High/Very High] (Score: X)
-**Root Cause:** [file.ext:line]
+## Complex Fixes (Complexity 7+)
 
-## Overview
+**Hand off to prd-writer agent** for full Bug PRD generation.
 
-[2-3 sentences describing the bug and its impact]
+Use the Task tool with `subagent_type=prd-writer`:
 
-**Root Cause:** [Technical explanation]
-**Fix Strategy:** [High-level approach]
-**Affected Components:** [List components]
+```yaml
+---
+FEATURE_NAME: fix-[bug-name]
+PROBLEM: "[Bug description] - Root cause at [file:line]"
+USERS: [Affected users/scope]
+MUST_HAVE:
+- Fix root cause at [location]
+- [Additional fix requirements]
+- Regression tests
+NICE_TO_HAVE:
+- [Preventive improvements]
+USER_FLOWS:
+  HAPPY_PATH:
+    - [Expected behavior after fix]
+  ERROR_FLOWS:
+    - [Edge cases to handle]
+INTEGRATION_POINTS: [From EXPLORE_CONTEXT]
+SUCCESS_CRITERIA: Bug no longer reproduces, no regressions
+COMPLEXITY: High (Score: [X]/10)
+RED_FLAGS: [From EXPLORE_CONTEXT - breaking changes, data risk, etc.]
+ASSUMPTIONS:
+- [Assumption about fix]: Risk if wrong: [risk], Validation: [method]
+KEY_FILES:
+- [From EXPLORE_CONTEXT]
+BUG_CONTEXT:
+  ROOT_CAUSE: [file:line - explanation]
+  SEVERITY: [Level]
+  IMPACT: [From EXPLORE_CONTEXT.impact]
+  SELECTED_FIX: [Option chosen from Phase 4]
+EXPLORE_CONTEXT: |
+  [Full EXPLORE_CONTEXT summary - paste complete output]
+---
 
-## Bug Details
-
-**Observed Behavior:**
-[What users see/experience]
-
-**Expected Behavior:**
-[What should happen]
-
-**Reproduction Steps:**
-1. [Step 1]
-2. [Step 2]
-3. [Result]
-
-**Root Cause Analysis:**
-[Detailed technical explanation]
-**Location:** [file.ext:line]
-
-## Impact Assessment
-
-**Severity:** [Level] - [Justification]
-**Affected Users:** [All/Subset description]
-**Affected Features:** [List]
-**Data Risk:** [Yes/No - explanation]
-**Business Impact:** [How this affects operations]
-
-## Fix Options Analysis
-
-[Include all options from Phase 5]
-
-## Selected Approach
-
-**Option:** [Selected option]
-**Rationale:** [Why chosen]
-
-## Implementation Plan
-
-[Structured like PRD Feature Components section]
-
-### Component 1: [Fix Component]
-**Responsibility:** [What this fixes]
-**Files:** [file.ext:line]
-**Pattern:** [From PATTERNS.md]
-
-## Functional Requirements
-
-### Fix Requirements
-
-**FR1.1:** The system must [specific fix requirement]
-- **Change:** [What changes]
-- **Validation:** [How to verify fix works]
-- **Error Handling:** [Edge cases addressed]
-
-## Data Specifications
-
-[Only if data model changes required]
-
-## Testing Requirements
-
-**Test Scenarios:**
-1. **Verify Fix:** [How to confirm bug is fixed]
-2. **Regression:** [Ensure nothing else broke]
-3. **Edge Cases:** [Test edge cases]
-
-**Test Data:**
-[Specific test cases to verify]
-
-## Acceptance Criteria
-
-- [ ] Bug no longer reproduces - **Test:** [Specific test]
-- [ ] No regressions introduced - **Test:** Full regression suite
-- [ ] Performance unaffected - **Test:** [Performance check]
-- [ ] Edge cases handled - **Test:** [Edge case tests]
-
-## Risk Analysis
-
-**Implementation Risks:**
-- [Risk 1 + mitigation]
-- [Risk 2 + mitigation]
-
-**Rollback Plan:**
-[How to roll back if fix causes issues]
-
-## Non-Goals
-
-- Will NOT [out of scope items]
-
-[Include other relevant PRD sections as needed]
+Generate a Bug PRD document using this context. Use EXPLORE_CONTEXT for architectural details.
 ```
+
+**The prd-writer agent will:**
+1. Use EXPLORE_CONTEXT for architectural context (skips redundant memory file reads)
+2. Generate Bug PRD with fix requirements
+3. Save to `/tasks/prd-fix-[bug-name].md`
+
+**After prd-writer returns:** "Bug PRD generated. Run `/TaskGen prd-fix-[bug-name]` to generate implementation tasks."
 
 ---
 
@@ -507,23 +449,22 @@ Before presenting findings:
 - Present findings before Explore agent completes
 - Ignore EXPLORE_CONTEXT findings
 - Propose fixes that don't address the identified root cause
-- Present only one option (unless trivial)
-- Sugarcoat risks or effort estimates
-- Create PRD for simple fixes
+- Generate tasks inline for moderate fixes (use task-writer)
+- Generate Bug PRD inline for complex fixes (use prd-writer)
+- Hand off without passing EXPLORE_CONTEXT
 - Skip the Explore agent investigation
 - Ask user technical questions they can't answer
-- Present options you know are bad ideas (just to have more options)
+- Sugarcoat risks or effort estimates
 
 **DO:**
 - Invoke Explore agent for systematic investigation
 - Use EXPLORE_CONTEXT for root cause presentation
-- Present honest trade-off analysis based on Explore findings
+- Use three-tier decision: inline (1-2) / task-writer (3-6) / prd-writer (7+)
+- Pass EXPLORE_CONTEXT in all agent handoffs
 - Make clear recommendations using EXPLORE_CONTEXT.recommended
 - Validate Explore's complexity assessment
-- Create appropriate output (tasks vs PRD)
 - Ask only essential clarifying questions
-- Show your reasoning
-- Provide actionable next steps
+- Clear next steps after agent returns
 
 ---
 

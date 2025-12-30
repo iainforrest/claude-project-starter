@@ -46,11 +46,26 @@ KEY_FILES:
 - [Relevant file 2]
 DOCUMENTATION:
 - [External doc links if any]
+EXPLORE_CONTEXT: |  # OPTIONAL - provided when called from /prd command
+  [Full summary from Explore agent with architectural context]
 ```
 
-## Memory System Loading (REQUIRED)
+## Architectural Context Loading
 
-Before generating the PRD, read these files for architectural context:
+### If EXPLORE_CONTEXT is provided (from /prd command):
+
+**Use EXPLORE_CONTEXT directly** - it already contains:
+- Similar existing features with file references
+- Applicable architectural patterns
+- Key files with line numbers
+- Integration constraints
+- Red flags identified during exploration
+
+**Skip memory file reads** - the Explore agent already analyzed these files and provided the relevant summary. Using EXPLORE_CONTEXT avoids redundant file reads and keeps context efficient.
+
+### If EXPLORE_CONTEXT is NOT provided (standalone invocation):
+
+**Read memory files for architectural context:**
 
 ```bash
 # Load memory system files

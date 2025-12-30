@@ -296,13 +296,17 @@ KEY_FILES:
 - [Relevant file 2]
 DOCUMENTATION:
 - [External doc links if any]
+EXPLORE_CONTEXT: |
+  [Full summary from Explore agent - include all sections:
+   Similar Features, Applicable Pattern, Key Files, Integration Points,
+   Red Flags, Suggested Questions - paste the complete Explore output here]
 ---
 
-Generate the PRD document using this context and the memory system.
+Generate the PRD document using this context. Use EXPLORE_CONTEXT for architectural details instead of re-reading memory files.
 ```
 
 **The prd-writer agent will:**
-1. Load memory files for architectural context
+1. Use EXPLORE_CONTEXT for architectural context (skips redundant memory file reads)
 2. Generate complete 17-section PRD using the template
 3. Save to `/tasks/prd-[feature-name].md`
 4. Return confirmation with summary and next steps
