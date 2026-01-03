@@ -456,9 +456,10 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 - `chore`: Maintenance tasks
 - `style`: Code style changes
 
-## Code Review Phase (Before Memory Update)
+## Step 5: Code Review Phase (Before Memory Update)
 
-**MANDATORY**: Before updating memory, run a thorough code review of all changes.
+🚨 **MANDATORY**: Before updating memory, run a thorough code review of all changes.
+**DO NOT SKIP**: This step catches issues before they get committed to the memory system.
 
 ### Code Review Process
 
@@ -501,7 +502,12 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 ---
 
-## Memory System Update (Final Task)
+## Step 6: Memory System Update (Final Task)
+
+🚨 **PREREQUISITE**: Code Review Phase MUST be completed first. Do NOT start memory update until:
+- [ ] Code review agent has been run
+- [ ] All CRITICAL and HIGH findings have been fixed
+- [ ] Code review passes (no blocking issues remain)
 
 **CRITICAL RULE**: Do NOT create separate sprint completion files.
 **UPDATE RULE**: Integrate ALL sprint info into existing core files only.
@@ -573,14 +579,24 @@ Every implementation must:
 - [ ] Pass build verification from QUICK.md (mandatory)
 ```
 
-### 5. **Future Proof**
+### 5. **Code Review (MANDATORY - Before Memory Update)**
 ```
-AFTER all tasks complete:
+🚨 CRITICAL: Do NOT skip this step. Do NOT proceed to memory update without code review.
+
+AFTER all tasks complete, BEFORE memory update:
 1. Run code review agent (Task tool with subagent_type='code-review-agent')
-2. Address any CRITICAL or HIGH findings
-3. Run memory update (Task tool with subagent_type='update-memory-agent')
-4. Commit all changes with proper commit message
-5. Verify memory system integrity (8 core files only)
+2. Review all findings by severity (CRITICAL, HIGH, MEDIUM, LOW)
+3. Fix all CRITICAL and HIGH findings immediately
+4. Re-run code review if significant fixes were made
+5. Only proceed to Step 6 when code review passes
+```
+
+### 6. **Memory Update (Final Task)**
+```
+AFTER code review passes:
+1. Run memory update (Task tool with subagent_type='update-memory-agent')
+2. Commit all changes with proper commit message
+3. Verify memory system integrity (8 core files only)
 ```
 
 ## Example: Memory-Driven Task Execution
