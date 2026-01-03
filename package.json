@@ -1,0 +1,38 @@
+{
+  "name": "create-claude-project",
+  "version": "2.0.0",
+  "description": "A self-bootstrapping development system that sets up a complete AI-assisted workflow for any project",
+  "main": "install.js",
+  "bin": {
+    "create-claude-project": "./install.js"
+  },
+  "scripts": {
+    "test": "node install.js"
+  },
+  "keywords": [
+    "claude",
+    "ai",
+    "development",
+    "workflow",
+    "automation",
+    "memory",
+    "assistant"
+  ],
+  "author": "Iain Forrest",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/iainforrest/claude-project-starter.git"
+  },
+  "files": [
+    ".claude/**/*",
+    ".ai/**/*",
+    "INSTALL-NEW.md",
+    "INSTALL-EXISTING.md",
+    "README.md",
+    "install.js"
+  ],
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
