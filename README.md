@@ -10,32 +10,57 @@ A self-bootstrapping development system that sets up a complete AI-assisted work
 
 ## Installation
 
+### One-Command Install (Recommended)
+
+Install into any project with a single command:
+
+```bash
+npx create-claude-project
+```
+
+The installer will:
+1. Ask if you're setting up a **new** or **existing** project
+2. Copy all necessary files (`.claude/`, `.ai/`, installers)
+3. Guide you to the next steps
+
 ### Choose Your Path
 
-| Scenario | Use This | What It Does |
-|----------|----------|--------------|
-| **New project** (empty or minimal code) | `INSTALL-NEW.md` | Asks questions, populates `.ai/` from your answers |
-| **Existing project** (has code already) | `INSTALL-EXISTING.md` | Explores your codebase, extracts knowledge into `.ai/` |
-| **Upgrading from CPS v1.x** | `upgrade-to-cps-v2.md` | Migrates existing setup to v2.0 architecture |
+| Scenario | Installer Will Guide You To |
+|----------|------------------------------|
+| **New project** (empty or minimal code) | `@INSTALL-NEW.md` - Asks questions, populates `.ai/` from your answers |
+| **Existing project** (has code already) | `@INSTALL-EXISTING.md` - Explores your codebase, extracts knowledge into `.ai/` |
 
 ### Quick Start
 
-1. **Copy the files** into your project:
+1. **Run the installer** in your project directory:
    ```bash
-   git clone https://github.com/iainforrest/claude-project-starter.git
-   cp -r claude-project-starter/.claude your-project/
-   cp -r claude-project-starter/.ai your-project/
-   cp claude-project-starter/INSTALL-*.md your-project/
+   cd your-project
+   npx create-claude-project
    ```
 
-2. **Run the appropriate installer** with Claude Code:
+2. **Follow the installer prompts** (new vs existing)
+
+3. **Open Claude Code** and run the appropriate installer:
    - For new projects: `@INSTALL-NEW.md`
    - For existing projects: `@INSTALL-EXISTING.md`
 
-3. **Start building**:
+4. **Start building**:
    ```
    /prd → /TaskGen → /execute → /commit → /update
    ```
+
+### Manual Installation (Alternative)
+
+If you prefer to install manually:
+
+```bash
+git clone https://github.com/iainforrest/claude-project-starter.git
+cp -r claude-project-starter/.claude your-project/
+cp -r claude-project-starter/.ai your-project/
+cp claude-project-starter/INSTALL-*.md your-project/
+```
+
+Then run the appropriate installer with Claude Code.
 
 ## Key Architecture (v2.0)
 
