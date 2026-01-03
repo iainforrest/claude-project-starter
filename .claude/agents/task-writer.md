@@ -245,10 +245,24 @@ Generate tasks with:
   - **Migration Path**: [How to transition]
 ```
 
+### Second-to-Last: Code Review (ALWAYS INCLUDE)
+```markdown
+### [N].0 Code Review
+**Goal**: Verify code quality before memory update
+🚨 **MANDATORY**: Do NOT proceed to memory update without completing code review
+
+- [ ] [N].1 - complexity 2/5 - Run code review agent
+  - **Action**: Use Task tool with subagent_type='code-review-agent'
+  - **Review**: All CRITICAL and HIGH findings must be addressed
+  - **Re-run**: If significant fixes made, run code review again
+  - **Gate**: Only proceed to memory update when code review passes
+```
+
 ### Final: Documentation & Memory Update (ALWAYS INCLUDE)
 ```markdown
 ### [Final].0 Documentation & Memory Update
 **Goal**: Update documentation and memory system
+**PREREQUISITE**: Code review must be completed first
 **CRITICAL**: Do NOT create separate sprint files
 
 - [ ] [Final].1 - complexity 2/5 - Update memory system

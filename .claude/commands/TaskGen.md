@@ -84,12 +84,19 @@ Task generation benefits from running in an isolated context window because:
 
 The task-writer agent has full access to tools (Read, Glob, Grep, Write) and generates tasks autonomously based on the PRD and memory system.
 
-## Memory Update Requirement
+## Code Review & Memory Update Requirements
 
-**IMPORTANT:** Every generated task list includes a MANDATORY final task to update the memory system:
+**IMPORTANT:** Every generated task list includes TWO mandatory final tasks:
+
+### Step 5: Code Review (Before Memory Update)
+- Run code review agent on all changes
+- Fix any CRITICAL or HIGH severity findings
+- Re-run code review if significant fixes were made
+
+### Step 6: Memory Update (Final Task)
 - Update FILES.json with new files
 - Update PATTERNS.md with new patterns discovered
 - Update BUSINESS.json with feature status
 - Update TODO.md with sprint completion
 
-This ensures the memory system stays current after implementation.
+This ensures code quality is verified before updating the memory system.
