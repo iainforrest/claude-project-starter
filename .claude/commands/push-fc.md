@@ -16,7 +16,8 @@ Push improved commands or agents back to The Fat Controller repository as a pull
 |----------|-------------|
 | `.claude/commands/*.md` | `.ai/*` (project-specific) |
 | `.claude/agents/*.md` | `.claude/settings.local.json` |
-| `.claude/WORKFLOW.md` | Project-specific commands |
+| `.claude/skills/*.md` | Project-specific commands |
+| `.claude/WORKFLOW.md` | |
 
 ## Steps
 

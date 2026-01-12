@@ -16,7 +16,8 @@ Pull the latest generic commands and agents from The Fat Controller repository.
 |-------|-------------|
 | `.claude/commands/*.md` | `.ai/*` (project-specific memory) |
 | `.claude/agents/*.md` | `.claude/settings.local.json` (machine-specific) |
-| `.claude/WORKFLOW.md` | `pull-fc.md`, `push-fc.md` (sync commands) |
+| `.claude/skills/*.md` | `pull-fc.md`, `push-fc.md` (sync commands) |
+| `.claude/WORKFLOW.md` | |
 
 ## Steps
 
@@ -33,6 +34,7 @@ echo "Cloned to $TEMP_DIR"
 Compare these directories:
 - `.claude/commands/` (excluding pull-fc.md and push-fc.md)
 - `.claude/agents/`
+- `.claude/skills/`
 - `.claude/WORKFLOW.md` (if exists)
 
 For each file, determine:
