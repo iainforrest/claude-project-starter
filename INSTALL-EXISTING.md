@@ -359,8 +359,8 @@ Does this look accurate? Anything I missed or got wrong?
 ### Keeping Updated
 
 - Run `/update` after significant changes
-- Run `/pull-cps` to get latest commands
-- Run `/push-cps` to contribute improvements
+- Run `/pull-fc` to get latest commands
+- Run `/push-fc` to contribute improvements
 ```
 
 ---

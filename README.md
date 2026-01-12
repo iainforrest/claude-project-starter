@@ -10,7 +10,7 @@ A complete AI-assisted development system that orchestrates Claude Code agents t
 
 - **Generic Commands & Agents**: Reusable workflow tools that work across any project
 - **AI Memory System**: Persistent project knowledge in `.ai/` that prevents context loss
-- **Sync System**: Keep your projects up-to-date with `/pull-cps` and `/push-cps`
+- **Sync System**: Keep your projects up-to-date with `/pull-fc` and `/push-fc`
 
 ## Installation
 
@@ -104,8 +104,8 @@ Then run the appropriate installer with Claude Code.
 ### Sync Commands
 
 ```
-/pull-cps               → Pull latest commands/agents from this repo
-/push-cps               → Push improvements back as PR
+/pull-fc               → Pull latest commands/agents from this repo
+/push-fc               → Push improvements back as PR
 ```
 
 ## Commands Reference
@@ -117,8 +117,8 @@ Then run the appropriate installer with Claude Code.
 | `/execute` | Orchestrate task execution via agents | Implemented code + commits |
 | `/commit` | Group and commit changes intelligently | Git commits |
 | `/update` | Update memory system from git diffs | Updated `.ai/` files |
-| `/pull-cps` | Sync latest from starter repo | Updated commands/agents |
-| `/push-cps` | Contribute improvements back | GitHub PR |
+| `/pull-fc` | Sync latest from starter repo | Updated commands/agents |
+| `/push-fc` | Contribute improvements back | GitHub PR |
 
 ## Specialized Agents
 
@@ -160,7 +160,7 @@ The memory system is your project's brain. It's populated during installation an
 When new commands or agents are added to this repo:
 
 ```
-/pull-cps
+/pull-fc
 ```
 
 This compares your `.claude/` with the latest, shows diffs, and lets you selectively update.
@@ -170,7 +170,7 @@ This compares your `.claude/` with the latest, shows diffs, and lets you selecti
 When you improve a command or agent:
 
 ```
-/push-cps
+/push-fc
 ```
 
 This validates your changes are generic (no project-specific content), then creates a PR.
@@ -370,7 +370,7 @@ The `status` attribute tracks progress (`pending` → `in_progress` → `complet
 
 ### Previous Updates (v2.0)
 
-- **Sync System**: `/pull-cps` and `/push-cps` commands for keeping projects updated
+- **Sync System**: `/pull-fc` and `/push-fc` commands for keeping projects updated
 - **Cleaner Architecture**: Commands/agents are now fully generic
 - **Memory-First Design**: All project context lives in `.ai/`
 - **Dual Installation**: Separate paths for new vs existing projects
@@ -387,8 +387,8 @@ your-project/
 │   │   ├── execute.md
 │   │   ├── commit.md
 │   │   ├── update.md
-│   │   ├── pull-cps.md
-│   │   └── push-cps.md
+│   │   ├── pull-fc.md
+│   │   └── push-fc.md
 │   ├── agents/             # Specialized agents
 │   │   ├── execution-agent.md      # Task executor with skill loading
 │   │   ├── code-review-agent.md    # Domain-aware code review

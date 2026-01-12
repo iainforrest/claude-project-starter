@@ -25,7 +25,7 @@
 ```
 
 Commands don't contain project-specific code. They read from `.ai/` for context. This means:
-- You can sync command updates with `/pull-cps`
+- You can sync command updates with `/pull-fc`
 - Your project knowledge stays in `.ai/`
 - Same commands work for any project
 
@@ -358,12 +358,12 @@ Your development system is ready.
 
 Pull latest commands/agents anytime:
 ```
-/pull-cps
+/pull-fc
 ```
 
 Contribute improvements back:
 ```
-/push-cps
+/push-fc
 ```
 
 ### Files Reference
