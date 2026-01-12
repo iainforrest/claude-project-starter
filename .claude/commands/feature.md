@@ -125,7 +125,37 @@ THOROUGHNESS: very thorough
 **Decision Recommendation:** [Tasks directly / PRD first] - [rationale]
 ```
 
-**After Explore returns, store findings as `EXPLORE_CONTEXT` for use in subsequent phases.**
+**After Explore returns:**
+1. Store findings as `EXPLORE_CONTEXT` for use in subsequent phases
+2. Save to `.ai/EXPLORE_CONTEXT.json` for downstream agents
+
+### Saving EXPLORE_CONTEXT.json
+
+After the Explore agent returns, persist the context:
+
+**File Location:** `.ai/EXPLORE_CONTEXT.json`
+
+**Save Process:**
+1. Extract the structured context from Explore agent output
+2. Format as JSON matching the expected structure
+3. Check file size - if > 50KB, apply truncation
+4. Write to `.ai/EXPLORE_CONTEXT.json`
+
+**Expected JSON Structure:**
+```json
+{
+  "feature_name": "feature-name",
+  "generated_at": "2026-01-12T10:00:00Z",
+  "similar_features": [...],
+  "applicable_patterns": [...],
+  "key_files": [...],
+  "integration_points": [...],
+  "red_flags": [...]
+}
+```
+
+**Size Validation (50KB Limit):**
+If > 50KB, truncate `similar_features` and `key_files` to 10 entries each.
 
 **Benefit:** Memory files and code exploration happen in Explore's context window - only the focused summary (max 600 words) returns to main context.
 

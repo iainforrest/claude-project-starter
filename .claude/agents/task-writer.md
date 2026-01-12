@@ -1,7 +1,7 @@
 ---
 name: task-writer
-description: Transform PRD documents into implementation-ready task lists with exact file:line references, pattern templates, and complexity ratings. Invoke with PRD file name (e.g., "prd-email-notifications"). Reads memory system for patterns and file locations. Outputs to /tasks/tasks-[prd-name].md. Examples: (1) User runs /tasks prd-email-notifications - invoke task-writer with the PRD filename. (2) PRD is approved and ready for implementation breakdown - invoke task-writer. (3) Complex feature PRD needs task decomposition - invoke task-writer with PRD reference.
-model: sonnet
+description: Transform PRD documents into implementation-ready XML task files with exact file:line references, pattern templates, complexity ratings, and project-aware verify commands. Invoke with PRD file name (e.g., "prd-email-notifications"). Reads memory system for patterns and file locations. Outputs to /tasks/task-[prd-name].xml. Examples: (1) User runs /TaskGen prd-email-notifications - invoke task-writer with the PRD filename. (2) PRD is approved and ready for implementation breakdown - invoke task-writer. (3) Complex feature PRD needs task decomposition - invoke task-writer with PRD reference.
+model: opus
 color: purple
 ---
 
@@ -40,16 +40,351 @@ EXPLORE_CONTEXT: |
 1. Use provided context directly (no file read needed)
 2. Use EXPLORE_CONTEXT for architectural details
 3. Read only `PATTERNS.md` for code templates (if needed)
-4. Generate tasks
-5. Save to `/tasks/tasks-[name].md`
+4. Generate tasks in XML format
+5. Save to `/tasks/task-[name].xml`
 
 **If PRD_FILE only (no INLINE_CONTEXT):**
 1. Read the PRD from `/tasks/[PRD_FILE].md`
 2. Check if PRD contains EXPLORE_CONTEXT
 3. If yes: use it, only read PATTERNS.md for templates
 4. If no: load full memory system
-5. Generate tasks
-6. Save to `/tasks/tasks-[PRD_FILE].md`
+5. Generate tasks in XML format
+6. Save to `/tasks/task-[PRD_FILE].xml`
+
+---
+
+## XML Output Format
+
+**IMPORTANT**: Tasks are now output in XML format for the orchestrator. This is a breaking change from the previous markdown format.
+
+### XML Structure
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<execution_plan>
+  <metadata>
+    <feature_name>user-authentication</feature_name>
+    <generated_from>prd-user-authentication.md</generated_from>
+    <date>2026-01-12</date>
+    <total_parent_tasks>5</total_parent_tasks>
+    <architecture_pattern>Service Pattern</architecture_pattern>
+    <build_command>npm run build</build_command>
+  </metadata>
+
+  <parent_task id="1.0" complexity="3" status="pending">
+    <title>Implement Core Business Logic</title>
+    <goal>Create the main service with authentication logic</goal>
+    <verify>npm test -- --grep "auth"</verify>
+    <pattern_reference>patterns/API.md:Service Pattern</pattern_reference>
+    <files>
+      <file action="create">src/services/AuthService.ts</file>
+      <file action="modify" line="45">src/routes/index.ts</file>
+    </files>
+    <subtasks>
+      <subtask id="1.1" complexity="2" status="pending">
+        <description>Create AuthService class with login method</description>
+        <files>src/services/AuthService.ts</files>
+        <details>Use service pattern from PATTERNS.md. Include JWT token generation.</details>
+        <pattern_reference>patterns/API.md:15-45</pattern_reference>
+      </subtask>
+      <subtask id="1.2" complexity="2" status="pending">
+        <description>Add password validation with bcrypt</description>
+        <files>src/services/AuthService.ts</files>
+        <details>Hash passwords on registration, verify on login.</details>
+      </subtask>
+    </subtasks>
+  </parent_task>
+
+  <!-- Additional parent tasks follow same structure -->
+
+</execution_plan>
+```
+
+### Status Tracking
+
+Every `<parent_task>` and `<subtask>` includes a `status` attribute for progress tracking:
+
+| Status | Meaning |
+|--------|---------|
+| `pending` | Not yet started (default when generated) |
+| `in_progress` | Currently being worked on |
+| `completed` | Successfully finished |
+| `blocked` | Cannot proceed (requires intervention) |
+
+**Example of partially completed task file:**
+```xml
+<parent_task id="1.0" complexity="3" status="completed">
+  <subtasks>
+    <subtask id="1.1" status="completed">...</subtask>
+    <subtask id="1.2" status="completed">...</subtask>
+  </subtasks>
+</parent_task>
+
+<parent_task id="2.0" complexity="4" status="in_progress">
+  <subtasks>
+    <subtask id="2.1" status="completed">...</subtask>
+    <subtask id="2.2" status="in_progress">...</subtask>
+    <subtask id="2.3" status="pending">...</subtask>
+  </subtasks>
+</parent_task>
+
+<parent_task id="3.0" complexity="2" status="pending">
+  ...
+</parent_task>
+```
+
+This enables:
+- **Resumability**: See exactly where execution stopped
+- **Progress visibility**: Quick scan shows completion state
+- **Recovery**: Re-run `/execute` picks up from last incomplete task
+
+### Required XML Elements
+
+| Element | Location | Required | Description |
+|---------|----------|----------|-------------|
+| `<execution_plan>` | Root | Yes | Root container for all content |
+| `<metadata>` | execution_plan | Yes | Feature metadata and build info |
+| `<feature_name>` | metadata | Yes | Kebab-case feature identifier |
+| `<generated_from>` | metadata | Yes | Source PRD filename |
+| `<date>` | metadata | Yes | Generation date (YYYY-MM-DD) |
+| `<total_parent_tasks>` | metadata | Yes | Count of parent tasks |
+| `<parent_task>` | execution_plan | Yes | One or more parent tasks |
+| `id` attribute | parent_task | Yes | Task ID (e.g., "1.0", "2.0") |
+| `complexity` attribute | parent_task | Yes | 1-5 rating |
+| `status` attribute | parent_task | Yes | "pending", "in_progress", "completed", "blocked" |
+| `domain` attribute | parent_task | No | Explicit domain override (frontend, backend, data, mobile, security, infrastructure, general) |
+| `<title>` | parent_task | Yes | Human-readable task title |
+| `<verify>` | parent_task | Yes | Verification command |
+| `<subtasks>` | parent_task | Yes | Container for subtasks |
+| `<subtask>` | subtasks | Yes | Individual subtask |
+| `id` attribute | subtask | Yes | Subtask ID (e.g., "1.1") |
+| `status` attribute | subtask | Yes | "pending", "in_progress", "completed", "blocked" |
+| `<description>` | subtask | Yes | What to implement |
+
+### Optional XML Elements
+
+| Element | Location | Description |
+|---------|----------|-------------|
+| `<architecture_pattern>` | metadata | Primary pattern used |
+| `<build_command>` | metadata | From QUICK.md |
+| `<goal>` | parent_task | Detailed goal description |
+| `<pattern_reference>` | parent_task/subtask | Pattern file:line reference |
+| `<files>` | parent_task/subtask | List of affected files |
+| `<details>` | subtask | Additional implementation details |
+| `complexity` attribute | subtask | Subtask-level complexity |
+
+### File Element Attributes
+
+```xml
+<file action="create">path/to/new/file.ts</file>
+<file action="modify" line="45">path/to/existing/file.ts</file>
+<file action="delete">path/to/remove/file.ts</file>
+```
+
+---
+
+## Verify Command Generation
+
+Generate project-aware verification commands for each parent task.
+
+### Project Type Detection
+
+Detect project type by checking for these files:
+
+| File | Project Type | Default Verify Command |
+|------|--------------|----------------------|
+| `package.json` | Node.js | `npm test` |
+| `pyproject.toml` | Python (modern) | `pytest` |
+| `requirements.txt` | Python (legacy) | `pytest` |
+| `Cargo.toml` | Rust | `cargo test` |
+| `go.mod` | Go | `go test ./...` |
+| `pom.xml` | Java (Maven) | `mvn test` |
+| `build.gradle` | Java (Gradle) | `./gradlew test` |
+| `*.csproj` | .NET | `dotnet test` |
+
+### Fallback Command
+
+If no recognized project file is found:
+```xml
+<verify>echo "Manual verification required"</verify>
+```
+
+### Task-Specific Verification
+
+Customize verify commands based on task scope:
+
+```xml
+<!-- For auth-related tasks -->
+<verify>npm test -- --grep "auth"</verify>
+
+<!-- For API endpoint tasks -->
+<verify>npm test -- --grep "api"</verify>
+
+<!-- For full feature -->
+<verify>npm test</verify>
+
+<!-- For build-focused tasks -->
+<verify>npm run build</verify>
+```
+
+---
+
+## Complexity in XML
+
+Complexity ratings drive model selection in the orchestrator:
+- **Complexity 1-3**: Executed with Sonnet (cost efficient)
+- **Complexity 4-5**: Executed with Opus (complex reasoning)
+
+### XML Complexity Attributes
+
+```xml
+<!-- Parent task complexity determines model selection -->
+<parent_task id="1.0" complexity="3">
+  <!-- Sonnet will execute this task -->
+</parent_task>
+
+<parent_task id="2.0" complexity="4">
+  <!-- Opus will execute this task -->
+</parent_task>
+
+<!-- Subtask complexity is informational -->
+<subtask id="1.1" complexity="2">
+  <!-- Helps execution agent prioritize within parent -->
+</subtask>
+```
+
+---
+
+## XML Schema Validation
+
+### Required vs Optional Summary
+
+**Parent Task - Required:**
+- `id` attribute
+- `complexity` attribute
+- `<title>`
+- `<verify>`
+- `<subtasks>` with at least one `<subtask>`
+
+**Parent Task - Optional:**
+- `<goal>`
+- `<files>`
+- `<pattern_reference>`
+
+**Subtask - Required:**
+- `id` attribute
+- `<description>`
+
+**Subtask - Optional:**
+- `complexity` attribute
+- `<files>`
+- `<details>`
+- `<pattern_reference>`
+
+### Domain Attribute (Optional Override)
+
+The `domain` attribute on `<parent_task>` provides explicit control over which skill the execution agent uses:
+
+```xml
+<!-- Explicit domain override - use security skill even though files look like backend -->
+<parent_task id="2.0" complexity="4" status="pending" domain="security">
+  <title>Implement Token Validation</title>
+  <files>
+    <file action="modify">src/services/AuthService.ts</file>
+  </files>
+  <!-- ... -->
+</parent_task>
+
+<!-- No domain attribute - orchestrator auto-detects from file patterns -->
+<parent_task id="3.0" complexity="2" status="pending">
+  <title>Create Login Form Component</title>
+  <files>
+    <file action="create">src/components/LoginForm.tsx</file>
+  </files>
+  <!-- Auto-detected as "frontend" due to .tsx and /components/ -->
+</parent_task>
+```
+
+**Valid domain values:** `frontend`, `backend`, `data`, `mobile`, `security`, `infrastructure`, `general`
+
+**When to use explicit domain:**
+- Task spans multiple domains but one is primary
+- Auto-detection would pick wrong domain
+- Security-sensitive code in non-security directories
+- Override to use `general` skill for simple tasks
+
+### Validation Rules
+
+1. All IDs must be unique within the document
+2. Parent task IDs should be sequential (1.0, 2.0, 3.0...)
+3. Subtask IDs should be parent.sequence (1.1, 1.2, 2.1, 2.2...)
+4. Complexity must be integer 1-5
+5. Verify command must be non-empty
+6. Domain attribute (if present) must be one of: frontend, backend, data, mobile, security, infrastructure, general
+
+---
+
+## XML Generation Implementation
+
+### Construction Process
+
+When generating the XML task file, follow this process:
+
+1. **Start with XML declaration**: `<?xml version="1.0" encoding="UTF-8"?>`
+2. **Create root element**: `<execution_plan>`
+3. **Add metadata section** with all required fields
+4. **For each parent task**:
+   - Create `<parent_task id="N.0" complexity="X">` with attributes
+   - Add child elements: title, goal, verify, files, subtasks
+   - Nest `<subtask>` elements within `<subtasks>` container
+5. **Close all elements** properly
+
+### Character Escaping
+
+XML requires escaping special characters in text content and attributes:
+
+| Character | Escaped Form | Context |
+|-----------|--------------|---------|
+| `<` | `&lt;` | Text content |
+| `>` | `&gt;` | Text content |
+| `&` | `&amp;` | Text content and attributes |
+| `"` | `&quot;` | Inside attribute values |
+| `'` | `&apos;` | Inside attribute values (if using single quotes) |
+
+**Example:**
+```xml
+<!-- WRONG -->
+<description>Check if x < 10 && y > 5</description>
+
+<!-- CORRECT -->
+<description>Check if x &lt; 10 &amp;&amp; y &gt; 5</description>
+```
+
+### Indentation and Formatting
+
+Use consistent indentation for readability:
+- 2 spaces per nesting level
+- Each element on its own line
+- Attributes on same line as opening tag
+
+### Post-Generation Validation
+
+After generating XML, verify:
+1. **Well-formed XML**: All tags are balanced (each `<tag>` has `</tag>`)
+2. **Required elements present**: Check all required fields exist
+3. **IDs unique**: No duplicate parent task or subtask IDs
+4. **Complexity valid**: All complexity values are integers 1-5
+5. **Verify commands non-empty**: Each parent task has a verify command
+
+### Common Errors to Avoid
+
+| Error | Example | Fix |
+|-------|---------|-----|
+| Unclosed tag | `<title>Name` | Add `</title>` |
+| Unescaped ampersand | `a && b` | Use `a &amp;&amp; b` |
+| Unescaped angle bracket | `x < 10` | Use `x &lt; 10` |
+| Missing quotes | `id=1.0` | Use `id="1.0"` |
+| Wrong quote type | `id='1.0'` | Use `id="1.0"` (prefer double quotes)
 
 ## Architectural Context Loading
 
@@ -328,34 +663,40 @@ Based on existing codebase patterns:
 ## Output Specifications
 
 ### File Requirements
-- **Format**: Markdown (.md)
+- **Format**: XML (.xml)
 - **Location**: `/tasks/`
-- **Filename**: `tasks-[prd-file-name].md` (kebab-case)
+- **Filename**: `task-[prd-file-name].xml` (kebab-case, singular "task")
 - **Memory References**: Include file paths and line numbers from FILES.json
-- **Pattern Templates**: Copy-paste ready code from PATTERNS.md
+- **Pattern Templates**: Referenced via pattern_reference elements
+- **Verify Commands**: Project-aware verification for each parent task
 
 ### Quality Standards
 - **Implementation Ready**: Zero additional research required
 - **Pattern Compliant**: 100% alignment with established patterns
 - **Architecture Aware**: Full integration with existing system
 - **Performance Conscious**: Aligned with current targets and constraints
+- **XML Valid**: Well-formed XML that the orchestrator can parse
 
 ## Confirmation Response
 
 After saving, return this summary:
 
 ```
-Tasks saved to /tasks/tasks-[prd-name].md
+Task file saved to /tasks/task-[prd-name].xml
 
 Summary:
 - Total tasks: [X parent tasks, Y subtasks]
 - Complexity distribution: [breakdown by complexity level]
-- Estimated total complexity: [sum of all task complexity / 5]
+- Model selection: Sonnet x[N], Opus x[M] (based on complexity)
 - Key files affected: [list main files]
 
+BREAKING CHANGE: Tasks are now in XML format.
+- Old markdown task files are not compatible with /execute
+- Run /TaskGen on existing PRDs to regenerate in XML format
+
 Next steps:
-1. Review task breakdown
-2. Run /execute to implement all tasks
+1. Review task breakdown in the XML file
+2. Run /execute task-[prd-name] to implement all tasks
 3. Use /commit when complete
 ```
 

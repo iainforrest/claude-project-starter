@@ -1,4 +1,4 @@
-# Claude Project Starter v2.0
+# Claude Project Starter v2.3
 
 A self-bootstrapping development system that sets up a complete AI-assisted workflow for any project.
 
@@ -62,12 +62,13 @@ cp claude-project-starter/INSTALL-*.md your-project/
 
 Then run the appropriate installer with Claude Code.
 
-## Key Architecture (v2.0)
+## Key Architecture (v2.3)
 
 ```
 .claude/                    # Generic (syncs across projects)
 ├── commands/               # Workflow commands (/prd, /TaskGen, /execute, etc.)
 ├── agents/                 # Specialized AI agents (CTO, Security, UI/UX, etc.)
+├── skills/                 # Domain-specific skills loaded by agents
 └── WORKFLOW.md             # Command/agent documentation
 
 .ai/                        # Project-specific (never syncs)
@@ -108,8 +109,8 @@ Then run the appropriate installer with Claude Code.
 | Command | Purpose | Output |
 |---------|---------|--------|
 | `/prd` | Generate requirements from feature idea | `/tasks/prd-[name].md` |
-| `/TaskGen` | Convert PRD to implementation tasks | `/tasks/tasks-[name].md` |
-| `/execute` | Execute tasks with build verification | Implemented code |
+| `/TaskGen` | Convert PRD to implementation tasks | `/tasks/task-[name].xml` |
+| `/execute` | Orchestrate task execution via agents | Implemented code + commits |
 | `/commit` | Group and commit changes intelligently | Git commits |
 | `/update` | Update memory system from git diffs | Updated `.ai/` files |
 | `/pull-cps` | Sync latest from starter repo | Updated commands/agents |
@@ -121,11 +122,14 @@ Agents provide domain expertise and are invoked automatically or on request:
 
 | Agent | Expertise |
 |-------|-----------|
+| `execution-agent` | Fresh-context task execution with domain skill loading |
+| `code-review-agent` | Code quality review with domain-specific checks |
+| `research-agent` | Deep research with plan/execute/synthesize phases |
 | `cto-technical-advisor` | Architecture decisions, feasibility assessment |
 | `security-auditor` | Security reviews, vulnerability detection |
 | `ui-ux-expert` | Interface design, accessibility, user flows |
 | `prd-writer` | Requirements documentation |
-| `task-writer` | Task breakdown with complexity ratings |
+| `task-writer` | Task breakdown in XML format with complexity ratings |
 | `update-memory-agent` | Git diff analysis, memory updates |
 
 ## Memory System (`.ai/`)
@@ -173,9 +177,194 @@ This validates your changes are generic (no project-specific content), then crea
 |-------|-------------|
 | `.claude/commands/*.md` | `.ai/*` (project-specific) |
 | `.claude/agents/*.md` | `.claude/settings.local.json` |
-| `.claude/WORKFLOW.md` | Project-specific commands |
+| `.claude/skills/*.md` | Project-specific commands |
+| `.claude/WORKFLOW.md` | |
 
-## What's New in v2.0
+## What's New in v2.3 - Parallel Task Execution
+
+### Wave-Based Parallelism
+
+The `/execute` command now runs non-conflicting tasks in parallel, dramatically reducing execution time for features with independent components:
+
+```
+Wave 1 (parallel):  [Task 1: frontend]  [Task 2: backend]  [Task 3: infra]
+                            ↓                   ↓                ↓
+                         commit              commit           commit
+                            └───────────────────┴────────────────┘
+                                         merge STATE
+                                              ↓
+Wave 2 (sequential):              [Task 4: touches frontend + backend]
+```
+
+### Conflict Detection
+
+Tasks are grouped into waves based on file dependencies:
+
+| Conflict Type | Example | Result |
+|---------------|---------|--------|
+| **File-level** | Both tasks modify `auth.ts` | Run in separate waves |
+| **Import-level** | Task B imports file Task A modifies | Run in separate waves |
+| **No conflict** | Frontend vs Backend files | Run in parallel |
+
+### Per-Agent STATE Files
+
+Each parallel agent writes learnings to its own STATE file:
+```
+/tasks/STATE-feature-agent-1.0.md  # Agent 1
+/tasks/STATE-feature-agent-2.0.md  # Agent 2
+/tasks/STATE-feature-agent-3.0.md  # Agent 3
+```
+
+After wave completes, orchestrator merges into main `STATE-feature.md`.
+
+### Failure Handling
+
+- Other tasks in wave continue if one fails
+- Failed task retried once with bumped model (Sonnet → Opus)
+- User must explicitly approve skipping a failed task
+- Next wave only starts after current wave fully passes
+
+### Progress Display
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🌊 Wave 1: 3 tasks executing in parallel
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ⏳ [1.0] Create Frontend Component (sonnet, frontend)
+   ⏳ [2.0] Create API Endpoint (sonnet, backend)
+   ⏳ [3.0] Setup Infrastructure (opus, infrastructure)
+
+   ✅ [1.0] Create Frontend Component - commit abc123
+   ✅ [2.0] Create API Endpoint - commit def456
+   ✅ [3.0] Setup Infrastructure - commit ghi789
+
+Wave 1 complete: 3/3 tasks
+```
+
+---
+
+## What's New in v2.2 - Specialized Agent Architecture
+
+### Domain Skills System
+
+Agents now dynamically load **domain-specific skills** based on the files being modified. This provides specialized guidance without bloating agent context:
+
+```
+Base Agent  ×  Domain Skill  =  Specialized Behavior
+───────────────────────────────────────────────────
+execution   ×  frontend      =  React patterns, a11y checks
+execution   ×  backend       =  Service layers, API design
+code-review ×  security      =  OWASP checks, crypto review
+research    ×  data          =  Query optimization research
+```
+
+**Available Domain Skills:**
+
+| Skill | File Patterns | Focus Areas |
+|-------|---------------|-------------|
+| `frontend` | `*.tsx`, `*/components/*`, `*/hooks/*` | React/Vue patterns, state management, accessibility |
+| `backend` | `*/api/*`, `*/services/*`, `*/routes/*` | Service layers, REST design, error handling |
+| `data` | `*/repositories/*`, `*.sql`, `*/models/*` | Query optimization, N+1 prevention, transactions |
+| `mobile` | `*/ios/*`, `*/android/*`, `*.swift`, `*.kt` | Platform patterns, lifecycle, offline-first |
+| `security` | `*/auth/*`, `*/crypto/*`, `*security*` | OWASP Top 10, auth flows, secrets management |
+| `infrastructure` | `Dockerfile`, `*.yaml`, `*/terraform/*` | Container patterns, IaC, CI/CD pipelines |
+| `general` | (fallback) | Senior dev best practices, code quality |
+
+### Domain Detection
+
+The orchestrator automatically detects domains from file paths in each task:
+
+```xml
+<!-- Auto-detected from files -->
+<parent_task id="1.0" complexity="3" status="pending">
+  <files>src/components/Button.tsx</files>  <!-- → frontend skill -->
+  ...
+</parent_task>
+
+<!-- Explicit override when needed -->
+<parent_task id="2.0" complexity="4" status="pending" domain="security">
+  <files>src/services/auth.ts</files>  <!-- Override: use security skill -->
+  ...
+</parent_task>
+```
+
+### New & Refactored Agents
+
+| Agent | Change |
+|-------|--------|
+| `execution-agent` | **Refactored**: Now accepts and applies domain skills |
+| `code-review-agent` | **Refactored**: Domain-specific review checks |
+| `research-agent` | **New**: Plan → Execute → Synthesize research workflow |
+
+### New Files
+
+| File | Purpose |
+|------|---------|
+| `.claude/skills/domain-*.md` | 7 domain skill files (~2KB each) |
+
+---
+
+## What's New in v2.1 - Integrated Execution Architecture
+
+### Orchestrator Pattern
+
+The `/execute` command has been refactored from a monolithic executor to a **lightweight orchestrator** that spawns fresh-context execution agents per parent task:
+
+```
+/execute task-feature-name
+    │
+    ├── Parses XML task file
+    ├── Initializes STATE.md for cross-task learning
+    ├── Loads EXPLORE_CONTEXT.json
+    │
+    └── For each parent task:
+        ├── Selects model (Sonnet 1-3, Opus 4-5)
+        ├── Spawns execution-agent with fresh context
+        ├── Agent executes subtasks → verifies → commits
+        ├── Updates STATE.md with learnings
+        └── Continues to next task
+```
+
+**Benefits:**
+- **Eliminates context debt**: Fresh context per parent task
+- **Cross-task learning**: STATE.md passes learnings between agents
+- **Dynamic model selection**: Complex tasks (4-5) use Opus, others use Sonnet
+- **Atomic commits**: One commit per parent task with full traceability
+- **Progress tracking**: Status attributes on tasks enable resumability
+
+### XML Task Format (Breaking Change)
+
+Task files are now generated in **XML format** for structured parsing:
+
+```xml
+<execution_plan>
+  <metadata>
+    <feature_name>user-auth</feature_name>
+    <total_parent_tasks>5</total_parent_tasks>
+  </metadata>
+  <parent_task id="1.0" complexity="3" status="pending">
+    <title>Implement Login Service</title>
+    <verify>npm test</verify>
+    <subtasks>
+      <subtask id="1.1" status="pending">...</subtask>
+    </subtasks>
+  </parent_task>
+</execution_plan>
+```
+
+The `status` attribute tracks progress (`pending` → `in_progress` → `completed`), enabling you to stop and resume execution without losing progress.
+
+**Migration**: Run `/TaskGen prd-{name}` to regenerate existing PRDs in XML format.
+
+### New Files
+
+| File | Purpose |
+|------|---------|
+| `.claude/agents/execution-agent.md` | Fresh-context agent for executing parent tasks |
+| `/tasks/STATE-{feature}.md` | Cross-task learning state file (generated during execution) |
+| `.ai/EXPLORE_CONTEXT.json` | Cached exploration context for execution agents |
+
+### Previous Updates (v2.0)
 
 - **Sync System**: `/pull-cps` and `/push-cps` commands for keeping projects updated
 - **Cleaner Architecture**: Commands/agents are now fully generic
@@ -197,12 +386,23 @@ your-project/
 │   │   ├── pull-cps.md
 │   │   └── push-cps.md
 │   ├── agents/             # Specialized agents
+│   │   ├── execution-agent.md      # Task executor with skill loading
+│   │   ├── code-review-agent.md    # Domain-aware code review
+│   │   ├── research-agent.md       # NEW: Deep research workflow
 │   │   ├── prd-writer.md
 │   │   ├── task-writer.md
 │   │   ├── update-memory-agent.md
 │   │   ├── cto-technical-advisor.md
 │   │   ├── security-auditor.md
 │   │   └── ui-ux-expert.md
+│   ├── skills/             # Domain-specific skills (NEW)
+│   │   ├── domain-general.md
+│   │   ├── domain-frontend.md
+│   │   ├── domain-backend.md
+│   │   ├── domain-data.md
+│   │   ├── domain-mobile.md
+│   │   ├── domain-security.md
+│   │   └── domain-infrastructure.md
 │   └── WORKFLOW.md
 ├── .ai/
 │   ├── ARCHITECTURE.json   # Your patterns

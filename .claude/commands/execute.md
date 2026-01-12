@@ -1,626 +1,1404 @@
 ---
-description: Execute task list with architectural precision
+description: Execute task list with architectural precision via agent orchestration
 ---
 
-# AI-Optimized Task Execution Command
+# Task Execution Orchestrator
 
-**Objective:** Execute a task list systematically using memory-driven patterns and architectural precision.
+**Objective:** Orchestrate task execution by spawning fresh-context execution agents per parent task, with dynamic model selection, atomic commits, and cross-task learning via STATE.md.
 
-## 🚨 CRITICAL: SUBTASK MARKING IS MANDATORY
+## Orchestrator Philosophy
 
-**⚠️ SUBTASK COMPLETION TRACKING - NON-NEGOTIABLE:**
+This command acts as a **lightweight orchestrator** rather than a monolithic executor. For each parent task, it:
 
-Every single subtask MUST be marked `[x]` in the task file IMMEDIATELY after completing its implementation.
+1. **Reads current state** from STATE.md (cross-task learnings)
+2. **Selects model** based on complexity (Sonnet for 1-3, Opus for 4-5)
+3. **Spawns execution agent** with fresh context via Task tool
+4. **Validates result** (verify passed, commit created)
+5. **Updates STATE.md** with learnings
+6. **Continues** to next parent task
 
-**Why this matters:**
-- ✅ Enables recovery if execution is interrupted
-- ✅ Provides clear progress visibility to user
-- ✅ Allows debugging which subtask caused issues
-- ✅ Prevents confusion about what's been completed
-
-**When to mark subtasks [x]:**
-1. ✅ Immediately after completing subtask implementation
-2. ✅ BEFORE moving to next subtask
-3. ✅ BEFORE running build verification
-4. ✅ Even if tests haven't been run yet
-
-**When NOT to mark subtasks [x]:**
-1. ❌ Batching multiple subtasks to mark at once
-2. ❌ Waiting until all subtasks complete
-3. ❌ Waiting until build passes
-4. ❌ Forgetting to mark and moving to next subtask
-
-**How to mark:**
-After implementing subtask 1.1, use Edit tool to change:
-```
-- [ ] 1.1 - complexity 3/5 - Implement feature X
-```
-to:
-```
-- [x] 1.1 - complexity 3/5 - Implement feature X
-```
-
-**If you forget:** Stop and go back to mark it before continuing.
+This eliminates context debt accumulation across tasks while preserving cross-task learning.
 
 ---
 
-## 🚨 CRITICAL: NO SHORTCUTS ALLOWED
+## Input: Task File Parsing
 
-**WARNING TO AI**: You are getting smarter, but that does NOT mean you should skip these rules.
+### Accepting Task File Argument
 
-**Common "smart" shortcuts that are FORBIDDEN:**
-❌ "I don't need to read PATTERNS.md, I know the pattern"
-❌ "I can figure out the file path without checking FILES.json"
-❌ "This is simple, I'll skip the build verification"
-❌ "I'll update all memory files at once at the end"
-❌ "I know how to handle this, I don't need the template"
-❌ "I'll mark all the subtasks complete at once when I'm done" ← **NEVER DO THIS**
+The orchestrator accepts a task file reference as argument:
+- **Usage**: `/execute task-feature-name` or `/execute tasks-feature-name`
+- **File Path Resolution**: `/tasks/task-{feature-name}.xml`
 
-**The CORRECT approach:**
-✅ ALWAYS read memory files BEFORE any implementation
-✅ ALWAYS use templates from PATTERNS.md exactly
-✅ ALWAYS verify build after significant changes
-✅ **ALWAYS mark subtasks [x] IMMEDIATELY after completion - NO EXCEPTIONS**
-✅ ALWAYS update memory files as specified in rules
+### XML Task File Format
 
-**Why these rules exist:**
-- Prevent architectural drift
-- Ensure pattern consistency
-- Maintain code quality
-- Enable effective collaboration
-- Preserve project knowledge
+The orchestrator parses XML task files with this structure:
 
-**Rule**: If you find yourself thinking "I can skip this step because...", STOP. Follow the rule.
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<execution_plan>
+  <metadata>
+    <feature_name>user-authentication</feature_name>
+    <generated_from>prd-user-authentication.md</generated_from>
+    <date>2026-01-12</date>
+    <total_parent_tasks>5</total_parent_tasks>
+  </metadata>
+
+  <parent_task id="1.0" complexity="3" status="pending">
+    <title>Implement Login Service</title>
+    <goal>Create authentication service with JWT tokens</goal>
+    <verify>npm test -- --grep "auth"</verify>
+    <files>
+      <file action="create">src/services/AuthService.ts</file>
+      <file action="modify" line="45">src/routes/index.ts</file>
+    </files>
+    <subtasks>
+      <subtask id="1.1" complexity="2" status="pending">
+        <description>Create AuthService class with login method</description>
+        <files>src/services/AuthService.ts</files>
+        <details>Use service pattern from PATTERNS.md</details>
+      </subtask>
+      <subtask id="1.2" complexity="2" status="pending">
+        <description>Add password validation</description>
+        <files>src/services/AuthService.ts</files>
+      </subtask>
+    </subtasks>
+  </parent_task>
+
+  <!-- Additional parent tasks -->
+</execution_plan>
+```
+
+### Required XML Elements
+
+| Element | Required | Description |
+|---------|----------|-------------|
+| `<execution_plan>` | Yes | Root element |
+| `<metadata>` | Yes | Contains feature_name, date |
+| `<parent_task>` | Yes | One or more, with id, complexity, and status attributes |
+| `status` attribute | Yes | "pending", "in_progress", "completed", or "blocked" |
+| `<title>` | Yes | Human-readable task title |
+| `<verify>` | Yes | Verification command |
+| `<subtasks>` | Yes | Container for subtask elements |
+| `<subtask>` | Yes | With id, status, and description |
+
+### Optional XML Elements
+
+| Element | Description |
+|---------|-------------|
+| `<goal>` | Detailed goal description |
+| `<files>` | List of affected files |
+| `<details>` | Additional implementation details |
+| `<pattern_reference>` | Reference to pattern in PATTERNS.md |
+
+### Error Handling
+
+**Pre-Parse Format Detection:**
+
+Before attempting XML parse, check file format:
+```
+1. Read first line of task file
+2. IF line starts with "# Task List" or "# Tasks":
+   Display markdown migration error (see below)
+   HALT execution
+3. IF line starts with "<?xml" or "<execution_plan>":
+   Proceed with XML parsing
+4. ELSE:
+   Display: "Unrecognized task file format"
+   HALT execution
+```
+
+**Markdown Task File Detected:**
+```
+❌ This task file is in deprecated markdown format.
+
+The /execute orchestrator now requires XML format.
+
+Migration steps:
+1. Find source PRD: tasks/prd-{feature-name}.md
+2. Run: /TaskGen prd-{feature-name}
+3. This generates: tasks/task-{feature-name}.xml
+4. Run: /execute task-{feature-name}
+
+Note: Old markdown task files (tasks-*.md) are not compatible.
+```
+Do not proceed with execution.
+
+**Invalid XML - Detailed Error Handling:**
+```
+❌ XML Parsing Error in task-{name}.xml
+
+Error at line {line}: {error_message}
+Context:
+{line-2}: {content}
+{line-1}: {content}
+>{line}:   {content}  ← ERROR HERE
+{line+1}: {content}
+
+Common fixes:
+- Unclosed tag: Check for missing </tag> close tags
+- Special characters: Escape & as &amp;, < as &lt;, > as &gt;
+- Attribute quotes: Use double quotes " not single quotes '
+
+Fix the XML and run /execute again.
+```
+Do not proceed with execution.
+
+**Missing Required Fields:**
+```
+❌ Task file missing required fields
+
+Missing in metadata:
+- {list missing: feature_name, date, total_parent_tasks}
+
+Missing in parent_task {id}:
+- {list missing: title, verify, subtasks}
+
+Add the missing fields and run /execute again.
+```
+Do not proceed until fixed.
 
 ---
 
-## Core Philosophy
+## STATE.md Initialization
 
-Execute tasks with **architectural precision** using the AI memory system for instant pattern application, dependency resolution, and quality assurance. Every implementation follows established patterns with zero architectural drift.
+Before executing the first parent task, initialize the STATE.md file.
 
-## Code Documentation Standards
+### File Location
 
-### 🚨 MANDATORY: High-Quality, Extensive Comments
+`/tasks/STATE-{feature-name}.md`
 
-**CRITICAL REQUIREMENT**: Every implementation MUST include extensive, high-quality comments throughout the codebase.
+### Initial Content
 
-**Objective**: Code should be **immediately understandable** when revisited months later. Comments should eliminate ambiguity and dramatically increase readability.
-
-### Comment Quality Guidelines
-
-**HIGH-QUALITY comments explain:**
-- ✅ **WHY** the code exists (business logic reasoning)
-- ✅ **WHAT** the code does (at a high level)
-- ✅ **HOW** complex logic works (step-by-step for algorithms)
-- ✅ **WHEN** code runs (lifecycle, triggers, conditions)
-- ✅ **WHAT** assumptions are made (preconditions, postconditions)
-- ✅ **WHAT** edge cases are handled (and why)
-- ✅ **HOW** the code integrates with other components
-- ✅ **WHAT** performance considerations exist
-
-**LOW-QUALITY comments to AVOID:**
-- ❌ Restating what the code obviously does: `// increment counter` for `counter++`
-- ❌ Outdated comments that don't match current code
-- ❌ Vague comments: `// fix bug` or `// TODO: handle this`
-- ❌ Commented-out code without explanation
-
-### Where to Comment (Be Excessive)
-
-**1. File-Level Documentation**
-```javascript
-/**
- * UserAuthenticationService
- *
- * Handles all user authentication operations including login, logout,
- * token refresh, and session management. Integrates with SessionManager
- * for session persistence and JWTService for token generation.
- *
- * Security: All passwords are hashed using bcrypt with 12 rounds.
- * Tokens expire after 24 hours and require refresh.
- *
- * Performance: Target <500ms for authentication operations.
- * Uses in-memory cache for active sessions.
- */
-```
-
-**2. Function/Method Documentation**
-```javascript
-/**
- * Authenticates user with email and password
- *
- * @param email - User's email address (must be valid format)
- * @param password - Plain text password (will be hashed for comparison)
- * @returns JWT token and user profile on success
- * @throws AuthenticationError if credentials invalid
- * @throws RateLimitError if too many attempts (>5 in 15 min)
- *
- * Process:
- * 1. Validates email format and rate limit check
- * 2. Retrieves user from database by email
- * 3. Compares hashed password using bcrypt
- * 4. Generates JWT token with 24hr expiration
- * 5. Creates session entry in SessionManager
- * 6. Returns token and sanitized user profile
- *
- * Security: Password never logged or returned in response
- * Performance: Typically completes in 200-300ms
- */
-async login(email: string, password: string): Promise<AuthResponse> {
-```
-
-**3. Complex Logic Blocks**
-```javascript
-// Rate limiting: Check if user has exceeded 5 login attempts in 15 minutes
-// This prevents brute force attacks. We use a sliding window approach
-// stored in Redis with automatic expiration. If limit exceeded, we return
-// a 429 error and require a 15-minute cooldown before allowing retry.
-const attempts = await this.rateLimiter.getAttempts(email);
-if (attempts > 5) {
-  throw new RateLimitError('Too many login attempts. Try again in 15 minutes.');
-}
-```
-
-**4. Business Logic Explanations**
-```javascript
-// Business rule: Free tier users limited to 10 projects, Pro users get 100
-// This limit is enforced at project creation time, not at display time,
-// to ensure consistent UX. We check against projectCount in user profile
-// which is updated via database trigger on project insert/delete.
-if (user.tier === 'free' && user.projectCount >= 10) {
-  throw new BusinessLogicError('Free tier limit reached. Upgrade to Pro for more projects.');
-}
-```
-
-**5. Integration Points**
-```javascript
-// Integration with SessionManager: We must call createSession AFTER
-// successful password verification but BEFORE returning token to client.
-// This ensures session exists in database for subsequent API calls that
-// validate the token. SessionManager handles automatic cleanup of expired
-// sessions via background job running every 1 hour.
-await this.sessionManager.createSession(userId, token);
-```
-
-**6. Error Handling**
-```javascript
-try {
-  await this.database.saveUser(user);
-} catch (error) {
-  // Database constraint violation: Most likely duplicate email
-  // We catch this specifically to provide user-friendly error message
-  // rather than exposing internal database error details
-  if (error.code === 'SQLITE_CONSTRAINT') {
-    throw new ValidationError('Email already registered');
-  }
-  // Unexpected database error: Log for debugging and throw generic error
-  logger.error('Failed to save user', { error, userId: user.id });
-  throw new DatabaseError('Failed to create user account');
-}
-```
-
-**7. Performance Optimizations**
-```javascript
-// Performance optimization: We cache user profiles in Redis for 5 minutes
-// to avoid repeated database queries on every API call. Cache is invalidated
-// when user profile is updated. This reduced average API response time
-// from 250ms to 50ms in production testing.
-const cachedProfile = await this.cache.get(`user:${userId}`);
-if (cachedProfile) {
-  return JSON.parse(cachedProfile);
-}
-```
-
-**8. Edge Cases and Assumptions**
-```javascript
-// Edge case: Handle scenario where token is valid but session was
-// manually deleted by admin (account suspension). In this case, token
-// verification passes but session lookup fails. We treat this as
-// unauthorized and force re-authentication.
-const session = await this.sessionManager.findSession(tokenData.sessionId);
-if (!session) {
-  // Assumption: Missing session means account action taken, not system error
-  throw new UnauthorizedError('Session no longer valid. Please login again.');
-}
-```
-
-### Comment Frequency Guidelines
-
-**Target: 1 comment block every 5-15 lines of code**
-- Simple code: 1 comment per 10-15 lines
-- Complex code: 1 comment per 5-10 lines
-- Critical security/business logic: 1 comment per 3-5 lines
-
-### Comment During Implementation
-
-**IMPORTANT**: Write comments **as you code**, not after:
-1. Write function/method documentation FIRST
-2. Add inline comments as you implement each logic block
-3. Document edge cases when you handle them
-4. Explain integration points when you connect components
-
-### Comments as Documentation
-
-**Remember**: Comments are **living documentation** that:
-- Help future developers (including yourself) understand code quickly
-- Serve as onboarding material for new team members
-- Explain business logic without requiring external documentation
-- Capture architectural decisions and trade-offs
-- Document performance optimizations and why they were needed
-
-**If you're unsure whether to add a comment: ADD IT.** Too many high-quality comments is infinitely better than too few.
-
-## Pre-Execution Memory Preparation
-
-### 1. **Task Analysis with Memory Context**
-```bash
-# Required memory consultation before ANY task execution
-1. Read task file → Understand scope and dependencies
-2. Read ARCHITECTURE.json → Verify integration approach
-3. Read FILES.json → Confirm target files and line references
-4. Read PATTERNS.md → Load implementation templates
-5. Read BUSINESS.json → Check performance and feature constraints
-6. Read QUICK.md → Get build commands and debugging approaches
-```
-
-### 2. **Pattern-Specific Setup**
 ```markdown
-**For Business Logic Tasks**: Load service/manager pattern from PATTERNS.md
-**For UI Tasks**: Load UI component pattern from PATTERNS.md
-**For Repository Tasks**: Load repository pattern from PATTERNS.md
-**For Integration Tasks**: Load integration pattern from PATTERNS.md
-```
+# Execution State: {feature_name}
 
-## AI-Optimized Execution Workflow
-
-### Phase 1: Memory-Informed Analysis
-```
-1. **Task Scope Analysis**: Map parent task to architectural layer
-2. **Dependency Resolution**: Check FILES.json for all file relationships
-3. **Pattern Selection**: Select templates from PATTERNS.md
-4. **Integration Planning**: Verify approach against ARCHITECTURE.json
-5. **Performance Planning**: Check targets against BUSINESS.json
-```
-
-### Phase 2: Pattern-Perfect Implementation
-```
-1. **Template Application**: Copy relevant pattern from PATTERNS.md
-2. **File Targeting**: Use exact file paths from FILES.json
-3. **Integration Points**: Follow ARCHITECTURE.json relationships
-4. **Quality Gates**: Apply established patterns throughout
-5. **Performance Monitoring**: Track against BUSINESS.json targets
-```
-
-### Phase 3: Memory-Driven Verification
-```
-1. **Pattern Compliance**: Verify against PATTERNS.md checklist
-2. **Integration Testing**: Confirm ARCHITECTURE.json relationships work
-3. **Performance Validation**: Check BUSINESS.json target achievement
-4. **Build Verification**: Use commands from QUICK.md - MANDATORY after major changes
-5. **Task Completion**: Mark parent task [x] only after ALL subtasks [x] and build succeeds
-6. **Memory Update**: Document new patterns discovered
-```
-
-## Task Execution Framework
-
-### Complexity-Aware Processing
-**Based on memory system complexity calibration:**
-
-**1-2/5 (Simple-Standard)**: Direct implementation with pattern templates
-**3/5 (Moderate)**: Template + integration analysis + testing
-**4-5/5 (Complex-System)**: Full memory consultation + pattern extension
-
-### Memory-Enhanced Task Processing
-
-#### Parent Task Initialization
-```markdown
-**Memory Loading Phase**:
-- [ ] Load pattern template from PATTERNS.md
-- [ ] Identify target files from FILES.json with line numbers
-- [ ] Verify integration approach with ARCHITECTURE.json
-- [ ] Check performance targets from BUSINESS.json
-- [ ] Load development commands from QUICK.md
-
-**Pattern Context**: [Specific pattern from PATTERNS.md]
-**Integration Points**: [Connections from ARCHITECTURE.json]
-**File Scope**: [Files from FILES.json with line references]
-```
-
-#### Subtask Execution Loop
-```markdown
-FOR EACH SUBTASK:
-  1. **Load Context**
-     - Read subtask details (file, pattern, complexity)
-     - Load pattern template from PATTERNS.md
-     - Identify dependencies from ARCHITECTURE.json
-
-  2. **Implement**
-     - Apply pattern template to target file
-     - Follow integration approach from memory
-     - Include error handling from established patterns
-
-  3. **Mark Complete** ← **IMMEDIATELY AFTER IMPLEMENTATION**
-     - Use Edit tool to mark subtask [x] in task file
-     - DO NOT batch markings
-     - DO NOT wait for build
-
-  4. **Verify** (If Last Subtask in Parent)
-     - Run build using command from QUICK.md
-     - Fix any issues before marking parent complete
-     - Only mark parent [x] after build success
-```
-
-## Build Verification Frequency (MANDATORY)
-
-### When to Build:
-✅ **After completing each parent task** (1.0, 2.0, 3.0, etc.)
-✅ **Before marking parent task complete**
-✅ **After any core service/business logic changes**
-✅ **After any configuration changes**
-✅ **After any dependency changes**
-✅ **After any major refactoring**
-
-### When NOT to build (optional):
-⚠️ After individual subtasks within parent (optional but recommended)
-⚠️ After test file changes (optional but recommended)
-⚠️ After comment-only changes (optional)
-
-### Build Failure Protocol:
-1. **DO NOT** mark task complete if build fails
-2. **DO NOT** skip to next task if build fails
-3. **DO** fix the build error immediately
-4. **DO** document the fix in implementation notes
-5. **DO** verify fix with successful build before continuing
-
-### Build Success Verification:
-- Look for "BUILD SUCCESSFUL" or equivalent in output
-- Note build time for performance tracking
-- If first build after major changes, test application launches
-
-## Testing Verification Requirements
-
-### Unit Testing (When Required):
-- [ ] New service/business logic methods: Unit test with mock dependencies
-- [ ] New repository methods: Unit test with mock database
-- [ ] New business logic: Unit test with edge cases
-- [ ] Run unit test command from QUICK.md - must pass
-
-### Integration Testing (When Required):
-- [ ] Database integration: Integration test with actual database
-- [ ] API integration: Integration test with actual API (or mocked)
-- [ ] Multi-component features: Integration test
-- [ ] Run integration test command from QUICK.md - must pass (if applicable)
-
-### Manual Testing (Always Required):
-- [ ] Launch application: Verify app launches without crash
-- [ ] Test feature: Execute feature workflow end-to-end
-- [ ] Test edge cases: Try invalid inputs, error scenarios
-- [ ] Test performance: Feature meets performance targets
-
-### Testing Documentation:
-Document in task notes:
-- **Tests Run**: List specific tests executed
-- **Results**: Pass/fail with details
-- **Issues Found**: Any bugs or problems discovered
-- **Performance**: Measured performance vs target
-
-## Security Review Checklist (For Security-Sensitive Tasks)
-
-**Applies to tasks involving:**
-- Authentication or authorization
-- User data handling
-- API keys or credentials
-- Database security rules
-- Permissions
-
-**Checklist:**
-- [ ] No secrets committed to git
-- [ ] API keys properly secured (environment variables, secret manager, etc.)
-- [ ] Database security rules updated appropriately
-- [ ] User data access follows principle of least privilege
-- [ ] Authentication flows tested with edge cases
-- [ ] Permission requests justified and documented
-- [ ] Security implications documented in task notes
-
-## Commit Message Template (For Git Commits)
-
-### Structure:
-```
-<type>: <short summary> (50 chars max)
-
-<detailed description in present tense>
-
-Changes:
-- <specific change 1>
-- <specific change 2>
-- <specific change 3>
-
-Files Modified: <count>
-Files Created: <count>
-Files Deleted: <count>
-
-Performance: <if applicable>
-Testing: <verification performed>
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude <noreply@anthropic.com>
-```
-
-### Types:
-- `feat`: New feature
-- `fix`: Bug fix
-- `refactor`: Code refactoring
-- `perf`: Performance improvement
-- `docs`: Documentation only
-- `test`: Test additions/changes
-- `chore`: Maintenance tasks
-- `style`: Code style changes
-
-## Step 5: Code Review Phase (Before Memory Update)
-
-🚨 **MANDATORY**: Before updating memory, run a thorough code review of all changes.
-**DO NOT SKIP**: This step catches issues before they get committed to the memory system.
-
-### Code Review Process
-
-1. **Invoke Code Review Agent**
-   ```
-   Use Task tool with subagent_type='code-review-agent'
-   ```
-
-   The agent will:
-   - Analyze all uncommitted changes and recent commits
-   - Review against `.ai/PATTERNS.md` and `ARCHITECTURE.json`
-   - Check security, testing, error handling, performance
-   - Output structured findings with severity levels
-
-2. **Review Findings**
-   - **CRITICAL**: Must fix before proceeding
-   - **HIGH**: Should fix before proceeding
-   - **MEDIUM**: Create tasks for next sprint
-   - **LOW**: Note for future improvement
-
-3. **Generate Fix Tasks**
-   If CRITICAL or HIGH findings exist:
-   - Extract tasks from the "Tasks for Task Generation" section
-   - Add to current task list as new parent task
-   - Execute fix tasks following standard execution rules
-   - Re-run code review if fixes were significant
-
-4. **Proceed When Clean**
-   Only proceed to Memory Update when:
-   - [ ] Zero CRITICAL findings remain
-   - [ ] Zero HIGH findings remain (or explicitly deferred with justification)
-   - [ ] MEDIUM/LOW findings documented for future action
-
-### Code Review Checklist
-- [ ] Code review agent invoked with full context
-- [ ] All CRITICAL findings addressed
-- [ ] All HIGH findings addressed or justified
-- [ ] Fix tasks executed and verified
-- [ ] Ready for memory update
+**Started:** {ISO 8601 timestamp}
+**Total Parent Tasks:** {count from XML}
+**Task File:** task-{feature-name}.xml
 
 ---
 
-## Step 6: Memory System Update (Final Task)
+## Execution Log
 
-🚨 **PREREQUISITE**: Code Review Phase MUST be completed first. Do NOT start memory update until:
-- [ ] Code review agent has been run
-- [ ] All CRITICAL and HIGH findings have been fixed
-- [ ] Code review passes (no blocking issues remain)
+_Cross-task learnings will be recorded below as parent tasks complete._
 
-**CRITICAL RULE**: Do NOT create separate sprint completion files.
-**UPDATE RULE**: Integrate ALL sprint info into existing core files only.
-
-The final task in every task list MUST be Memory System Update. Follow the procedure exactly as defined in `.ai/SPRINT_UPDATE.md`.
-
-### Memory Update Checklist:
-- [ ] Verify no extra files in .ai/ directory (only 8 core files allowed)
-- [ ] Update BUSINESS.json with new features
-- [ ] Update FILES.json with new files
-- [ ] Update PATTERNS.md with new patterns (if any)
-- [ ] Update QUICK.md with new commands (if any)
-- [ ] Update TODO.md with sprint completion
-- [ ] Validate memory system integrity (8 files, ~3000 lines total)
-
-## Success Metrics
-
-### Execution Quality
-- **Pattern Compliance**: 100% adherence to PATTERNS.md templates
-- **Build Success**: 90%+ first-attempt build success rate
-- **Architecture Alignment**: Zero drift from ARCHITECTURE.json patterns
-- **Memory Accuracy**: All file references valid, all patterns documented
-
-### Development Speed
-- **Implementation Time**: Matches complexity estimates (±20%)
-- **Research Time**: Near zero (memory system provides everything)
-- **Debug Time**: Minimal due to pattern compliance
-- **Integration Time**: Reduced via ARCHITECTURE.json guidance
-
-## AI Assistant Instructions
-
-### 1. **Memory-First Execution**
-```
-BEFORE implementing ANY task:
-1. Read PATTERNS.md → Get exact implementation template
-2. Read FILES.json → Confirm file paths and line references
-3. Read ARCHITECTURE.json → Verify integration approach
-4. Read BUSINESS.json → Check performance requirements
-5. Read QUICK.md → Get build and test commands
+---
 ```
 
-### 2. **Pattern-Perfect Implementation**
-```
-FOR EACH implementation:
-1. Copy pattern template from PATTERNS.md (do not improvise)
-2. Apply to exact file from FILES.json with line reference
-3. Follow integration points from ARCHITECTURE.json
-4. Include error handling from established patterns
-5. Mark subtask [x] IMMEDIATELY after completion
-```
+### Creation Timing
 
-### 3. **Build-Driven Verification**
-```
-AFTER each parent task:
-1. Run build command from QUICK.md
-2. If build fails, fix immediately (do not continue)
-3. If build succeeds, mark parent task [x]
-4. Move to next parent task
-5. Update memory system at end (not before)
-```
-
-### 4. **Quality Assurance**
-```
-Every implementation must:
-- [ ] Use exact pattern from PATTERNS.md (no improvisation)
-- [ ] Target exact file from FILES.json (no guessing paths)
-- [ ] Follow integration from ARCHITECTURE.json (no assumptions)
-- [ ] Meet performance targets from BUSINESS.json (verify)
-- [ ] Pass build verification from QUICK.md (mandatory)
-```
-
-### 5. **Code Review (MANDATORY - Before Memory Update)**
-```
-🚨 CRITICAL: Do NOT skip this step. Do NOT proceed to memory update without code review.
-
-AFTER all tasks complete, BEFORE memory update:
-1. Run code review agent (Task tool with subagent_type='code-review-agent')
-2. Review all findings by severity (CRITICAL, HIGH, MEDIUM, LOW)
-3. Fix all CRITICAL and HIGH findings immediately
-4. Re-run code review if significant fixes were made
-5. Only proceed to Step 6 when code review passes
-```
-
-### 6. **Memory Update (Final Task)**
-```
-AFTER code review passes:
-1. Run memory update (Task tool with subagent_type='update-memory-agent')
-2. Commit all changes with proper commit message
-3. Verify memory system integrity (8 core files only)
-```
-
-## Example: Memory-Driven Task Execution
-
-**Task**: Implement user authentication service
-
-**Memory Consultation Results**:
-- `PATTERNS.md` → Service pattern template with auth
-- `FILES.json` → AuthService.ts:148, UserRepository.ts:67
-- `ARCHITECTURE.json` → Integration with SessionManager
-- `BUSINESS.json` → JWT token auth, <500ms response target
-- `QUICK.md` → `npm test`, `npm run build`
-
-**Execution**:
-1. Load service pattern template from PATTERNS.md
-2. Apply to AuthService.ts:148 (exact file from FILES.json)
-3. Integrate with SessionManager (from ARCHITECTURE.json)
-4. Implement JWT tokens (from BUSINESS.json)
-5. Mark subtask [x] immediately
-6. Run `npm test` and `npm run build` (from QUICK.md)
-7. Verify <500ms response time (BUSINESS.json target)
-
-**Result**: Pattern-perfect implementation with zero architectural drift, completed in estimated time.
+Create STATE.md **after** successful XML parsing, **before** spawning first execution agent.
 
 ---
 
-**This system transforms generic task execution into memory-driven, architecturally precise implementation with zero drift and maximum efficiency.**
+## EXPLORE_CONTEXT.json Loading
+
+Load exploration context to pass to execution agents.
+
+### File Location
+
+`.ai/EXPLORE_CONTEXT.json`
+
+### Loading Logic
+
+```
+1. Attempt to read .ai/EXPLORE_CONTEXT.json
+2. If file exists:
+   - Parse JSON content
+   - Validate structure (similar_features, applicable_patterns, etc.)
+   - Pass to all execution agents
+3. If file missing:
+   - Set explore_context to null
+   - Log: "EXPLORE_CONTEXT.json not found - agents will use memory system directly"
+   - Continue execution (not an error)
+4. If invalid JSON:
+   - Log warning: "EXPLORE_CONTEXT.json contains invalid JSON - using null"
+   - Set explore_context to null
+   - Continue execution
+```
+
+### Expected Structure
+
+```json
+{
+  "similar_features": [
+    {"name": "feature", "file": "path:line", "relevance": "description"}
+  ],
+  "applicable_patterns": [
+    {"pattern": "name", "file": "patterns/DOMAIN.md", "usage": "description"}
+  ],
+  "key_files": [
+    {"path": "file:line", "purpose": "description"}
+  ],
+  "integration_points": [
+    {"system": "name", "connection": "description"}
+  ],
+  "red_flags": [
+    {"issue": "description", "severity": "HIGH/MEDIUM/LOW"}
+  ]
+}
+```
+
+---
+
+## Domain Detection & Skill Loading
+
+Load domain-specific skills to guide execution agents with specialized patterns and pitfalls.
+
+### Domain Detection Logic
+
+Detect the primary domain for each parent task based on file patterns:
+
+```
+detectDomain(parent_task):
+  files = parent_task.files[]
+
+  # Check for explicit override first
+  IF parent_task has domain attribute:
+    RETURN parent_task.domain
+
+  # Auto-detect from file patterns
+  FOR EACH file in files:
+    IF file matches *.tsx, *.jsx, *.vue, *.svelte, */components/*, */hooks/*, */pages/*:
+      RETURN "frontend"
+    IF file matches */api/*, */services/*, */controllers/*, */routes/*, */handlers/*:
+      RETURN "backend"
+    IF file matches */models/*, */repositories/*, */migrations/*, */schemas/*, *.prisma, *.sql:
+      RETURN "data"
+    IF file matches *.dart, *.swift, *.kt, */android/*, */ios/*, */lib/*:
+      RETURN "mobile"
+    IF file matches */auth/*, */security/*, */crypto/*, *password*, *token*, *session*:
+      RETURN "security"
+    IF file matches Dockerfile*, docker-compose*, .github/workflows/*, terraform/*, *.tf:
+      RETURN "infrastructure"
+
+  # Fallback to general
+  RETURN "general"
+```
+
+### Skill File Loading
+
+```
+loadSkill(domain):
+  skill_path = ".claude/skills/domain-{domain}.md"
+
+  IF file exists at skill_path:
+    skill_content = read(skill_path)
+    RETURN skill_content
+  ELSE:
+    # Fallback to general skill
+    general_path = ".claude/skills/domain-general.md"
+    IF file exists at general_path:
+      RETURN read(general_path)
+    ELSE:
+      RETURN null  # No skill available
+```
+
+### Skill Content Structure
+
+Skills contain YAML frontmatter and markdown sections:
+
+```yaml
+---
+name: domain-frontend
+domain: frontend
+description: Frontend patterns for React, Vue, Angular
+---
+
+## Patterns to Apply
+- Component composition over inheritance
+- Custom hooks for shared logic
+
+## Pitfalls to Avoid
+- Prop drilling beyond 2 levels
+- Direct DOM manipulation
+
+## Quality Checks
+- [ ] Components have types defined
+- [ ] No inline styles for reusable components
+```
+
+### Logging
+
+For each parent task, log the domain detection:
+```
+Parent Task {id}: Detected domain "{domain}" → loading skill from .claude/skills/domain-{domain}.md
+```
+
+---
+
+## Model Selection
+
+Select the appropriate model based on parent task complexity.
+
+### Selection Function
+
+```
+selectModel(complexity):
+  IF complexity >= 4:
+    RETURN "opus"
+  ELSE:
+    RETURN "sonnet"
+```
+
+### Mapping
+
+| Complexity | Model | Rationale |
+|------------|-------|-----------|
+| 1/5 | sonnet | Simple task, cost efficient |
+| 2/5 | sonnet | Standard task, cost efficient |
+| 3/5 | sonnet | Moderate task, sonnet capable |
+| 4/5 | **opus** | Complex task, needs stronger reasoning |
+| 5/5 | **opus** | System-wide task, needs strongest model |
+
+### Logging
+
+For each parent task, log the model selection:
+```
+Parent Task {id} (complexity {n}/5) → using {model}
+```
+
+### Cost Rationale
+
+Opus is approximately 10x more expensive than Sonnet. The complexity threshold of 4+ ensures Opus is only used when the additional reasoning capability justifies the cost.
+
+### Task Tool Model Parameter
+
+The Task tool accepts a `model` parameter to specify which model should execute the spawned agent:
+
+```
+Use Task tool with:
+  - subagent_type: "execution-agent"
+  - model: "sonnet" or "opus"  ← Dynamic based on complexity
+  - prompt: YAML handoff content
+```
+
+**Fallback Behavior:**
+- If model parameter is not supported: Log warning, use default model
+- If specified model unavailable: Fall back to sonnet
+- Always log which model is actually being used
+
+---
+
+## Wave Analysis (Parallel Execution)
+
+Group non-conflicting tasks into "waves" that execute in parallel. Tasks within a wave run simultaneously; waves execute sequentially.
+
+### Conflict Detection
+
+Two tasks **conflict** if:
+1. **File-level**: They modify the same file
+2. **Import-level**: One task's files import files from another task
+
+Tasks that don't conflict can run in parallel.
+
+### Wave Building Algorithm
+
+```
+buildWaves(parent_tasks):
+  waves = []
+  remaining = copy(parent_tasks where status != "completed")
+
+  WHILE remaining not empty:
+    wave = []
+    wave_files = Set()
+    wave_imports = Set()  # Files imported by wave tasks
+
+    FOR EACH task in remaining:
+      task_files = extractAllFiles(task)
+
+      # Check direct file conflict
+      IF task_files INTERSECTS wave_files:
+        CONTINUE  # Skip - conflicts with task in wave
+
+      # Check import-level conflict
+      task_imports = getImportedFiles(task_files)
+      IF task_files INTERSECTS wave_imports:
+        CONTINUE  # Task modifies file imported by wave task
+      IF task_imports INTERSECTS wave_files:
+        CONTINUE  # Task imports file modified by wave task
+
+      # No conflicts - add to wave
+      wave.append(task)
+      wave_files.addAll(task_files)
+      wave_imports.addAll(task_imports)
+
+    waves.append(wave)
+    FOR EACH task in wave:
+      remaining.remove(task)
+
+  RETURN waves
+
+extractAllFiles(task):
+  files = Set()
+  FOR EACH file_element in task.files:
+    files.add(file_element.path)
+  FOR EACH subtask in task.subtasks:
+    IF subtask.files exists:
+      files.add(subtask.files)
+  RETURN files
+```
+
+### Import Detection
+
+Detect imports based on file extension:
+
+```
+getImportedFiles(file_paths):
+  imports = Set()
+
+  FOR EACH file_path in file_paths:
+    IF file does not exist:
+      CONTINUE  # New file - no imports yet
+
+    content = readFile(file_path)
+    extension = getExtension(file_path)
+
+    SWITCH extension:
+      CASE ".ts", ".tsx", ".js", ".jsx":
+        # import X from "Y" | import "Y" | require("Y")
+        matches = regex: /(?:import\s+.*\s+from\s+|import\s+|require\()["']([^"']+)["']/g
+        FOR EACH match:
+          resolved = resolveImportPath(file_path, match)
+          imports.add(resolved)
+
+      CASE ".py":
+        # from X import Y | import X
+        matches = regex: /(?:from\s+(\S+)\s+import|^import\s+(\S+))/gm
+        FOR EACH match:
+          resolved = resolveModulePath(match)
+          imports.add(resolved)
+
+      CASE ".go":
+        # "package/path" in import blocks
+        matches = regex: /"([^"]+)"/g within import()
+        FOR EACH match:
+          imports.add(match)
+
+      CASE ".md":
+        # References like .claude/agents/*.md
+        matches = regex: /\.claude\/[^\s)]+\.md|\.ai\/[^\s)]+/g
+        FOR EACH match:
+          imports.add(match)
+
+  RETURN imports
+
+resolveImportPath(from_file, import_path):
+  IF import_path starts with "./" or "../":
+    RETURN resolvePath(dirname(from_file), import_path)
+  ELSE:
+    RETURN import_path  # Package import - keep as-is
+```
+
+### Wave Display
+
+After building waves, display the grouping:
+
+```
+🌊 Wave Analysis Complete
+
+Total Tasks: {count}
+Waves: {wave_count}
+Max Parallelism: {max_wave_size} tasks
+
+Wave 1: [{task_ids}] - {count} tasks in parallel
+Wave 2: [{task_ids}] - {count} tasks in parallel
+...
+
+Tasks with file conflicts run in separate waves.
+```
+
+---
+
+## Parallel Agent Dispatch
+
+Execute all tasks in a wave simultaneously.
+
+### Per-Agent STATE Files
+
+Each parallel agent writes to its own STATE file:
+
+```
+/tasks/STATE-{feature-name}-agent-{task.id}.md
+```
+
+After wave completes, orchestrator merges into main STATE file.
+
+### Handoff for Parallel Mode
+
+Add parallel execution fields to agent handoff:
+
+```yaml
+# Existing fields...
+parent_task: { id, title, complexity, verify }
+subtasks: [...]
+state_md: "..."  # Learnings from COMPLETED waves only
+explore_context: "..."
+model: "sonnet"
+feature_name: "..."
+task_file: "/tasks/task-{feature-name}.xml"
+domain_skill: "..."
+
+# NEW: Parallel execution fields
+parallel_execution:
+  enabled: true
+  wave_id: 1
+  wave_size: 3                    # Tasks in this wave
+  agent_state_file: "/tasks/STATE-{feature}-agent-{task.id}.md"
+  xml_update_mode: "report"       # "report" - agent reports status, orchestrator updates XML
+```
+
+### Agent Output for Parallel Mode
+
+When `xml_update_mode: "report"`, agent returns status updates instead of writing XML:
+
+```yaml
+# Agent returns:
+status: "completed"
+commit_sha: "abc123"
+learnings:
+  patterns_applied: [...]
+  integration_discoveries: [...]
+  issues_resolved: [...]
+
+# NEW: Status updates for orchestrator to apply
+status_updates:
+  parent_status: "completed"
+  subtask_statuses:
+    - id: "1.1", status: "completed"
+    - id: "1.2", status: "completed"
+```
+
+### Dispatch Logic
+
+```
+executeWave(wave, state_md, explore_context, task_file, wave_id):
+  agent_handles = []
+
+  FOR EACH task in wave:
+    # Create per-agent STATE file
+    agent_state_file = "/tasks/STATE-{feature}-agent-{task.id}.md"
+    initializeAgentState(agent_state_file, task)
+
+    # Build handoff with parallel fields
+    model = selectModel(task.complexity)
+    domain = detectDomain(task)
+    domain_skill = loadSkill(domain)
+
+    handoff = {
+      parent_task: task,
+      subtasks: task.subtasks,
+      state_md: state_md,
+      explore_context: explore_context,
+      model: model,
+      feature_name: feature_name,
+      task_file: task_file,
+      domain_skill: domain_skill,
+      parallel_execution: {
+        enabled: true,
+        wave_id: wave_id,
+        wave_size: wave.length,
+        agent_state_file: agent_state_file,
+        xml_update_mode: "report"
+      }
+    }
+
+    # Spawn agent asynchronously (run_in_background: true)
+    handle = Task tool with:
+      subagent_type: "execution-agent"
+      model: model
+      prompt: YAML(handoff)
+      run_in_background: true
+
+    agent_handles.append({task: task, handle: handle})
+
+  RETURN agent_handles
+```
+
+---
+
+## STATE.md Merge Logic
+
+After all agents in a wave complete, merge their learnings.
+
+### Merge Process
+
+```
+mergeAgentStates(wave_results, main_state_path, wave_id):
+  wave_section = """
+---
+
+## Wave {wave_id} Completed: {ISO timestamp}
+
+"""
+
+  FOR EACH result in wave_results:
+    IF result.status == "completed":
+      wave_section += """
+### Parent Task {id}: {title}
+
+**Commit:** {commit_sha}
+**Model:** {model}
+**Domain:** {domain}
+
+#### Patterns Applied
+{bullet list from result.learnings.patterns_applied}
+
+#### Integration Discoveries
+{bullet list from result.learnings.integration_discoveries}
+
+#### Issues Resolved
+{bullet list from result.learnings.issues_resolved}
+
+"""
+
+  # Append to main STATE.md
+  appendToFile(main_state_path, wave_section)
+
+  # Cleanup per-agent STATE files
+  FOR EACH result in wave_results:
+    deleteFile(result.agent_state_file)
+```
+
+### Merge Example
+
+After Wave 1 with 3 parallel tasks:
+
+```markdown
+---
+
+## Wave 1 Completed: 2026-01-12T10:30:00Z
+
+### Parent Task 1.0: Create Frontend Component
+
+**Commit:** abc123
+**Model:** sonnet
+**Domain:** frontend
+
+#### Patterns Applied
+- React composition with forwardRef
+
+#### Integration Discoveries
+- Existing Button component has compatible API
+
+### Parent Task 2.0: Create API Endpoint
+
+**Commit:** def456
+**Model:** sonnet
+**Domain:** backend
+
+#### Patterns Applied
+- Service layer with repository pattern
+
+#### Integration Discoveries
+- Auth middleware already validates tokens
+
+### Parent Task 3.0: Setup Infrastructure
+
+**Commit:** ghi789
+**Model:** opus
+**Domain:** infrastructure
+
+#### Patterns Applied
+- Multi-stage Dockerfile
+
+#### Issues Resolved
+- Fixed npm ci cache path
+```
+
+---
+
+## Parallel Progress Display
+
+Show real-time progress for multiple executing tasks.
+
+### Wave Start
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🌊 Wave {wave_id}: {count} tasks executing in parallel
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ⏳ [{task.id}] {task.title} ({model}, {domain})
+   ⏳ [{task.id}] {task.title} ({model}, {domain})
+   ⏳ [{task.id}] {task.title} ({model}, {domain})
+```
+
+### As Tasks Complete
+
+```
+   ✅ [1.0] Create Frontend Component - commit abc123
+   ✅ [2.0] Create API Endpoint - commit def456
+   ⚠️  [3.0] Setup Infrastructure - verification failed
+```
+
+### Wave Summary
+
+```
+Wave {wave_id} complete: {success}/{total} tasks
+
+Merging learnings from {success} agents...
+Merged. Proceeding to Wave {wave_id + 1}.
+```
+
+---
+
+## Failure Handling (Parallel Mode)
+
+When tasks fail in a parallel wave.
+
+### Failure Flow
+
+```
+1. Wave completes (all agents finish - success or fail)
+2. Collect results from all agents
+3. Update XML status for successful tasks
+4. Merge STATE.md for successful tasks
+5. Handle failed tasks:
+   a. Display failure details
+   b. Retry failed task ONCE (with bumped model)
+   c. If retry succeeds: continue
+   d. If retry fails: prompt user
+6. Only proceed to next wave when current wave fully passes
+```
+
+### Retry Logic
+
+```
+handleWaveFailures(wave_results, task_file):
+  failed_tasks = filter(wave_results, r => r.status != "completed")
+
+  IF failed_tasks is empty:
+    RETURN "all_success"
+
+  FOR EACH failed in failed_tasks:
+    displayFailure(failed)
+
+    # Retry once with bumped model
+    PRINT "🔄 Retrying [{failed.task.id}] with enhanced context..."
+
+    retry_result = spawnAgent(
+      task: failed.task,
+      model: bumpModel(failed.task.complexity),  # Sonnet→Opus or keep Opus
+      retry_context: failed.error_details
+    )
+
+    IF retry_result.status == "completed":
+      PRINT "✅ [{failed.task.id}] succeeded on retry"
+      updateXmlStatus(task_file, failed.task.id, "completed")
+      CONTINUE
+
+    # Retry failed - ask user
+    user_choice = promptUser("""
+      ❌ Task [{id}] failed after retry
+
+      Error: {retry_result.error}
+
+      Options:
+      1. Fix manually and retry
+      2. Skip this task (requires explicit confirmation)
+      3. Abort execution
+
+      Choice:
+    """)
+
+    SWITCH user_choice:
+      CASE 1:
+        # User will fix, then re-run /execute
+        RETURN "paused_for_fix"
+
+      CASE 2:
+        IF NOT user confirms "yes, skip this task":
+          PRINT "Skipping requires explicit 'yes, skip this task' confirmation"
+          RETURN "paused_for_fix"
+        updateXmlStatus(task_file, failed.task.id, "skipped")
+        CONTINUE
+
+      CASE 3:
+        RETURN "aborted"
+
+  RETURN "all_resolved"
+
+bumpModel(complexity):
+  IF complexity < 4:
+    RETURN "opus"  # Bump to stronger model
+  ELSE:
+    RETURN "opus"  # Already opus, keep it
+```
+
+### User Prompts
+
+**Verification Failed:**
+```
+⚠️ Task [3.0] Setup Infrastructure - verification failed
+
+Verify Command: docker build -t test .
+Exit Code: 1
+Output:
+  Step 5/8 : RUN npm ci
+  npm ERR! Could not resolve dependency
+
+🔄 Retrying with opus model and error context...
+```
+
+**After Retry Fails:**
+```
+❌ Task [3.0] failed after retry
+
+The task could not complete even with enhanced context.
+
+Options:
+1. Fix manually and retry - I'll pause here
+2. Skip this task - requires typing "yes, skip this task"
+3. Abort execution - stop completely
+
+What would you like to do?
+```
+
+---
+
+## Orchestrator Main Loop
+
+The core execution loop uses **wave-based parallel execution**.
+
+### Loop Structure (Wave-Based)
+
+```
+1. PARSE XML & INITIALIZE
+   - Parse task file
+   - Initialize main STATE.md
+   - Load EXPLORE_CONTEXT.json
+
+2. BUILD WAVES
+   - waves = buildWaves(parent_tasks)
+   - Display wave analysis (task groupings)
+
+3. FOR EACH wave in waves:
+
+   3.1. SKIP COMPLETED TASKS
+        - active_wave = filter(wave, task.status != "completed")
+        - IF active_wave is empty: CONTINUE to next wave
+
+   3.2. DISPLAY WAVE START
+        - Show: "Wave {id}: {count} tasks executing in parallel"
+        - List tasks with model and domain
+
+   3.3. READ CURRENT STATE.md
+        - Load learnings from completed waves
+
+   3.4. SPAWN ALL AGENTS IN PARALLEL
+        - FOR EACH task in active_wave:
+          - Create per-agent STATE file
+          - Build handoff with parallel_execution fields
+          - Spawn agent with run_in_background: true
+        - Collect agent handles
+
+   3.5. WAIT FOR ALL AGENTS
+        - Poll/await all agent handles
+        - Collect results as agents complete
+        - Display progress: ✅/⚠️ as each finishes
+
+   3.6. PROCESS WAVE RESULTS
+        - Successful tasks:
+          - Update XML status to "completed"
+          - Collect learnings for merge
+        - Failed tasks:
+          - Handle via failure workflow (retry, prompt user)
+
+   3.7. MERGE STATE.md
+        - Append wave section with all completed task learnings
+        - Delete per-agent STATE files
+
+   3.8. CHECK WAVE COMPLETION
+        - IF all tasks passed OR user skipped failures:
+          - CONTINUE to next wave
+        - ELSE:
+          - PAUSE execution
+          - Wait for user to fix and re-run
+
+4. ALL WAVES COMPLETE
+   - Run code review
+   - Run memory update
+   - Offer archive workflow
+```
+
+### Sequential Fallback
+
+If wave analysis determines all tasks conflict (wave size = 1 for all waves), execution automatically falls back to sequential mode:
+
+```
+⚠️ All tasks have file conflicts - executing sequentially
+
+This feature modifies overlapping files, so tasks cannot run in parallel.
+Proceeding with sequential execution...
+```
+
+### Failure Handling
+
+If validation fails at step 6:
+
+**For status == "blocked":**
+```
+❌ Parent Task {id} is BLOCKED
+
+Blocker: {blocker.description}
+Subtask: {blocker.subtask_id}
+Details: {blocker.details}
+
+Execution paused. Please resolve the blocker and resume.
+Options:
+1. Fix the issue and run /execute again
+2. Modify the task file to work around the blocker
+3. Skip this task (not recommended - may break dependencies)
+```
+
+**For status == "verification_failed":**
+```
+❌ Parent Task {id} VERIFICATION FAILED
+
+Verify Command: {parent_task.verify}
+Exit Code: {verify_result.exit_code}
+Output:
+{verify_result.output}
+
+Execution paused. Please fix the failing tests and resume.
+```
+
+**For missing commit_sha (when status is completed):**
+```
+⚠️ Parent Task {id} completed but no commit was created
+
+This may indicate the agent skipped the commit step.
+Please review changes and commit manually, then resume.
+```
+
+### Retry Logic
+
+For spawn failures (Task tool errors):
+- Retry up to 2 times with exponential backoff
+- If all retries fail, pause execution and report error
+
+---
+
+## STATE.md Update Logic
+
+After each parent task completes successfully, update STATE.md with learnings.
+
+### Update Content
+
+Append this section for each completed parent task:
+
+```markdown
+---
+
+## Parent Task {id}: {title}
+
+**Completed:** {ISO 8601 timestamp}
+**Commit:** {commit_sha}
+**Model Used:** {model}
+
+### Patterns Applied
+{For each pattern in learnings.patterns_applied:}
+- {pattern description}
+
+### Integration Discoveries
+{For each discovery in learnings.integration_discoveries:}
+- {discovery description}
+
+### Issues Resolved
+{For each issue in learnings.issues_resolved:}
+- {issue description}
+```
+
+### STATE.md Size Monitoring
+
+Monitor STATE.md size to ensure it remains usable:
+
+| Metric | Threshold | Action |
+|--------|-----------|--------|
+| File Size | < 10KB | Normal operation |
+| File Size | 10KB - 20KB | Warning: feature is large or learnings are verbose |
+| File Size | > 20KB | Truncate older learnings, keep last 5 parent tasks |
+
+**Expected Growth Rate:** ~500 bytes - 1KB per parent task
+
+**At Execution Completion:**
+- Check STATE.md file size
+- If exceeds 10KB, log warning to user
+- If exceeds 20KB, halt and require truncation
+
+**Truncation Strategy (if needed):**
+1. Keep the header and metadata
+2. Summarize tasks older than the last 5 into a "Previous Learnings Summary"
+3. Keep full detail for the 5 most recent parent tasks
+
+### Example STATE.md After Two Tasks
+
+```markdown
+# Execution State: user-authentication
+
+**Started:** 2026-01-12T10:00:00Z
+**Total Parent Tasks:** 5
+**Task File:** task-user-authentication.xml
+
+---
+
+## Execution Log
+
+_Cross-task learnings will be recorded below as parent tasks complete._
+
+---
+
+## Parent Task 1.0: Implement Login Service
+
+**Completed:** 2026-01-12T10:45:00Z
+**Commit:** abc123def456
+**Model Used:** sonnet
+
+### Patterns Applied
+- Service pattern for AuthService with dependency injection
+- Repository pattern for UserRepository
+
+### Integration Discoveries
+- SessionManager.createSession requires userId, not user object
+- Token expiration must be set in milliseconds, not seconds
+
+### Issues Resolved
+- Fixed circular import between AuthService and TokenService
+
+---
+
+## Parent Task 2.0: Add Session Management
+
+**Completed:** 2026-01-12T11:30:00Z
+**Commit:** def456ghi789
+**Model Used:** opus
+
+### Patterns Applied
+- Manager pattern for SessionManager
+- Event pattern for session lifecycle events
+
+### Integration Discoveries
+- Redis client must be initialized before session operations
+- Session cleanup requires async iteration
+
+### Issues Resolved
+- Added null check for expired sessions
+```
+
+---
+
+## XML Status Update Logic
+
+After each parent task completes (or is blocked), update the task file to track progress.
+
+### Update Process
+
+After execution agent returns:
+
+```
+1. Read current task XML file
+2. Locate the <parent_task id="{id}"> element
+3. Update status attribute based on execution result:
+   - "completed" if status == "completed" and verify passed
+   - "blocked" if status == "blocked"
+   - "in_progress" if status == "verification_failed" (partial progress)
+4. Write updated XML back to file
+```
+
+### Status Values
+
+| Execution Result | XML Status |
+|-----------------|------------|
+| Agent returns `status: completed` | `status="completed"` |
+| Agent returns `status: blocked` | `status="blocked"` |
+| Agent returns `status: verification_failed` | `status="in_progress"` (needs retry) |
+| Agent spawn fails | Leave as `status="pending"` |
+
+### Example Update
+
+Before:
+```xml
+<parent_task id="1.0" complexity="3" status="pending">
+  ...
+</parent_task>
+```
+
+After successful completion:
+```xml
+<parent_task id="1.0" complexity="3" status="completed">
+  ...
+</parent_task>
+```
+
+### Resumability
+
+This status tracking enables resumability:
+
+```
+1. On /execute startup, scan XML for task statuses
+2. Find first parent_task where status != "completed"
+3. Resume execution from that task
+4. Skip any tasks already marked "completed"
+```
+
+### Resume Detection Logic
+
+```
+FOR EACH parent_task in XML:
+  IF status == "completed":
+    Log: "Skipping {id} - already completed"
+    CONTINUE to next task
+  ELSE:
+    Begin execution from this task
+    BREAK loop
+```
+
+This allows users to:
+- Stop execution mid-way and resume later
+- See exactly where execution paused
+- Re-run `/execute` without redoing completed work
+
+---
+
+## Post-Execution: Code Review
+
+After ALL parent tasks complete successfully, invoke code review.
+
+### Code Review Invocation
+
+```
+Use Skill tool with skill="code-review"
+
+Wait for code review agent to complete.
+```
+
+### Handling Code Review Results
+
+**If code review PASSES (no CRITICAL or HIGH findings):**
+- Log: "Code review passed. Proceeding to memory update."
+- Continue to memory update phase
+
+**If code review FAILS (CRITICAL or HIGH findings exist):**
+```
+⚠️ Code Review Found Issues
+
+CRITICAL findings: {count}
+HIGH findings: {count}
+
+{List findings with file:line references}
+
+Execution paused before memory update.
+Please fix the identified issues and run /execute again.
+The code review agent has generated fix tasks above.
+```
+
+Do NOT proceed to memory update until code review passes.
+
+---
+
+## Post-Execution: Memory Update
+
+After code review passes, invoke memory update.
+
+### Memory Update Invocation
+
+```
+Use Skill tool with skill="update"
+
+Pass STATE.md content as context for the update agent.
+```
+
+### Handling Memory Update Results
+
+**If memory update succeeds:**
+- Log: "Memory system updated successfully."
+- Proceed to archive workflow
+
+**If memory update fails:**
+- Log warning: "Memory update encountered issues: {details}"
+- Consider execution complete (memory update failure is non-fatal)
+- Suggest manual memory update if needed
+
+---
+
+## Post-Execution: Archive Workflow
+
+After memory update, offer to archive task files.
+
+### User Prompt
+
+```
+✅ Execution Complete!
+
+All {N} parent tasks completed successfully.
+Code review: PASSED
+Memory system: UPDATED
+
+Commits created:
+- [{id}] {title} ({commit_sha})
+- [{id}] {title} ({commit_sha})
+...
+
+Would you like to archive the task files? (y/n)
+- This moves task-{feature-name}.xml and STATE-{feature-name}.md
+  to /tasks/archive/task-{feature-name}-{timestamp}/
+```
+
+### Archive Process (If User Confirms)
+
+```
+1. Create archive directory:
+   /tasks/archive/task-{feature-name}-{YYYYMMDD-HHMMSS}/
+
+2. Move files:
+   - task-{feature-name}.xml → archive directory
+   - STATE-{feature-name}.md → archive directory
+
+3. Confirm:
+   "Task files archived to /tasks/archive/task-{feature-name}-{timestamp}/"
+```
+
+### Skip Archive (If User Declines)
+
+```
+"Task files left in place. You can archive them later or delete manually."
+```
+
+---
+
+## Execution Summary Display
+
+Throughout execution, provide clear progress updates.
+
+### Starting Execution
+
+```
+🚀 Starting Task Execution
+
+Feature: {feature_name}
+Task File: task-{feature-name}.xml
+Total Parent Tasks: {count}
+
+Model selection based on complexity:
+- Sonnet: complexity 1-3 (cost efficient)
+- Opus: complexity 4-5 (complex reasoning)
+
+Initializing STATE.md for cross-task learning...
+Loading EXPLORE_CONTEXT.json...
+
+Beginning execution...
+```
+
+### Per-Task Progress
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 Parent Task {id}/{total}: {title}
+   Complexity: {n}/5 → Model: {model}
+   Domain: {domain} → Skill: domain-{domain}.md
+   Verify: {verify_command}
+   Subtasks: {count}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Spawning execution agent with fresh context and {domain} skill...
+
+[Agent executes and returns]
+
+✅ Parent Task {id} completed
+   Commit: {commit_sha}
+   Learnings captured in STATE.md
+```
+
+### Completion Summary
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ All Parent Tasks Complete
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Summary:
+- Tasks Completed: {completed}/{total}
+- Models Used: Sonnet x{n}, Opus x{m}
+- Total Commits: {count}
+
+Running code review...
+```
+
+---
+
+## Quality Gates
+
+### Pre-Execution Checks
+
+- [ ] Task file exists and is valid XML
+- [ ] All required XML elements present
+- [ ] At least one parent task defined
+- [ ] Each parent task has verify command
+- [ ] STATE.md can be created/written
+
+### Per-Task Checks
+
+- [ ] Execution agent spawned successfully
+- [ ] Agent returned valid summary
+- [ ] Verification passed
+- [ ] Commit created
+- [ ] STATE.md updated
+
+### Post-Execution Checks
+
+- [ ] All parent tasks completed
+- [ ] Code review passed
+- [ ] Memory system updated
+- [ ] User prompted for archive
+
+---
+
+## Error Recovery
+
+### Resuming After Failure
+
+If execution fails mid-way:
+
+1. **Check STATE.md** - See which tasks completed (have commit entries)
+2. **Review task file** - Identify which task failed
+3. **Fix the issue** - Address blocker or test failure
+4. **Re-run /execute** - Orchestrator will:
+   - Skip completed tasks (detect via STATE.md commits)
+   - Resume from failed task
+
+### Manual Override
+
+For edge cases where automatic recovery doesn't work:
+- Manually edit STATE.md to mark tasks complete
+- Delete STATE.md to force fresh start
+- Modify task XML to skip problematic tasks
+
+---
+
+## Integration with Memory System
+
+The orchestrator integrates with the AI memory system:
+
+| Memory File | Usage |
+|-------------|-------|
+| `.ai/PATTERNS.md` | Passed to execution agents via EXPLORE_CONTEXT |
+| `.ai/FILES.json` | Passed to execution agents via EXPLORE_CONTEXT |
+| `.ai/ARCHITECTURE.json` | Passed to execution agents via EXPLORE_CONTEXT |
+| `.ai/BUSINESS.json` | Passed to execution agents via EXPLORE_CONTEXT |
+| `.ai/QUICK.md` | Used for verify commands and build reference |
+
+The orchestrator itself is lightweight - it delegates memory consultation to the execution agents, keeping its own context minimal.
+
+---
+
+## Breaking Change Notice
+
+**BREAKING CHANGE**: This orchestrator requires XML task format.
+
+- Old markdown task files (`tasks-*.md`) are not compatible
+- Run `/TaskGen {prd-name}` to regenerate tasks in XML format
+- The task-writer agent now outputs XML by default
+
+---
+
+**This orchestrator transforms task execution from a monolithic, context-heavy process into a lightweight, agent-based workflow with fresh context per task, dynamic model selection, and cross-task learning.**

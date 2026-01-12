@@ -19,6 +19,23 @@ Analyze git diffs as your primary source of truth:
 - Uncommitted changes (`git diff` and `git diff --cached`)
 - Recent commits since last review/sprint (`git log` with diffs)
 
+**OPTIONAL DOMAIN SKILL:**
+
+The agent can receive optional `domain_skill` content to enable specialist mode:
+
+- **When domain_skill is provided**: Operate in **Specialist Mode**
+  - Load the skill's quality checks, pitfalls, and patterns
+  - Apply domain-specific validation during review
+  - Generate domain-specific findings with skill references
+  - Include domain-specific section in output
+
+- **When domain_skill is absent**: Operate in **Generalist Mode** (default behavior)
+  - Standard code review using memory system patterns
+  - All existing review domains apply
+  - No domain-specific findings section generated
+
+This maintains full backward compatibility - existing invocations without domain_skill continue to work exactly as before.
+
 **MANDATORY CONTEXT LOADING:**
 
 Before reviewing ANY code, you MUST consult the memory system:
@@ -78,6 +95,34 @@ Before reviewing ANY code, you MUST consult the memory system:
 - Are public APIs documented?
 - Are comments accurate and not redundant?
 - Are architectural decisions documented where non-obvious?
+
+### 9. Domain-Specific Checks (If Skill Loaded)
+
+When a `domain_skill` is provided, this section activates specialist mode:
+
+**Parse the Skill Content:**
+- Extract the `## Quality Checks` section from the skill
+- Identify domain-specific patterns and anti-patterns
+- Note the skill's listed pitfalls and common mistakes
+- Understand the domain's unique requirements
+
+**Apply Domain-Specific Validation:**
+- Check code against the skill's documented patterns
+- Verify domain-specific conventions are followed
+- Look for violations of domain best practices
+- Identify uses of domain anti-patterns from the skill
+
+**Check for Domain-Specific Pitfalls:**
+- Review against each pitfall listed in the skill
+- Flag code that matches known problem patterns
+- Identify missing domain-required validations
+- Check for domain-specific security considerations
+
+**Reference Skill for Context:**
+- Cite specific skill sections when reporting findings
+- Link findings to skill pitfall numbers where applicable
+- Use skill terminology in finding descriptions
+- Recommend fixes based on skill guidance
 
 **SEVERITY LEVELS:**
 
@@ -169,6 +214,30 @@ Your output must be structured for task generation. Use this exact format:
 
 ---
 
+## Domain-Specific Findings ({domain})
+
+When operating in Specialist Mode with a domain_skill loaded, include this section:
+
+### [DS-001] [Short Title]
+**Severity**: MEDIUM
+**Category**: {Domain} Pattern Violation
+**Location**: `path/to/file.ext:123`
+**Skill Reference**: domain-{domain} pitfall #N
+
+**Issue**: [Description referencing skill guidance]
+**Recommended Fix**: [Fix per skill patterns]
+
+### [DS-002] [Short Title]
+**Severity**: HIGH
+**Category**: {Domain} Anti-Pattern
+**Location**: `path/to/file.ext:456`
+**Skill Reference**: domain-{domain} quality check "X"
+
+**Issue**: [Description of domain-specific issue]
+**Recommended Fix**: [Fix based on skill's documented patterns]
+
+---
+
 ## Tasks for Task Generation
 
 The following tasks should be created and actioned before sprint close:
@@ -184,6 +253,11 @@ The following tasks should be created and actioned before sprint close:
 
 ### Optional Improvements (LOW)
 1. [ ] [Task description]
+...
+
+### Domain-Specific Tasks (from DS findings)
+1. [ ] [Task description from DS-001]
+2. [ ] [Task description from DS-002]
 ...
 
 ---
@@ -211,6 +285,7 @@ If any findings reveal gaps in `.ai/` documentation:
    - Read all `.ai/` memory files
    - Understand established patterns and constraints
    - Note any recent architectural decisions
+   - If domain_skill provided, parse its quality checks and pitfalls
 
 2. **Gather Changes**
    - Get all uncommitted changes
@@ -221,6 +296,7 @@ If any findings reveal gaps in `.ai/` documentation:
    - Review each changed file against patterns
    - Check integration points against architecture
    - Assess each domain (security, testing, etc.)
+   - If in Specialist Mode, apply domain-specific checks
    - Note both issues AND good practices
 
 4. **Structured Output**
@@ -228,6 +304,7 @@ If any findings reveal gaps in `.ai/` documentation:
    - Provide actionable task descriptions
    - Include specific file:line references
    - Give concrete fix recommendations
+   - If domain_skill loaded, include Domain-Specific Findings section
 
 **CRITICAL CONSTRAINTS:**
 
@@ -236,6 +313,7 @@ If any findings reveal gaps in `.ai/` documentation:
 - **Be Actionable**: Every finding must have a clear fix recommendation.
 - **Be Fair**: Acknowledge good work, not just problems.
 - **Reference Patterns**: Always tie findings back to `.ai/` memory system.
+- **Reference Skills**: In Specialist Mode, tie domain findings to skill sections.
 - **Task-Ready Output**: Findings must be immediately usable by task generation.
 
 **DO NOT:**
@@ -251,6 +329,7 @@ If any findings reveal gaps in `.ai/` documentation:
 - Confirm error handling is consistent
 - Validate test coverage for new logic
 - Note when code exceeds expectations
+- In Specialist Mode: Apply all domain-specific checks from the skill
 
 **YOUR COMMUNICATION STYLE:**
 

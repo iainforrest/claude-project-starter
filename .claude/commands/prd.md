@@ -174,7 +174,54 @@ THOROUGHNESS: very thorough
 **Suggested Questions:** [questions to ask user based on findings]
 ```
 
-**After Explore returns, store findings as `EXPLORE_CONTEXT` for use in questioning.**
+**After Explore returns:**
+1. Store findings as `EXPLORE_CONTEXT` for use in questioning
+2. Save to `.ai/EXPLORE_CONTEXT.json` for downstream agents
+
+### Saving EXPLORE_CONTEXT.json
+
+After the Explore agent returns, persist the context for use by the execute orchestrator and execution agents:
+
+**File Location:** `.ai/EXPLORE_CONTEXT.json`
+
+**Save Process:**
+1. Extract the structured context from Explore agent output
+2. Format as JSON matching the expected structure
+3. Check file size - if > 50KB, apply truncation
+4. Write to `.ai/EXPLORE_CONTEXT.json`
+
+**Expected JSON Structure:**
+```json
+{
+  "feature_name": "feature-name",
+  "generated_at": "2026-01-12T10:00:00Z",
+  "similar_features": [
+    {"name": "feature", "file": "path:line", "relevance": "description"}
+  ],
+  "applicable_patterns": [
+    {"pattern": "name", "file": "patterns/DOMAIN.md", "usage": "description"}
+  ],
+  "key_files": [
+    {"path": "file:line", "purpose": "description"}
+  ],
+  "integration_points": [
+    {"system": "name", "connection": "description"}
+  ],
+  "red_flags": [
+    {"issue": "description", "severity": "HIGH/MEDIUM/LOW"}
+  ]
+}
+```
+
+**Size Validation (50KB Limit):**
+If the JSON exceeds 50KB:
+1. Truncate `similar_features` to 10 entries (keep most relevant)
+2. Truncate `key_files` to 10 entries (keep most important)
+3. Keep all `applicable_patterns` (usually small)
+4. Keep all `integration_points` (critical for execution)
+5. Keep all `red_flags` (critical for awareness)
+6. Recalculate size after truncation
+7. Log warning if truncation occurred
 
 **2. Batched Questioning**
 
