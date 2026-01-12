@@ -1,6 +1,6 @@
 {
   "name": "create-fat-controller",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "The Fat Controller - AI-assisted development system that orchestrates Claude Code agents like Sir Topham Hatt runs his railway",
   "main": "install.js",
   "bin": {
