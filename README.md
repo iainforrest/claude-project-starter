@@ -435,10 +435,14 @@ The memory system prevents Claude from "forgetting" your project between session
 
 ## Credits
 
-Originally inspired by **Ryan Carson** and his approach to AI-assisted development, discovered through **How to AI with Claire Vo**.
+This project builds on ideas from the Claude Code community:
 
-- [Ryan Carson's AI Dev Tasks](https://github.com/snarktank/ai-dev-tasks)
-- [How to AI with Claire Vo - YouTube](https://youtu.be/fD4ktSkNCw4)
+**PRD → Tasks → Execute workflow:**
+- [Ryan Carson's AI Dev Tasks](https://github.com/snarktank/ai-dev-tasks) - The original PRD and task-based execution approach
+- [How to AI with Claire Vo - YouTube](https://youtu.be/fD4ktSkNCw4) - Where I first discovered this workflow
+
+**Subagent orchestration and fresh context patterns:**
+- [GSD (Get Shit Done)](https://github.com/glittercowboy/get-shit-done) by TÂCHES - Pioneered the subagent execution model with fresh context windows per task. The wave-based parallel execution and "context debt" prevention in The Fat Controller were directly inspired by GSD's approach.
 
 ---
 
