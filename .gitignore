@@ -1,0 +1,21 @@
+# Development artifacts
+docs/
+tasks/prd-*.md
+tasks/tasks-*.md
+tasks/task-*.xml
+tasks/STATE-*.md
+tasks/*.jpg
+tasks/*.png
+
+# Node.js
+node_modules/
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+*.swp
+*.swo
+*~
