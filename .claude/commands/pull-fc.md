@@ -16,10 +16,24 @@ Pull the latest generic commands and agents from The Fat Controller repository.
 |-------|-------------|
 | `.claude/commands/*.md` | `.ai/*` (project-specific memory) |
 | `.claude/agents/*.md` | `.claude/settings.local.json` (machine-specific) |
-| `.claude/skills/*.md` | `pull-fc.md`, `push-fc.md` (sync commands) |
+| `.claude/skills/*.md` | |
 | `.claude/WORKFLOW.md` | |
 
 ## Steps
+
+### 0. Migration Check (IMPORTANT)
+
+**Before doing anything else**, check for and remove legacy sync commands:
+
+```bash
+# Remove old sync commands if they exist
+rm -f .claude/commands/pull-cps.md .claude/commands/push-cps.md
+```
+
+If these files existed, inform the user:
+```
+Migrated: Removed legacy pull-cps.md and push-cps.md (replaced by pull-fc.md and push-fc.md)
+```
 
 ### 1. Clone starter repo
 
@@ -32,7 +46,7 @@ echo "Cloned to $TEMP_DIR"
 ### 2. Compare files
 
 Compare these directories:
-- `.claude/commands/` (excluding pull-fc.md and push-fc.md)
+- `.claude/commands/` (all files including pull-fc.md and push-fc.md)
 - `.claude/agents/`
 - `.claude/skills/`
 - `.claude/WORKFLOW.md` (if exists)
