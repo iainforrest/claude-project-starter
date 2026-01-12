@@ -1,10 +1,10 @@
 {
-  "name": "create-claude-project",
-  "version": "2.0.0",
-  "description": "A self-bootstrapping development system that sets up a complete AI-assisted workflow for any project",
+  "name": "create-fat-controller",
+  "version": "3.0.0",
+  "description": "The Fat Controller - AI-assisted development system that orchestrates Claude Code agents like Sir Topham Hatt runs his railway",
   "main": "install.js",
   "bin": {
-    "create-claude-project": "./install.js"
+    "create-fat-controller": "./install.js"
   },
   "scripts": {
     "test": "node install.js"
@@ -16,13 +16,17 @@
     "workflow",
     "automation",
     "memory",
-    "assistant"
+    "assistant",
+    "orchestration",
+    "agents",
+    "fat-controller",
+    "thomas"
   ],
   "author": "Iain Forrest",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/iainforrest/claude-project-starter.git"
+    "url": "https://github.com/iainforrest/fat-controller.git"
   },
   "files": [
     ".claude/**/*",

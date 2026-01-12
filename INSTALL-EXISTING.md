@@ -1,6 +1,6 @@
-# Claude Project Starter - Install into Existing Project
+# The Fat Controller - Install into Existing Project
 
-**Purpose:** Set up the CPS development system in a project that already has code. Claude will explore your codebase and populate the `.ai/` memory files automatically.
+**Purpose:** Set up The Fat Controller development system in a project that already has code. Claude will explore your codebase and populate the `.ai/` memory files automatically.
 
 ## How This Differs from New Projects
 
@@ -12,9 +12,9 @@
 
 ## Before You Start
 
-Make sure you've copied the CPS files into your project:
+Make sure you've copied the Fat Controller files into your project:
 ```bash
-# From claude-project-starter repo
+# From fat-controller repo
 cp -r .claude/ /path/to/your-project/
 cp -r .ai/ /path/to/your-project/
 ```

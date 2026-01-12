@@ -1,6 +1,10 @@
-# Claude Project Starter v2.3
+# The Fat Controller v3.0 🚂
 
-A self-bootstrapping development system that sets up a complete AI-assisted workflow for any project.
+*"Really useful engines, every one."*
+
+A complete AI-assisted development system that orchestrates Claude Code agents to build software. Like having an entire engineering team in your terminal.
+
+> Named after Sir Topham Hatt from Thomas the Tank Engine - the one who keeps all the engines running on time. That's what this does for your AI agents.
 
 ## What This Is
 
@@ -15,7 +19,7 @@ A self-bootstrapping development system that sets up a complete AI-assisted work
 Install into any project with a single command:
 
 ```bash
-npx create-claude-project
+npx create-fat-controller
 ```
 
 The installer will:
@@ -35,7 +39,7 @@ The installer will:
 1. **Run the installer** in your project directory:
    ```bash
    cd your-project
-   npx create-claude-project
+   npx create-fat-controller
    ```
 
 2. **Follow the installer prompts** (new vs existing)
@@ -54,15 +58,15 @@ The installer will:
 If you prefer to install manually:
 
 ```bash
-git clone https://github.com/iainforrest/claude-project-starter.git
-cp -r claude-project-starter/.claude your-project/
-cp -r claude-project-starter/.ai your-project/
-cp claude-project-starter/INSTALL-*.md your-project/
+git clone https://github.com/iainforrest/fat-controller.git
+cp -r fat-controller/.claude your-project/
+cp -r fat-controller/.ai your-project/
+cp fat-controller/INSTALL-*.md your-project/
 ```
 
 Then run the appropriate installer with Claude Code.
 
-## Key Architecture (v2.3)
+## Key Architecture (v3.0)
 
 ```
 .claude/                    # Generic (syncs across projects)

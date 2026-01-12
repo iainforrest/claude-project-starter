@@ -1,10 +1,10 @@
 ---
-description: Pull latest commands and agents from claude-project-starter
+description: Pull latest commands and agents from fat-controller
 ---
 
-# Pull Claude Project Starter Updates
+# Pull Fat Controller Updates
 
-Pull the latest generic commands and agents from the central starter repository.
+Pull the latest generic commands and agents from The Fat Controller repository.
 
 ## Key Principle
 
@@ -24,7 +24,7 @@ Pull the latest generic commands and agents from the central starter repository.
 
 ```bash
 TEMP_DIR=$(mktemp -d)
-git clone --depth 1 https://github.com/iainforrest/claude-project-starter.git "$TEMP_DIR"
+git clone --depth 1 https://github.com/iainforrest/fat-controller.git "$TEMP_DIR"
 echo "Cloned to $TEMP_DIR"
 ```
 
@@ -85,7 +85,7 @@ Updated:
 Added:
 - agents/new-agent.md
 
-Your commands and agents are now in sync with claude-project-starter.
+Your commands and agents are now in sync with fat-controller.
 ```
 
 ---

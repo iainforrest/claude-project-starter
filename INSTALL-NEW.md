@@ -1,4 +1,4 @@
-# Claude Project Starter - Bootstrap v2.0
+# The Fat Controller - Bootstrap v3.0
 
 **Welcome!** This interactive process sets up your AI-assisted development system by customizing the `.ai/` memory files for your project.
 

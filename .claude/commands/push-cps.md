@@ -1,10 +1,10 @@
 ---
-description: Push command/agent improvements back to claude-project-starter as a PR
+description: Push command/agent improvements back to fat-controller as a PR
 ---
 
-# Push Improvements to Claude Project Starter
+# Push Improvements to Fat Controller
 
-Push improved commands or agents back to the central starter repository as a pull request.
+Push improved commands or agents back to The Fat Controller repository as a pull request.
 
 ## Key Principle
 
@@ -85,7 +85,7 @@ If clean, ask:
 
 ```bash
 TEMP_DIR=$(mktemp -d)
-git clone https://github.com/iainforrest/claude-project-starter.git "$TEMP_DIR"
+git clone https://github.com/iainforrest/fat-controller.git "$TEMP_DIR"
 cd "$TEMP_DIR"
 
 BRANCH_NAME="update/[descriptive-name]"
@@ -115,7 +115,7 @@ git push -u origin "$BRANCH_NAME"
 ```bash
 cd "$TEMP_DIR"
 gh pr create \
-  --repo iainforrest/claude-project-starter \
+  --repo iainforrest/fat-controller \
   --title "feat: [Title]" \
   --body "## Summary
 
