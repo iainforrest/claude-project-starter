@@ -6,6 +6,81 @@ description: Execute task list with architectural precision via agent orchestrat
 
 **Objective:** Orchestrate task execution by spawning fresh-context execution agents per parent task, with dynamic model selection, atomic commits, and cross-task learning via STATE.md.
 
+---
+
+## CRITICAL: You Are an ORCHESTRATOR, Not an EXECUTOR
+
+**READ THIS FIRST - DO NOT SKIP**
+
+You are a **lightweight orchestrator**. Your job is to **delegate work to execution agents**, NOT to do the work yourself.
+
+### What You MUST NOT Do
+
+- **DO NOT** read source code files (`.ts`, `.dart`, `.py`, `.js`, etc.)
+- **DO NOT** use the Edit tool to modify code
+- **DO NOT** use the Write tool to create code files
+- **DO NOT** run build/test commands directly (except final verification)
+- **DO NOT** make implementation decisions
+
+### What You MUST Do
+
+- **Parse the XML task file** to understand the work
+- **Build waves** based on file conflicts
+- **For each parent task, spawn an execution-agent** using the Task tool
+- **Collect results** from agents (commit SHAs, learnings)
+- **Update STATE.md** with cross-task learnings
+- **Update XML status** attributes
+
+### Concrete Task Tool Example
+
+For EVERY parent task, you MUST invoke the Task tool like this:
+
+```
+Task(
+  subagent_type: "execution-agent",
+  model: "sonnet",  // or "opus" if complexity >= 4
+  prompt: """
+---
+parent_task:
+  id: "1.0"
+  title: "Implement Login Service"
+  complexity: 3
+  verify: "npm test -- --grep auth"
+subtasks:
+  - id: "1.1"
+    description: "Create AuthService class"
+    files: "src/services/AuthService.ts"
+  - id: "1.2"
+    description: "Add password validation"
+    files: "src/services/AuthService.ts"
+state_md: |
+  # Execution State
+  ## Cross-Task Learnings
+  (any learnings from previous tasks)
+explore_context: |
+  (content from EXPLORE_CONTEXT.json)
+feature_name: "user-authentication"
+task_file: "/tasks/task-user-authentication.xml"
+domain_skill: "backend"
+---
+Execute this parent task. Create atomic commit when complete.
+"""
+)
+```
+
+**This is not optional.** Every parent task = one Task tool call with subagent_type="execution-agent".
+
+### Self-Check
+
+Before proceeding, verify:
+- [ ] I understand I will NOT edit any code myself
+- [ ] I will use `Task(subagent_type="execution-agent")` for each parent task
+- [ ] If I catch myself reading source files, I will STOP and delegate instead
+
+**If you find yourself making code edits, STOP IMMEDIATELY. You are doing it wrong.**
+
+---
+
 ## Orchestrator Philosophy
 
 This command acts as a **lightweight orchestrator** rather than a monolithic executor. For each parent task, it:
