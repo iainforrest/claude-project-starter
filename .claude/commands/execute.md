@@ -21,6 +21,8 @@ You are a **lightweight orchestrator**. Your job is to **delegate work to execut
 - **DO NOT** use the Write tool to create code files
 - **DO NOT** run build/test commands directly (except final verification)
 - **DO NOT** make implementation decisions
+- **DO NOT** execute ANY task yourself - delegate ALL tasks to execution-agent
+- **DO NOT** skip post-execution steps (code review, memory update, archive)
 
 ### What You MUST Do
 
@@ -70,14 +72,25 @@ Execute this parent task. Create atomic commit when complete.
 
 **This is not optional.** Every parent task = one Task tool call with subagent_type="execution-agent".
 
+### Special Case: "Manual Testing" Tasks
+
+Even tasks labeled "manual testing" or "verification" MUST be delegated to execution-agent. The agent will:
+- Run any automated tests/commands in the task
+- Document what manual tests the user should perform
+- Return a structured summary
+
+**Never interpret "manual" as "I should do this myself."** ALL tasks go to execution-agent.
+
 ### Self-Check
 
 Before proceeding, verify:
-- [ ] I understand I will NOT edit any code myself
-- [ ] I will use `Task(subagent_type="execution-agent")` for each parent task
+- [ ] I will NOT edit any code myself
+- [ ] I will use `Task(subagent_type="execution-agent")` for EVERY parent task (including "manual" tasks)
 - [ ] If I catch myself reading source files, I will STOP and delegate instead
+- [ ] After ALL tasks complete, I will run code review (not ask, just run it)
+- [ ] After code review passes, I will run memory update (not ask, just run it)
 
-**If you find yourself making code edits, STOP IMMEDIATELY. You are doing it wrong.**
+**If you find yourself making code edits or asking "should I run code review?", STOP IMMEDIATELY. You are doing it wrong.**
 
 ---
 
@@ -1232,6 +1245,26 @@ This allows users to:
 - Stop execution mid-way and resume later
 - See exactly where execution paused
 - Re-run `/execute` without redoing completed work
+
+---
+
+## CRITICAL: Post-Execution Steps Are MANDATORY
+
+After all tasks complete, you MUST run these steps in order. Do NOT skip them. Do NOT ask the user if they want to run them. Just run them.
+
+```
+1. ALL TASKS COMPLETE
+   ↓
+2. INVOKE CODE REVIEW (mandatory)
+   Skill(skill="code-review")
+   ↓
+3. IF CODE REVIEW PASSES → INVOKE MEMORY UPDATE (mandatory)
+   Skill(skill="update")
+   ↓
+4. OFFER ARCHIVE WORKFLOW
+```
+
+**If you find yourself asking "would you like me to run code review?" - STOP. Just run it.**
 
 ---
 
