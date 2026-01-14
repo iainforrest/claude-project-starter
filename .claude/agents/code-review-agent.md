@@ -1,7 +1,7 @@
 ---
 name: code-review-agent
 description: Thorough code review of recent changes against project patterns, architecture, and best practices. Run after implementation, before memory update. Outputs structured findings for task generation.
-model: sonnet
+model: opus
 color: blue
 ---
 

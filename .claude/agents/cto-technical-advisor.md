@@ -1,7 +1,7 @@
 ---
 name: cto-technical-advisor
 description: Strategic technical guidance for implementation decisions, feasibility assessments, and architectural choices. Consult during planning phases and when technical questions arise.
-model: sonnet
+model: opus
 color: green
 ---
 

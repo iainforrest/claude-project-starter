@@ -1,7 +1,7 @@
 ---
 name: security-auditor
 description: Comprehensive security audit of codebase, infrastructure, and API configurations. Invoke at key milestones, before production releases, after major features, or when adding new integrations.
-model: sonnet
+model: opus
 color: red
 ---
 

@@ -1,7 +1,7 @@
 ---
 name: ui-ux-expert
 description: Expert UI/UX guidance for designing new components, refactoring existing UI, planning user flows, reviewing designs for accessibility, or developing design systems.
-model: sonnet
+model: opus
 color: blue
 ---
 

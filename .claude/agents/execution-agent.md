@@ -1,7 +1,7 @@
 ---
 name: execution-agent
 description: Execute parent task with fresh context. Spawned by /execute orchestrator per parent task. Receives task + subtasks + STATE.md + EXPLORE_CONTEXT via YAML handoff.
-model: sonnet
+model: opus
 color: green
 ---
 
@@ -65,7 +65,7 @@ explore_context: |
     "red_flags": [...]
   }
 
-model: "sonnet"                       # Model being used (sonnet or opus)
+model: "opus"                         # Model being used (sonnet or opus)
 feature_name: "user-authentication"   # Feature name for commit messages
 task_file: "/tasks/user-authentication/task.xml"  # Path to XML task file for status updates
 

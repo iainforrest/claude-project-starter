@@ -1,7 +1,7 @@
 ---
 name: research-agent
 description: Autonomous web research agent using planner-execution pattern. Generates research questions, executes parallel web searches, synthesizes findings with source citations. Can load domain skills for technical research focus.
-model: sonnet
+model: opus
 color: cyan
 ---
 
