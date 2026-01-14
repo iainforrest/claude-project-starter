@@ -176,25 +176,27 @@ THOROUGHNESS: very thorough
 
 **After Explore returns:**
 1. Store findings as `EXPLORE_CONTEXT` for use in questioning
-2. Save to `.ai/EXPLORE_CONTEXT.json` for downstream agents
+2. Save to `/tasks/{feature-name}/explore-context.json` for downstream agents
 
 ### Saving EXPLORE_CONTEXT.json
 
 After the Explore agent returns, persist the context for use by the execute orchestrator and execution agents:
 
-**File Location:** `.ai/EXPLORE_CONTEXT.json`
+**File Location:** `/tasks/{feature-name}/explore-context.json`
 
 **Save Process:**
-1. Extract the structured context from Explore agent output
-2. Format as JSON matching the expected structure
-3. Check file size - if > 50KB, apply truncation
-4. Write to `.ai/EXPLORE_CONTEXT.json`
+1. Create the feature subfolder if it doesn't exist: `/tasks/{feature-name}/`
+2. Extract the structured context from Explore agent output
+3. Format as JSON matching the expected structure
+4. Check file size - if > 50KB, apply truncation
+5. Write to `/tasks/{feature-name}/explore-context.json`
 
 **Expected JSON Structure:**
 ```json
 {
   "feature_name": "feature-name",
   "generated_at": "2026-01-12T10:00:00Z",
+  "file_location": "/tasks/{feature-name}/explore-context.json",
   "similar_features": [
     {"name": "feature", "file": "path:line", "relevance": "description"}
   ],
@@ -355,7 +357,7 @@ Generate the PRD document using this context. Use EXPLORE_CONTEXT for architectu
 **The prd-writer agent will:**
 1. Use EXPLORE_CONTEXT for architectural context (skips redundant memory file reads)
 2. Generate complete 17-section PRD using the template
-3. Save to `/tasks/prd-[feature-name].md`
+3. Save to `/tasks/[feature-name]/prd.md`
 4. Return confirmation with summary and next steps
 
 ---
@@ -365,11 +367,11 @@ Generate the PRD document using this context. Use EXPLORE_CONTEXT for architectu
 After the prd-writer agent returns, present options to the user:
 
 ```
-PRD saved to /tasks/prd-[feature-name].md
+PRD saved to /tasks/[feature-name]/prd.md
 
 Would you like me to:
 1. Review the PRD with you
-2. Generate implementation tasks (/TaskGen prd-[feature-name])
+2. Generate implementation tasks (/TaskGen [feature-name])
 3. Make changes to the PRD
 4. Update memory system with new patterns
 ```

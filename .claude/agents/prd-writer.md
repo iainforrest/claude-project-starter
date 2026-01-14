@@ -539,13 +539,15 @@ Required for: auth, authorization, user data, API keys, permissions
 ## Output Requirements
 
 ### Save Location
-Save the PRD to: `/tasks/prd-[FEATURE_NAME].md`
+Save the PRD to: `/tasks/[FEATURE_NAME]/prd.md`
+
+**Important:** Create the feature subfolder `/tasks/[FEATURE_NAME]/` before writing the PRD file if it doesn't exist.
 
 ### Confirmation Response
 After saving, return this summary:
 
 ```
-PRD saved to /tasks/prd-[feature-name].md
+PRD saved to /tasks/[feature-name]/prd.md
 
 Summary:
 - Complexity: [Low/Medium/High]
@@ -556,7 +558,7 @@ Summary:
 
 Next steps:
 1. Review the PRD
-2. Run /TaskGen prd-[feature-name] to generate implementation tasks
+2. Run /TaskGen [feature-name] to generate implementation tasks
 3. Make changes if needed
 ```
 
