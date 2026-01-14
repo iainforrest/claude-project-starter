@@ -7,6 +7,16 @@ tasks/STATE-*.md
 tasks/*.jpg
 tasks/*.png
 
+# New subfolder structure
+tasks/*/prd.md
+tasks/*/task.xml
+tasks/*/explore-context.json
+tasks/*/STATE.md
+tasks/*/STATE-agent-*.md
+
+# Archive folder
+tasks/archive/
+
 # Node.js
 node_modules/
 npm-debug.log*
