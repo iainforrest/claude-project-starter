@@ -24,7 +24,7 @@ This command immediately delegates to the **task-writer agent** for autonomous t
 **Input:** PRD file name (without path or `.md` extension)
 
 **The task-writer agent will:**
-1. Read the PRD from `/tasks/[prd-name].md`
+1. Read the PRD from `/tasks/[feature-name]/prd.md`
 2. Detect memory structure:
    - Check if `.ai/MONOREPO.json` exists
    - If mono-repo: Identify target app from PRD or ask user
@@ -42,7 +42,7 @@ This command immediately delegates to the **task-writer agent** for autonomous t
    - Pattern templates from PATTERNS.md
    - Complexity ratings calibrated to codebase
    - Testing strategies
-6. Save to `/tasks/tasks-[prd-name].md`
+6. Save to `/tasks/[feature-name]/task.xml`
 7. Return confirmation with summary
 
 ## Agent Invocation
@@ -52,7 +52,7 @@ Use the Task tool with `subagent_type=task-writer`:
 ```
 PRD_FILE: $ARGUMENTS
 
-Read the PRD from /tasks/[PRD_FILE].md and generate implementation-ready tasks using the memory system for architectural context.
+Read the PRD from /tasks/[feature-name]/prd.md (extract feature-name from PRD_FILE argument, e.g., 'prd-email-notifications' becomes 'email-notifications') and generate implementation-ready tasks using the memory system for architectural context. Save output to /tasks/[feature-name]/task.xml.
 ```
 
 ## Complexity Calibration

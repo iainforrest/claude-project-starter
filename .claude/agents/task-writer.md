@@ -67,15 +67,15 @@ EXPLORE_CONTEXT: |
 2. Use EXPLORE_CONTEXT for architectural details
 3. Read only `PATTERNS.md` for code templates (if needed)
 4. Generate tasks in XML format
-5. Save to `/tasks/task-[name].xml`
+5. Save to `/tasks/[feature-name]/task.xml`
 
 **If PRD_FILE only (no INLINE_CONTEXT):**
-1. Read the PRD from `/tasks/[PRD_FILE].md`
+1. Read the PRD from `/tasks/[feature-name]/prd.md`
 2. Check if PRD contains EXPLORE_CONTEXT
 3. If yes: use it, only read PATTERNS.md for templates
 4. If no: load full memory system
 5. Generate tasks in XML format
-6. Save to `/tasks/task-[PRD_FILE].xml`
+6. Save to `/tasks/[feature-name]/task.xml`
 
 ---
 
@@ -736,8 +736,8 @@ Based on existing codebase patterns:
 
 ### File Requirements
 - **Format**: XML (.xml)
-- **Location**: `/tasks/`
-- **Filename**: `task-[prd-file-name].xml` (kebab-case, singular "task")
+- **Location**: `/tasks/[feature-name]/`
+- **Filename**: `task.xml`
 - **Memory References**: Include file paths and line numbers from FILES.json
 - **Pattern Templates**: Referenced via pattern_reference elements
 - **Verify Commands**: Project-aware verification for each parent task
@@ -754,7 +754,7 @@ Based on existing codebase patterns:
 After saving, return this summary:
 
 ```
-Task file saved to /tasks/task-[prd-name].xml
+Task file saved to /tasks/[feature-name]/task.xml
 
 Summary:
 - Total tasks: [X parent tasks, Y subtasks]
@@ -768,7 +768,7 @@ BREAKING CHANGE: Tasks are now in XML format.
 
 Next steps:
 1. Review task breakdown in the XML file
-2. Run /execute task-[prd-name] to implement all tasks
+2. Run /execute [feature-name] to implement all tasks
 3. Use /commit when complete
 ```
 
