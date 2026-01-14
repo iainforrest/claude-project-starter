@@ -251,8 +251,8 @@ THOROUGHNESS: very thorough
 **Next Step Decision:**
 [Based on complexity score]
 
-**If Complexity ≤ 6:** Create task list directly in `/tasks/tasks-[bug-name].md`
-**If Complexity ≥ 7:** Create bug PRD in `/tasks/prd-[bug-name].md`, then generate tasks
+**If Complexity ≤ 6:** Create task list directly in `/tasks/fix-[bug-name]/task.xml`
+**If Complexity ≥ 7:** Create bug PRD in `/tasks/fix-[bug-name]/prd.md`, then generate tasks
 
 ---
 
@@ -324,7 +324,7 @@ EXPLORE_CONTEXT: |
 ---
 
 Generate implementation tasks for this bug fix. Use EXPLORE_CONTEXT for architectural details.
-Save to /tasks/tasks-fix-[bug-name].md
+Save to /tasks/fix-[bug-name]/task.xml
 ```
 
 **The task-writer agent will:**
@@ -333,7 +333,7 @@ Save to /tasks/tasks-fix-[bug-name].md
 3. Include testing/verification tasks
 4. Save to `/tasks/tasks-fix-[bug-name].md`
 
-**After task-writer returns:** "Tasks generated. Run `/execute` to implement the fix."
+**After task-writer returns:** "Tasks saved to /tasks/fix-[bug-name]/task.xml. Run `/execute` to implement the fix."
 
 ---
 
@@ -382,9 +382,9 @@ Generate a Bug PRD document using this context. Use EXPLORE_CONTEXT for architec
 **The prd-writer agent will:**
 1. Use EXPLORE_CONTEXT for architectural context (skips redundant memory file reads)
 2. Generate Bug PRD with fix requirements
-3. Save to `/tasks/prd-fix-[bug-name].md`
+3. Save to `/tasks/fix-[bug-name]/prd.md`
 
-**After prd-writer returns:** "Bug PRD generated. Run `/TaskGen prd-fix-[bug-name]` to generate implementation tasks."
+**After prd-writer returns:** "Bug PRD saved to /tasks/fix-[bug-name]/prd.md. Run `/TaskGen fix-[bug-name]` to generate implementation tasks."
 
 ---
 

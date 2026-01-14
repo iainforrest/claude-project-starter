@@ -127,19 +127,20 @@ THOROUGHNESS: very thorough
 
 **After Explore returns:**
 1. Store findings as `EXPLORE_CONTEXT` for use in subsequent phases
-2. Save to `.ai/EXPLORE_CONTEXT.json` for downstream agents
+2. Save to `/tasks/{feature-name}/explore-context.json` for downstream agents
 
 ### Saving EXPLORE_CONTEXT.json
 
 After the Explore agent returns, persist the context:
 
-**File Location:** `.ai/EXPLORE_CONTEXT.json`
+**File Location:** `/tasks/{feature-name}/explore-context.json`
 
 **Save Process:**
 1. Extract the structured context from Explore agent output
 2. Format as JSON matching the expected structure
 3. Check file size - if > 50KB, apply truncation
-4. Write to `.ai/EXPLORE_CONTEXT.json`
+4. Create `/tasks/{feature-name}/` directory if it doesn't exist
+5. Write to `/tasks/{feature-name}/explore-context.json`
 
 **Expected JSON Structure:**
 ```json
@@ -287,7 +288,7 @@ EXPLORE_CONTEXT: |
 ---
 
 Generate implementation tasks for this feature. Use EXPLORE_CONTEXT for architectural details.
-Save to /tasks/tasks-[feature-name].md
+Save to /tasks/[feature-name]/task.xml
 ```
 
 **The task-writer agent will:**
@@ -296,7 +297,7 @@ Save to /tasks/tasks-[feature-name].md
 3. Include pattern templates from PATTERNS.md
 4. Save to `/tasks/tasks-[feature-name].md`
 
-**After task-writer returns:** "Tasks generated. Run `/execute` to implement, or review first."
+**After task-writer returns:** "Tasks saved to /tasks/[feature-name]/task.xml. Run `/execute` to implement, or review first."
 
 ---
 
@@ -341,9 +342,9 @@ Generate the PRD document using this context. Use EXPLORE_CONTEXT for architectu
 **The prd-writer agent will:**
 1. Use EXPLORE_CONTEXT for architectural context (skips redundant memory file reads)
 2. Generate complete 17-section PRD
-3. Save to `/tasks/prd-[feature-name].md`
+3. Save to `/tasks/[feature-name]/prd.md`
 
-**After prd-writer returns:** "PRD generated. Run `/TaskGen prd-[feature-name]` to generate implementation tasks."
+**After prd-writer returns:** "PRD saved to /tasks/[feature-name]/prd.md. Run `/TaskGen [feature-name]` to generate implementation tasks."
 
 ---
 
