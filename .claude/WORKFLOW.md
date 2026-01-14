@@ -50,9 +50,9 @@ User describes feature idea
     ↓
 [User confirms requirements summary]
     ↓
-prd-writer agent → PRD saved to /tasks/prd-[name].md
+prd-writer agent → PRD saved to /tasks/[name]/prd.md
     ↓
-/TaskGen prd-[name] → task-writer agent → Tasks saved
+/TaskGen [name] → task-writer agent → Tasks saved to /tasks/[name]/task.xml
     ↓
 /execute → Implementation → Code complete
     ↓
@@ -67,10 +67,10 @@ You: "I want to add email notifications when a report is finalized"
 /prd
 [Answers questions about requirements]
 [Confirms summary]
-→ PRD saved to /tasks/prd-email-notifications.md
+→ PRD saved to /tasks/email-notifications/prd.md
 
-/TaskGen prd-email-notifications
-→ Tasks saved to /tasks/tasks-email-notifications.md
+/TaskGen email-notifications
+→ Tasks saved to /tasks/email-notifications/task.xml
 
 /execute
 → Implements all tasks
@@ -131,9 +131,9 @@ You: "The algorithm assigns items incorrectly"
 /bugs "The algorithm assigns items incorrectly"
 → Investigates, finds core logic is fundamentally broken
 → Creates PRD for algorithm refactor (complex fix)
-→ Saves to /tasks/prd-fix-algorithm.md
+→ Saves to /tasks/fix-algorithm/prd.md
 
-/TaskGen prd-fix-algorithm
+/TaskGen fix-algorithm
 → Creates detailed task breakdown
 
 /execute
@@ -201,7 +201,7 @@ Is this a new feature or bug fix?
 3. Identifies integration points and patterns
 4. Confirms summary with user
 5. **Hands off to prd-writer agent** for document generation
-6. Agent saves to `/tasks/prd-[feature-name].md`
+6. Agent saves to `/tasks/[feature-name]/prd.md`
 
 **When to use:**
 - Building something new
@@ -256,7 +256,7 @@ Is this a new feature or bug fix?
 4. Identifies target files from FILES.json
 5. Generates tasks with specific file:line references
 6. Includes pattern templates for copy-paste
-7. Saves to `/tasks/tasks-[prd-name].md`
+7. Saves to `/tasks/[feature-name]/task.xml`
 
 **When to use:**
 - After PRD is approved
@@ -394,12 +394,12 @@ Commands and agents automatically:
 > [Answer questions about SMS provider, timing, opt-in, etc.]
 > [Confirm summary]
 → prd-writer agent generates PRD
-→ PRD saved: /tasks/prd-sms-notifications.md
+→ PRD saved: /tasks/sms-notifications/prd.md
 
 # Step 2: Generate tasks
-/TaskGen prd-sms-notifications
+/TaskGen sms-notifications
 → task-writer agent generates tasks
-→ Tasks saved: /tasks/tasks-sms-notifications.md
+→ Tasks saved: /tasks/sms-notifications/task.xml
 
 # Step 3: Implement
 /execute

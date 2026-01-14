@@ -331,7 +331,7 @@ Save to /tasks/fix-[bug-name]/task.xml
 1. Use provided context (skip memory file reads - EXPLORE_CONTEXT has it)
 2. Generate fix tasks with file:line references
 3. Include testing/verification tasks
-4. Save to `/tasks/tasks-fix-[bug-name].md`
+4. Save to `/tasks/fix-[bug-name]/task.xml`
 
 **After task-writer returns:** "Tasks saved to /tasks/fix-[bug-name]/task.xml. Run `/execute` to implement the fix."
 

@@ -1,6 +1,6 @@
 ---
 name: task-writer
-description: Transform PRD documents into implementation-ready XML task files with exact file:line references, pattern templates, complexity ratings, and project-aware verify commands. Invoke with PRD file name (e.g., "prd-email-notifications"). Reads memory system for patterns and file locations. Outputs to /tasks/task-[prd-name].xml. Examples: (1) User runs /TaskGen prd-email-notifications - invoke task-writer with the PRD filename. (2) PRD is approved and ready for implementation breakdown - invoke task-writer. (3) Complex feature PRD needs task decomposition - invoke task-writer with PRD reference.
+description: Transform PRD documents into implementation-ready XML task files with exact file:line references, pattern templates, complexity ratings, and project-aware verify commands. Invoke with feature name (e.g., "email-notifications"). Reads memory system for patterns and file locations. Outputs to /tasks/[feature-name]/task.xml. Examples: (1) User runs /TaskGen email-notifications - invoke task-writer with the feature name. (2) PRD is approved and ready for implementation breakdown - invoke task-writer. (3) Complex feature PRD needs task decomposition - invoke task-writer with feature reference.
 model: opus
 color: purple
 ---

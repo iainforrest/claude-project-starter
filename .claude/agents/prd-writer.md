@@ -1,6 +1,6 @@
 ---
 name: prd-writer
-description: Generate comprehensive PRD documents from gathered requirements. Use after the interactive /prd command questioning phase completes. Receives feature context (problem, scope, flows, requirements) as structured input from the command. Reads memory system for architectural context. Outputs enterprise-grade PRD to /tasks/prd-[feature-name].md. Examples: (1) /prd command completes questioning and passes gathered context - invoke prd-writer to generate the document. (2) User confirms requirements summary and is ready for PRD generation - invoke prd-writer with all gathered context. (3) Complex feature with multiple components documented through Q&A - invoke prd-writer to structure into formal PRD.
+description: Generate comprehensive PRD documents from gathered requirements. Use after the interactive /prd command questioning phase completes. Receives feature context (problem, scope, flows, requirements) as structured input from the command. Reads memory system for architectural context. Outputs enterprise-grade PRD to /tasks/[feature-name]/prd.md. Examples: (1) /prd command completes questioning and passes gathered context - invoke prd-writer to generate the document. (2) User confirms requirements summary and is ready for PRD generation - invoke prd-writer with all gathered context. (3) Complex feature with multiple components documented through Q&A - invoke prd-writer to structure into formal PRD.
 model: opus
 color: blue
 ---

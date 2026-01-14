@@ -295,7 +295,7 @@ Save to /tasks/[feature-name]/task.xml
 1. Use provided context (skip memory file reads - EXPLORE_CONTEXT has it)
 2. Generate implementation-ready tasks with file:line references
 3. Include pattern templates from PATTERNS.md
-4. Save to `/tasks/tasks-[feature-name].md`
+4. Save to `/tasks/[feature-name]/task.xml`
 
 **After task-writer returns:** "Tasks saved to /tasks/[feature-name]/task.xml. Run `/execute` to implement, or review first."
 
@@ -449,7 +449,7 @@ Before presenting design:
    Task tool with subagent_type=task-writer with EXPLORE_CONTEXT
    ```
 
-4. **Result:** "Tasks saved to /tasks/tasks-notification-frequency.md. Run `/execute` to implement."
+4. **Result:** "Tasks saved to /tasks/notification-frequency/task.xml. Run `/execute` to implement."
 
 ---
 
@@ -466,7 +466,7 @@ Before presenting design:
    Task tool with subagent_type=prd-writer with EXPLORE_CONTEXT
    ```
 
-4. **Result:** "PRD saved to /tasks/prd-realtime-collaboration.md. Run `/TaskGen prd-realtime-collaboration` to generate tasks."
+4. **Result:** "PRD saved to /tasks/realtime-collaboration/prd.md. Run `/TaskGen realtime-collaboration` to generate tasks."
 
 ---
 
