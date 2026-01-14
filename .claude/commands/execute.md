@@ -115,7 +115,7 @@ This eliminates context debt accumulation across tasks while preserving cross-ta
 
 The orchestrator accepts a task file reference as argument:
 - **Usage**: `/execute task-feature-name` or `/execute tasks-feature-name`
-- **File Path Resolution**: `/tasks/task-{feature-name}.xml`
+- **File Path Resolution**: `/tasks/{feature-name}/task.xml`
 
 ### XML Task File Format
 
@@ -253,7 +253,7 @@ Before executing the first parent task, initialize the STATE.md file.
 
 ### File Location
 
-`/tasks/STATE-{feature-name}.md`
+`/tasks/{feature-name}/STATE.md`
 
 ### Initial Content
 
@@ -262,7 +262,7 @@ Before executing the first parent task, initialize the STATE.md file.
 
 **Started:** {ISO 8601 timestamp}
 **Total Parent Tasks:** {count from XML}
-**Task File:** task-{feature-name}.xml
+**Task File:** task.xml
 
 ---
 
@@ -279,28 +279,28 @@ Create STATE.md **after** successful XML parsing, **before** spawning first exec
 
 ---
 
-## EXPLORE_CONTEXT.json Loading
+## explore-context.json Loading
 
 Load exploration context to pass to execution agents.
 
 ### File Location
 
-`.ai/EXPLORE_CONTEXT.json`
+`/tasks/{feature-name}/explore-context.json`
 
 ### Loading Logic
 
 ```
-1. Attempt to read .ai/EXPLORE_CONTEXT.json
+1. Attempt to read /tasks/{feature-name}/explore-context.json
 2. If file exists:
    - Parse JSON content
    - Validate structure (similar_features, applicable_patterns, etc.)
    - Pass to all execution agents
 3. If file missing:
    - Set explore_context to null
-   - Log: "EXPLORE_CONTEXT.json not found - agents will use memory system directly"
+   - Log: "explore-context.json not found - agents will use memory system directly"
    - Continue execution (not an error)
 4. If invalid JSON:
-   - Log warning: "EXPLORE_CONTEXT.json contains invalid JSON - using null"
+   - Log warning: "explore-context.json contains invalid JSON - using null"
    - Set explore_context to null
    - Continue execution
 ```
@@ -607,7 +607,7 @@ Execute all tasks in a wave simultaneously.
 Each parallel agent writes to its own STATE file:
 
 ```
-/tasks/STATE-{feature-name}-agent-{task.id}.md
+/tasks/{feature-name}/STATE-agent-{task.id}.md
 ```
 
 After wave completes, orchestrator merges into main STATE file.
@@ -624,7 +624,7 @@ state_md: "..."  # Learnings from COMPLETED waves only
 explore_context: "..."
 model: "sonnet"
 feature_name: "..."
-task_file: "/tasks/task-{feature-name}.xml"
+task_file: "/tasks/{feature-name}/task.xml"
 domain_skill: "..."
 
 # NEW: Parallel execution fields
@@ -632,7 +632,7 @@ parallel_execution:
   enabled: true
   wave_id: 1
   wave_size: 3                    # Tasks in this wave
-  agent_state_file: "/tasks/STATE-{feature}-agent-{task.id}.md"
+  agent_state_file: "/tasks/{feature-name}/STATE-agent-{task.id}.md"
   xml_update_mode: "report"       # "report" - agent reports status, orchestrator updates XML
 ```
 
@@ -665,7 +665,7 @@ executeWave(wave, state_md, explore_context, task_file, wave_id):
 
   FOR EACH task in wave:
     # Create per-agent STATE file
-    agent_state_file = "/tasks/STATE-{feature}-agent-{task.id}.md"
+    agent_state_file = "/tasks/{feature-name}/STATE-agent-{task.id}.md"
     initializeAgentState(agent_state_file, task)
 
     # Build handoff with parallel fields
@@ -1347,23 +1347,21 @@ Commits created:
 - [{id}] {title} ({commit_sha})
 ...
 
-Would you like to archive the task files? (y/n)
-- This moves task-{feature-name}.xml and STATE-{feature-name}.md
-  to /tasks/archive/task-{feature-name}-{timestamp}/
+Would you like to archive the task folder? (y/n)
+- This moves /tasks/{feature-name}/ to /tasks/archive/{feature-name}-{timestamp}/
 ```
 
 ### Archive Process (If User Confirms)
 
 ```
 1. Create archive directory:
-   /tasks/archive/task-{feature-name}-{YYYYMMDD-HHMMSS}/
+   /tasks/archive/{feature-name}-{YYYYMMDD-HHMMSS}/
 
-2. Move files:
-   - task-{feature-name}.xml → archive directory
-   - STATE-{feature-name}.md → archive directory
+2. Move folder:
+   mv /tasks/{feature-name}/ /tasks/archive/{feature-name}-{YYYYMMDD-HHMMSS}/
 
 3. Confirm:
-   "Task files archived to /tasks/archive/task-{feature-name}-{timestamp}/"
+   "Task folder archived to /tasks/archive/{feature-name}-{timestamp}/"
 ```
 
 ### Skip Archive (If User Declines)

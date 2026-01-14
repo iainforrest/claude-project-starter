@@ -67,7 +67,7 @@ explore_context: |
 
 model: "sonnet"                       # Model being used (sonnet or opus)
 feature_name: "user-authentication"   # Feature name for commit messages
-task_file: "/tasks/task-user-authentication.xml"  # Path to XML task file for status updates
+task_file: "/tasks/user-authentication/task.xml"  # Path to XML task file for status updates
 
 domain_skill: |                       # Optional skill content loaded by orchestrator
   ---
@@ -91,7 +91,7 @@ parallel_execution:
   enabled: true                      # Whether parallel mode is active
   wave_id: 1                         # Current wave number
   wave_size: 3                       # Number of tasks in this wave
-  agent_state_file: "/tasks/STATE-feature-agent-1.0.md"  # Write learnings HERE, not main STATE
+  agent_state_file: "/tasks/user-authentication/STATE-agent-1.0.md"  # Write learnings HERE, not main STATE
   xml_update_mode: "report"          # "report" = return status updates, don't write XML
 ```
 
