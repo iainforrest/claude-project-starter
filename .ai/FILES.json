@@ -3,7 +3,8 @@
     "projectName": "claude-project-starter",
     "lastUpdated": "2025-12-07",
     "totalFiles": 15,
-    "description": "Smart file index with cross-references and quick navigation"
+    "description": "Smart file index with cross-references and quick navigation",
+    "lineNumberPolicy": "Use globs or directories instead of file:line references."
   },
   "byPurpose": {
     "_comment": "Organize files by their functional purpose",

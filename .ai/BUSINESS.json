@@ -48,10 +48,26 @@
     }
   },
   "dataModels": {
-    "_comment": "Document key data structures and their relationships",
+    "_comment": "Document key data structures, relationships, and constraints",
     "_example": {
-      "fields": ["id", "name", "email", "createdAt"],
-      "relationships": ["has many Orders", "has one Profile"]
+      "entities": {
+        "User": {
+          "fields": ["id", "email", "createdAt"],
+          "required": ["email"]
+        },
+        "Order": {
+          "fields": ["id", "userId", "status", "total"],
+          "required": ["userId", "status"]
+        }
+      },
+      "relationships": [
+        "User has many Orders (User.id -> Order.userId)",
+        "Order belongs to User"
+      ],
+      "constraints": [
+        "User.email must be unique",
+        "Order.total must be >= 0"
+      ]
     }
   },
   "security": {
