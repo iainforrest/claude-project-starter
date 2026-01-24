@@ -33,9 +33,13 @@ You are a **lightweight orchestrator**. Your job is to **delegate work to execut
 - **Update STATE.md** with cross-task learnings
 - **Update XML status** attributes
 
-### Concrete Task Tool Example
+### Concrete Execution Examples
 
-For EVERY parent task, you MUST invoke the Task tool like this:
+For EVERY parent task, spawn execution based on complexity:
+- **Complexity 1-2:** Use Codex via Bash (see "Spawning by Model Type" section)
+- **Complexity 2.5+:** Use Task tool as shown below
+
+**Task Tool Example (for complexity 2.5+):**
 
 ```
 Task(
@@ -70,7 +74,7 @@ Execute this parent task. Create atomic commit when complete.
 )
 ```
 
-**This is not optional.** Every parent task = one Task tool call with subagent_type="execution-agent".
+**This is not optional.** Every parent task = one execution spawn (Codex for complexity 1-2, Task tool for 2.5+).
 
 ### Special Case: "Manual Testing" Tasks
 
@@ -425,17 +429,19 @@ Select the appropriate model based on parent task complexity.
 selectModel(complexity):
   IF complexity >= 4:
     RETURN "opus"
-  ELSE:
+  ELSE IF complexity >= 2.5:
     RETURN "sonnet"
+  ELSE:
+    RETURN "codex"
 ```
 
 ### Mapping
 
 | Complexity | Model | Rationale |
 |------------|-------|-----------|
-| 1/5 | sonnet | Simple task, cost efficient |
-| 2/5 | sonnet | Standard task, cost efficient |
-| 3/5 | sonnet | Moderate task, sonnet capable |
+| 1/5 | **codex** | Simple task, Codex capable, saves Claude tokens |
+| 2/5 | **codex** | Standard task, Codex capable, saves Claude tokens |
+| 3/5 | sonnet | Moderate task, needs Claude reasoning |
 | 4/5 | **opus** | Complex task, needs stronger reasoning |
 | 5/5 | **opus** | System-wide task, needs strongest model |
 
@@ -443,16 +449,57 @@ selectModel(complexity):
 
 For each parent task, log the model selection:
 ```
-Parent Task {id} (complexity {n}/5) → using {model}
+Parent Task {id} (complexity {n}/5) → using {model} via {method}
 ```
+
+Examples:
+- `Parent Task 1.0 (complexity 2/5) → using codex via Bash`
+- `Parent Task 2.0 (complexity 3/5) → using sonnet via Task tool`
+- `Parent Task 3.0 (complexity 4/5) → using opus via Task tool`
 
 ### Cost Rationale
 
-Opus is approximately 10x more expensive than Sonnet. The complexity threshold of 4+ ensures Opus is only used when the additional reasoning capability justifies the cost.
+Opus is approximately 10x more expensive than Sonnet. Codex uses separate token allocation. The three-tier routing ensures:
+- Codex handles simple tasks (1-2), saving Claude tokens
+- Sonnet handles moderate tasks (2.5-3.5), balancing cost and capability
+- Opus is reserved for complex reasoning (4+) where it justifies the cost
 
-### Task Tool Model Parameter
+### Spawning by Model Type
 
-The Task tool accepts a `model` parameter to specify which model should execute the spawned agent:
+**For Codex (complexity 1-2):** Use Bash with `codex exec`
+
+```bash
+codex exec --full-auto "$(cat <<'EOF'
+---
+parent_task:
+  id: "1.0"
+  title: "Add config option for notification timeout"
+  complexity: 2
+  verify: "npm test -- --grep notification"
+subtasks:
+  - id: "1.1"
+    description: "Add timeout config to settings"
+    files: "src/config/settings.ts"
+state_md: |
+  # Execution State
+  ## Cross-Task Learnings
+  (any learnings from previous tasks)
+explore_context: |
+  (content from EXPLORE_CONTEXT.json)
+feature_name: "notification-timeout"
+task_file: "/tasks/notification-timeout/task.xml"
+domain_skill: |
+  (content from .claude/skills/domain-frontend.md or relevant domain)
+---
+Execute this parent task following the execution-agent patterns.
+Read .claude/agents/execution-agent.md for the full execution protocol.
+Create atomic commit when complete.
+Return structured YAML summary with status, commit SHA, and learnings.
+EOF
+)"
+```
+
+**For Sonnet/Opus (complexity 2.5+):** Use Task tool
 
 ```
 Use Task tool with:
@@ -461,10 +508,80 @@ Use Task tool with:
   - prompt: YAML handoff content
 ```
 
+### Task Tool Model Parameter (Sonnet/Opus)
+
+The Task tool accepts a `model` parameter to specify which model should execute the spawned agent:
+
 **Fallback Behavior:**
 - If model parameter is not supported: Log warning, use default model
 - If specified model unavailable: Fall back to sonnet
 - Always log which model is actually being used
+
+### Codex Execution Notes
+
+When spawning via Codex:
+- Use `--full-auto` for autonomous execution with workspace write access
+- The prompt must be self-contained (Codex doesn't inherit conversation context)
+- Include the domain skill content directly in the prompt
+- Codex will read the execution-agent.md file for the full protocol
+- Output is captured; parse for status, commit SHA, and learnings
+
+### Codex Failure Detection and Fallback
+
+**Capture output and exit code:**
+```bash
+codex exec --full-auto "..." 2>&1 | tee /tmp/codex-task-output.txt
+CODEX_EXIT_CODE=${PIPESTATUS[0]}
+```
+
+**Detect failure conditions:**
+```
+codexFailed(exit_code, output):
+  # Token exhaustion
+  IF output contains "rate limit" OR "quota exceeded" OR "insufficient_quota":
+    RETURN true
+
+  # Explicit failure
+  IF exit_code != 0:
+    RETURN true
+
+  # No meaningful output (timeout or crash)
+  IF output is empty OR length < 50:
+    RETURN true
+
+  # Task not completed (check for success markers)
+  IF output does NOT contain "status: completed" AND
+     output does NOT contain "commit SHA":
+    RETURN true
+
+  RETURN false
+```
+
+**Fallback procedure:**
+```
+IF codexFailed(exit_code, output):
+  LOG "⚠️ Codex failed for Parent Task {id}. Falling back to sonnet."
+  LOG "Failure reason: {detected_reason}"
+
+  # Re-spawn same task via Task tool
+  Task(
+    subagent_type: "execution-agent",
+    model: "sonnet",
+    prompt: {same YAML handoff that was sent to Codex}
+  )
+ELSE:
+  # Parse Codex output for learnings
+  EXTRACT status, commit_sha, learnings from output
+  UPDATE STATE.md with learnings
+  MARK task as completed in XML
+```
+
+**Logging on fallback:**
+```
+Parent Task 1.0 (complexity 2/5) → using codex via Bash
+⚠️ Codex failed (reason: token quota exceeded). Falling back to sonnet via Task tool.
+Parent Task 1.0 (complexity 2/5) → RETRY using sonnet via Task tool
+```
 
 ---
 
