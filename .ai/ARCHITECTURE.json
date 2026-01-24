@@ -9,7 +9,7 @@
     "_comment": "Document the key architectural patterns used in your project",
     "_example": {
       "description": "Example: How services/managers are structured",
-      "keyFiles": ["ExampleService.ext:lineNumber"],
+      "keyFiles": ["services/ExampleService.ext"],
       "constraints": ["Limitation 1", "Limitation 2"],
       "benefits": ["Benefit 1", "Benefit 2"]
     }
@@ -43,7 +43,7 @@
         "Store session",
         "Return to client"
       ],
-      "keyFiles": ["AuthService.ext:123", "TokenManager.ext:45"],
+      "keyFiles": ["services/auth/*.ext", "managers/TokenManager.ext"],
       "dataModel": "User + AuthToken"
     }
   },
