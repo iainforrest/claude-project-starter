@@ -1,19 +1,54 @@
-# Quick Reference Guide
+# Quick Reference
 
-*Commands, file locations, and debugging shortcuts*
+*Agent entry point and router to authoritative memory files*
+
+---
+
+## Authority Map
+
+**Single source of truth for each content type. Content lives in ONE file only.**
+
+| File | Purpose | Source of Truth For |
+|------|---------|---------------------|
+| `QUICK.md` | Router + Authority Map | Agent entry point |
+| `ARCHITECTURE.json` | System topology | System design, data flows |
+| `FILES.json` | File map (globs, NO line numbers) | File locations |
+| `PATTERNS.md` | Implementation patterns | Coding conventions |
+| `BUSINESS.json` | Business rules + data models | Domain logic, schemas |
+| `OPS.md` | Debug, deploy, runbooks | Operations |
+| `decisions/` | ADR files | Architecture decisions |
+| `solutions/` | Solution capture YAML | Resolved investigation patterns |
+| `DEPRECATIONS.md` | Deprecated modules | Deprecation tracking |
+| `CONSTRAINTS.md` | Platform limits, non-goals | What we CAN'T do |
+| `TECH_DEBT.md` | Unfixed code review findings | Known issues backlog |
+
+---
+
+## Retrieval Strategy
+
+**Before loading full files, grep for matches first.**
+
+```bash
+# 1. Check solutions/ for error text or symptoms
+grep -r "error message or symptom" .ai/solutions/
+
+# 2. If found, read matching solution file
+# 3. If not found, proceed with normal memory loading below
+```
 
 ---
 
 ## Memory Loading Guide
 
-**Start here for any task.** Load additional files based on what you're doing:
+**Load files based on your task:**
 
-| Task | Also Load |
-|------|-----------|
+| Task | Load |
+|------|------|
 | Quick lookup | This file only |
 | New feature | ARCHITECTURE.json, PATTERNS.md |
-| Bug fix | FILES.json |
+| Bug fix | FILES.json, solutions/ (grep first) |
 | Business logic | BUSINESS.json |
+| Operations/debugging | OPS.md |
 | Full context | All .ai/ files |
 
 ---
@@ -22,86 +57,19 @@
 
 ```bash
 # Build
-[BUILD_COMMAND]              # e.g., "npm run build", "./gradlew build", "cargo build"
+[BUILD_COMMAND]
 
 # Test
-[TEST_COMMAND]               # e.g., "npm test", "./gradlew test", "cargo test"
+[TEST_COMMAND]
 
-# Development/Watch mode
-[DEV_COMMAND]                # e.g., "npm run dev", "./gradlew run", "cargo run"
+# Dev mode
+[DEV_COMMAND]
 
-# Lint/Format
-[LINT_COMMAND]               # e.g., "npm run lint", "./gradlew lint"
+# Lint
+[LINT_COMMAND]
 ```
 
----
-
-## Critical File Locations
-
-*Add file references with line numbers as your project grows*
-
-```
-[Feature]Service.ext:line    # Description of what's here
-[Feature]Repository.ext:line # Description
-config.ext:line              # Configuration file
-routes.ext:line              # Route definitions
-```
-
----
-
-## Debugging Commands
-
-```bash
-# Debug mode
-[DEBUG_COMMAND]              # e.g., "npm run debug", "cargo build --debug"
-
-# Logs
-[LOG_COMMAND]                # e.g., "tail -f logs/app.log"
-
-# Test specific file
-[TEST_FILE_COMMAND]          # e.g., "npm test -- path/to/test"
-```
-
----
-
-## Performance Monitoring
-
-```bash
-# Profile
-[PROFILE_COMMAND]            # e.g., "npm run profile"
-
-# Analyze bundle/build
-[ANALYZE_COMMAND]            # e.g., "npm run analyze"
-```
-
----
-
-## Common Issues & Fixes
-
-### Issue: [Common Problem]
-**Symptoms**: [Description]
-**Fix**: [Solution]
-**File**: [Relevant file reference]
-
-### Issue: [Another Problem]
-**Symptoms**: [Description]
-**Fix**: [Solution]
-**Command**: [Specific command to run]
-
----
-
-## Development Workflow
-
-```bash
-# Quick rebuild
-[QUICK_BUILD]
-
-# Install dependencies
-[INSTALL_DEPS]               # e.g., "npm install", "./gradlew dependencies"
-
-# Clean build
-[CLEAN_BUILD]                # e.g., "npm run clean && npm run build"
-```
+*For debugging, deploy, monitoring: see OPS.md*
 
 ---
 
@@ -109,14 +77,26 @@ routes.ext:line              # Route definitions
 
 ```bash
 /prd [idea]        # Generate PRD from feature idea
-/TaskGen [prd-file]  # Generate tasks from PRD
+/TaskGen [file]    # Generate tasks from PRD
 /execute           # Execute task list
-/code-review       # Run thorough code review on recent changes
+/code-review       # Run code review on changes
 /bugs [issue]      # Investigate and fix bugs
 /commit            # Group and commit changes
 /update            # Update memory system
-/review-memory     # Analyze and optimize memory structure
+/review-memory     # Analyze memory structure
 ```
+
+---
+
+## Anti-Duplication Rules
+
+**NEVER add to QUICK.md:**
+- File paths (FILES.json owns this)
+- Pattern details (PATTERNS.md owns this)
+- Runbooks (OPS.md owns this)
+- Debug commands (OPS.md owns this)
+
+**This file is a router. Add content to the authoritative file instead.**
 
 ---
 
@@ -124,23 +104,16 @@ routes.ext:line              # Route definitions
 
 ```
 .ai/
-├── QUICK.md          ← YOU ARE HERE (start point)
-├── ARCHITECTURE.json   → System patterns, data flows
-├── BUSINESS.json       → Features, rules, requirements
-├── FILES.json          → File index, dependencies
-├── PATTERNS.md         → Pattern index (lightweight)
-├── patterns/           → Domain-specific patterns
-│   └── _TEMPLATE.md    → How to add new patterns
-├── TODO.md             → Current sprint tasks
-└── SPRINT_UPDATE.md    → Update procedures
+├── QUICK.md            <- YOU ARE HERE (router)
+├── ARCHITECTURE.json   -> System patterns, data flows
+├── BUSINESS.json       -> Features, rules, data models
+├── FILES.json          -> File index (globs, no line numbers)
+├── PATTERNS.md         -> Pattern index
+├── OPS.md              -> Debug, deploy, runbooks
+├── CONSTRAINTS.md      -> Platform limits, non-goals
+├── DEPRECATIONS.md     -> Deprecated modules
+├── TECH_DEBT.md        -> Unfixed code review findings
+├── decisions/          -> ADR files (NNN-title.md)
+├── solutions/          -> Solution capture (YYYY-MM-DD-desc.yaml)
+└── patterns/           -> Domain-specific patterns
 ```
-
----
-
-## Notes
-
-- Update this file with commands as you discover them
-- Add debugging techniques that work
-- Document solutions to problems encountered
-- Keep it concise - this is for quick reference
-- Use `File.ext:line` format for file references
