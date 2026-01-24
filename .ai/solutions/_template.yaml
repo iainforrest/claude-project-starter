@@ -1,0 +1,95 @@
+# Solution Capture Template
+#
+# Purpose: Document solutions to problems at resolution time for future searchability
+# Filename Convention: YYYY-MM-DD-brief-description.yaml
+# Usage: When you solve a non-trivial problem, capture it here
+#
+# How to Use:
+# 1. Copy this template to a new file with date prefix
+# 2. Fill in all sections
+# 3. Add searchable tags (error-type, component, pattern, etc.)
+# 4. Link to related solutions if applicable
+#
+# Benefits:
+# - grep solutions/ directory for error messages or symptoms
+# - Find previously solved similar problems instantly
+# - Build institutional knowledge of problem-solving patterns
+# - Avoid solving the same problem twice
+
+---
+# Brief problem statement (1-2 sentences)
+problem: |
+  [What was the issue? Be specific enough for future grep searches]
+  [Include error messages or symptoms if applicable]
+
+# Context that triggered investigation
+context: |
+  [What were you doing when this happened?]
+  [What changed recently?]
+  [What was the expected vs actual behavior?]
+
+# What worked to resolve it
+solution: |
+  [What fixed the problem?]
+  [Step-by-step if the solution is non-obvious]
+  [Include commands, code changes, or configuration changes]
+  [Explain WHY this worked, not just WHAT you did]
+
+# Searchable tags for future lookup
+tags:
+  - error-type      # e.g., "build-error", "runtime-error", "integration-error"
+  - component       # e.g., "authentication", "database", "api-client"
+  - pattern         # e.g., "race-condition", "config-issue", "dependency-mismatch"
+  # Add custom tags as needed
+
+# Links to related solutions or ADRs
+related:
+  solutions: []     # e.g., ["2026-01-15-similar-auth-issue.yaml"]
+  decisions: []     # e.g., ["001-use-service-pattern.md"]
+  references: []    # e.g., ["https://github.com/project/issues/123"]
+
+# Metadata
+captured_date: YYYY-MM-DD
+captured_by: [name or "automated"]
+
+# Optional: If this led to a pattern, note it here
+pattern_extracted: false  # Set to true if added to PATTERNS.md
+pattern_reference: null   # e.g., "patterns/API.md#error-handling"
+
+---
+
+# Example Solution Capture
+
+# problem: |
+#   npm build failing with "Cannot find module '@types/node'" after upgrading TypeScript to v5.0
+#
+# context: |
+#   Upgraded TypeScript from 4.9 to 5.0 in package.json
+#   Build worked fine before upgrade
+#   Error occurred during type checking phase
+#
+# solution: |
+#   TypeScript 5.0 requires explicit @types/node installation, whereas 4.9 included it implicitly
+#
+#   Fix:
+#   npm install --save-dev @types/node
+#
+#   Why this works: TS 5.0 changed how it resolves type definitions, requiring
+#   explicit declaration of Node.js types in package.json
+#
+# tags:
+#   - build-error
+#   - typescript
+#   - dependency-mismatch
+#   - node-types
+#
+# related:
+#   solutions: []
+#   decisions: []
+#   references:
+#     - "https://devblogs.microsoft.com/typescript/announcing-typescript-5-0/"
+#
+# captured_date: 2026-01-15
+# captured_by: developer-name
+# pattern_extracted: false
+# pattern_reference: null
