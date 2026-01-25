@@ -86,6 +86,11 @@ Load for: Finding implementation templates. Then load specific `patterns/[DOMAIN
 
 Structure: Create files like `patterns/WEB.md`, `patterns/API.md`, `patterns/DATABASE.md` as your project grows.
 
+### templates/ folder
+**Purpose**: Clean starter templates for bootstrapping new projects.
+
+Load for: Project setup. Contains pristine .ai/ starter files and task directory structure.
+
 ### TODO.md
 **Purpose**: Current sprint tasks and completed work.
 

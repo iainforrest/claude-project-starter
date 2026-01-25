@@ -210,23 +210,23 @@ Task arrives
     ↓
 Complexity assessment
     ↓
-┌─────────────────────┬──────────────────┬───────────────────────┐
-│ COMPLEX (4-5)       │ STANDARD (3)     │ SIMPLE (1-2)          │
-│ Codex Max           │ Sonnet 4.5       │ Codex (gpt-5.2-codex) │
-│ (gpt-5.1-codex-max) │                  │                       │
-├─────────────────────┼──────────────────┼───────────────────────┤
-│ - Architecture      │ - Implementation │ - Validation          │
-│ - Complex refactor  │ - Bug fixes      │ - Simple edits        │
-│ - System-wide tasks │ - Code review    │ - Config changes      │
-└─────────────────────┴──────────────────┴───────────────────────┘
+┌────────────────────────┬──────────────────┬─────────────────────────────┐
+│ COMPLEX (4-5)          │ STANDARD (3)     │ SIMPLE (1-2)                │
+│ Codex (xhigh)          │ Sonnet 4.5       │ Codex (medium)              │
+│ (gpt-5.2-codex, xhigh) │                  │ (gpt-5.2-codex, medium)     │
+├────────────────────────┼──────────────────┼─────────────────────────────┤
+│ - Architecture         │ - Implementation │ - Validation                │
+│ - Complex refactor     │ - Bug fixes      │ - Simple edits              │
+│ - System-wide tasks    │ - Code review    │ - Config changes            │
+└────────────────────────┴──────────────────┴─────────────────────────────┘
 ```
 
 ### Implementation Checklist
 - [ ] Assess task complexity (lines of code, decision points, context needed)
 - [ ] Route to appropriate tier
-- [ ] Use Codex for simple tasks (1-2) via Bash
+- [ ] Use Codex (medium) for simple tasks (1-2) via Bash with `codex exec --full-auto`
 - [ ] Use Sonnet for moderate tasks (3) via Task tool
-- [ ] Use Codex Max for complex tasks (4-5) via Bash with `-m gpt-5.1-codex-max`
+- [ ] Use Codex (xhigh) for complex tasks (4-5) via Bash with `codex -c 'model_reasoning_effort="xhigh"' exec --full-auto`
 
 **Reference**: `.claude/commands/execute.md` (model selection), `.claude/commands/code-review.md` (uses Codex)
 

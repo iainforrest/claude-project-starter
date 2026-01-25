@@ -1,7 +1,7 @@
 {
   "meta": {
     "projectName": "claude-project-starter",
-    "version": "3.0.0",
+    "version": "3.1.0",
     "lastUpdated": "2026-01-25",
     "description": "Business logic, feature specifications, and product requirements"
   },
@@ -39,6 +39,28 @@
         "/bugs → solutions/*.yaml",
         "/execute → solutions/*.yaml, decisions/*.md, DEPRECATIONS.md",
         "/code-review → TECH_DEBT.md"
+      ]
+    },
+    "templateSeparation": {
+      "status": "complete",
+      "version": "v3.1.0",
+      "description": "Clean starter templates separated from active project memory",
+      "keyComponents": [
+        "templates/.ai/ - pristine starter files with examples",
+        ".ai/ - active project memory",
+        "/pull-fc syncs templates/ from fat-controller",
+        "Bootstrap process copies templates/ to .ai/"
+      ]
+    },
+    "threeTierModelSelection": {
+      "status": "complete",
+      "version": "v3.1.0",
+      "description": "Optimized model selection based on task complexity and reasoning effort",
+      "keyComponents": [
+        "Codex (gpt-5.2-codex, medium) for complexity 1-2",
+        "Sonnet for complexity 3",
+        "Codex (gpt-5.2-codex, xhigh) for complexity 4-5",
+        "Reasoning effort controlled via -c flag, not model switching"
       ]
     },
     "_example": {

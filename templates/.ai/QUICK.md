@@ -14,6 +14,7 @@
 | Platform limitations | `CONSTRAINTS.md` |
 | Deprecated patterns | `DEPRECATIONS.md` |
 | Known tech debt | `TECH_DEBT.md` |
+| Release notes | `CHANGELOG.md` |
 | Past decisions (ADR) | `decisions/*.md` |
 | Solved problems | `solutions/*.yaml` |
 

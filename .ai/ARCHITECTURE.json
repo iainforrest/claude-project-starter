@@ -1,7 +1,7 @@
 {
   "meta": {
     "projectName": "claude-project-starter",
-    "version": "3.0.0",
+    "version": "3.1.0",
     "lastUpdated": "2026-01-25",
     "description": "Architecture patterns, data flows, and component relationships"
   },
@@ -48,6 +48,35 @@
         "Builds knowledge base automatically",
         "Grep-first retrieval for faster debugging",
         "No manual documentation burden"
+      ]
+    },
+    "templateSeparation": {
+      "description": "Clean starter templates separated from active project memory",
+      "keyFiles": ["templates/.ai/", "templates/tasks/", ".ai/"],
+      "constraints": [
+        "templates/.ai/ contains pristine starter files",
+        ".ai/ contains active project memory",
+        "Never sync templates/ during pull-fc (only .claude/)"
+      ],
+      "benefits": [
+        "Easy project bootstrap from clean slate",
+        "Active memory not polluted by examples",
+        "Clear separation of starter vs working state"
+      ]
+    },
+    "threeTierModelSelection": {
+      "description": "Route tasks to appropriate model based on complexity and reasoning needs",
+      "keyFiles": [".claude/commands/execute.md"],
+      "constraints": [
+        "Complexity 1-2: Codex (gpt-5.2-codex) with medium reasoning effort",
+        "Complexity 3: Sonnet (Claude)",
+        "Complexity 4-5: Codex (gpt-5.2-codex) with xhigh reasoning effort",
+        "Use codex -c 'model_reasoning_effort=\"xhigh\"' for complex tasks"
+      ],
+      "benefits": [
+        "Cost optimization via OpenAI token allocation for simple/complex tasks",
+        "Claude tokens reserved for moderate complexity",
+        "Deep reasoning for complex tasks without model switching"
       ]
     },
     "_example": {

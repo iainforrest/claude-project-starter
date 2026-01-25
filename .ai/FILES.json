@@ -2,7 +2,7 @@
   "meta": {
     "projectName": "claude-project-starter",
     "lastUpdated": "2026-01-25",
-    "totalFiles": 22,
+    "totalFiles": 33,
     "description": "Smart file index with cross-references and quick navigation",
     "lineNumberPolicy": "Use globs or directories instead of file:line references."
   },
@@ -44,7 +44,8 @@
         ".ai/OPS.md",
         ".ai/CONSTRAINTS.md",
         ".ai/DEPRECATIONS.md",
-        ".ai/TECH_DEBT.md"
+        ".ai/TECH_DEBT.md",
+        ".ai/CHANGELOG.md"
       ],
       "routing": [".ai/QUICK.md"],
       "metadata": [
@@ -56,10 +57,32 @@
         ".ai/decisions/",
         ".ai/solutions/",
         ".ai/patterns/"
+      ],
+      "templates": [
+        "templates/.ai/ARCHITECTURE.json",
+        "templates/.ai/BUSINESS.json",
+        "templates/.ai/FILES.json",
+        "templates/.ai/PATTERNS.md",
+        "templates/.ai/OPS.md",
+        "templates/.ai/CONSTRAINTS.md",
+        "templates/.ai/DEPRECATIONS.md",
+        "templates/.ai/TECH_DEBT.md",
+        "templates/.ai/QUICK.md",
+        "templates/.ai/README.md",
+        "templates/.ai/TODO.md",
+        "templates/.ai/SPRINT_UPDATE.md",
+        "templates/.ai/decisions/000-template.md",
+        "templates/.ai/solutions/_template.yaml",
+        "templates/.ai/patterns/_TEMPLATE.md",
+        "templates/tasks/.gitkeep"
       ]
     },
     "codexIntegration": {
       "prompts": [".codex/prompts/code-review.md"]
+    },
+    "projectBootstrap": {
+      "install": ["install.js", "package.json"],
+      "templates": ["templates/.ai/*", "templates/tasks/.gitkeep"]
     }
   },
   "byLayer": {
@@ -106,6 +129,10 @@
       "invokes": [".claude/agents/update-memory-agent.md"],
       "validates": [".codex/prompts/code-review.md"]
     },
+    ".claude/commands/pull-fc.md": {
+      "syncs": [".claude/commands/", ".claude/agents/", ".claude/skills/", "templates/.ai/", "templates/tasks/"],
+      "excludes": [".ai/", ".claude/settings.local.json"]
+    },
     ".claude/commands/code-review.md": {
       "invokes": [".claude/agents/code-review-agent.md"],
       "validates": [".codex/prompts/code-review.md"],
@@ -113,7 +140,7 @@
     },
     ".claude/agents/update-memory-agent.md": {
       "uses": [".ai/QUICK.md"],
-      "updates": [".ai/ARCHITECTURE.json", ".ai/BUSINESS.json", ".ai/FILES.json", ".ai/PATTERNS.md", ".ai/OPS.md", ".ai/CONSTRAINTS.md", ".ai/DEPRECATIONS.md", ".ai/TECH_DEBT.md"]
+      "updates": [".ai/ARCHITECTURE.json", ".ai/BUSINESS.json", ".ai/FILES.json", ".ai/PATTERNS.md", ".ai/OPS.md", ".ai/CONSTRAINTS.md", ".ai/DEPRECATIONS.md", ".ai/TECH_DEBT.md", ".ai/CHANGELOG.md"]
     },
     ".claude/agents/code-review-agent.md": {
       "captures": {
