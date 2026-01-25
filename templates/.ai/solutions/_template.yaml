@@ -1,0 +1,33 @@
+# Solution Template
+# Copy this file and rename to: YYYY-MM-DD-brief-description.yaml
+# This format is grep-friendly for quick searches
+
+problem: "Brief description of the problem encountered"
+
+symptoms:
+  - "Observable symptom 1"
+  - "Observable symptom 2"
+  - "Error message or behavior seen"
+
+rootCause: "The underlying reason this happened"
+
+solution: "What fixed the issue"
+
+codeChanges:
+  - file: "path/to/file.ext"
+    change: "Description of change made"
+
+preventionSteps:
+  - "How to prevent this from happening again"
+  - "Tests or checks to add"
+
+relatedFiles:
+  - "path/to/related/file1.ext"
+  - "path/to/related/file2.ext"
+
+tags:
+  - "category"
+  - "technology"
+  - "component"
+
+date: "YYYY-MM-DD"

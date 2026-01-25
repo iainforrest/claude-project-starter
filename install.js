@@ -23,7 +23,7 @@ function header() {
   console.log('\n');
   log('┌─────────────────────────────────────────────────────────┐', 'cyan');
   log('│                                                         │', 'cyan');
-  log('│         Claude Project Starter v2.0 Installer           │', 'cyan');
+  log('│         Claude Project Starter v3.1 Installer           │', 'cyan');
   log('│                                                         │', 'cyan');
   log('│    AI-assisted development workflow for any project     │', 'cyan');
   log('│                                                         │', 'cyan');
@@ -112,8 +112,8 @@ async function installFiles(setupType) {
   log('  Copying .claude/ (commands and agents)...', 'blue');
   copyRecursive(claudeSrc, claudeDest);
 
-  // Copy .ai directory
-  const aiSrc = path.join(sourceDir, '.ai');
+  // Copy .ai directory from templates (not active memory)
+  const aiSrc = path.join(sourceDir, 'templates', '.ai');
   const aiDest = path.join(targetDir, '.ai');
   log('  Copying .ai/ (memory system templates)...', 'blue');
   copyRecursive(aiSrc, aiDest);

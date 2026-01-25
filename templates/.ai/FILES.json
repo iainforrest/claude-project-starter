@@ -1,0 +1,136 @@
+{
+  "meta": {
+    "projectName": "your-project-name",
+    "lastUpdated": "YYYY-MM-DD",
+    "totalFiles": 0,
+    "description": "Smart file index with cross-references and quick navigation",
+    "lineNumberPolicy": "Use globs or directories instead of file:line references."
+  },
+  "byPurpose": {
+    "_comment": "Organize files by their functional purpose",
+    "commandWorkflow": {
+      "primary": [
+        ".claude/commands/prd.md",
+        ".claude/commands/TaskGen.md",
+        ".claude/commands/execute.md",
+        ".claude/commands/bugs.md"
+      ],
+      "support": [
+        ".claude/commands/commit.md",
+        ".claude/commands/update.md",
+        ".claude/commands/feature.md",
+        ".claude/commands/code-review.md"
+      ]
+    },
+    "agents": {
+      "primary": [
+        ".claude/agents/prd-writer.md",
+        ".claude/agents/task-writer.md",
+        ".claude/agents/update-memory-agent.md",
+        ".claude/agents/code-review-agent.md"
+      ],
+      "support": [
+        ".claude/agents/cto-technical-advisor.md",
+        ".claude/agents/security-auditor.md",
+        ".claude/agents/ui-ux-expert.md"
+      ]
+    },
+    "memorySystem": {
+      "authoritative": [
+        ".ai/ARCHITECTURE.json",
+        ".ai/BUSINESS.json",
+        ".ai/FILES.json",
+        ".ai/PATTERNS.md",
+        ".ai/OPS.md",
+        ".ai/CONSTRAINTS.md",
+        ".ai/DEPRECATIONS.md",
+        ".ai/TECH_DEBT.md"
+      ],
+      "routing": [".ai/QUICK.md"],
+      "metadata": [
+        ".ai/README.md",
+        ".ai/TODO.md",
+        ".ai/SPRINT_UPDATE.md"
+      ],
+      "structured": [
+        ".ai/decisions/",
+        ".ai/solutions/",
+        ".ai/patterns/"
+      ]
+    },
+    "_example_yourDomain": {
+      "primary": ["src/main/EntryPoint.ext"],
+      "services": ["src/services/"],
+      "models": ["src/models/"],
+      "tests": ["tests/"]
+    }
+  },
+  "byLayer": {
+    "_comment": "Organize files by architectural layer",
+    "commands": {
+      "files": [".claude/commands/"],
+      "pattern": "Interactive commands with user Q&A"
+    },
+    "agents": {
+      "files": [".claude/agents/"],
+      "pattern": "Autonomous document generation agents"
+    },
+    "memory": {
+      "files": [".ai/"],
+      "pattern": "AI memory system"
+    },
+    "_example_presentation": {
+      "files": ["src/components/", "src/views/"],
+      "pattern": "React/Vue components"
+    },
+    "_example_business": {
+      "files": ["src/services/", "src/managers/"],
+      "pattern": "Business logic"
+    },
+    "_example_data": {
+      "files": ["src/repositories/", "src/models/"],
+      "pattern": "Data access"
+    }
+  },
+  "dependencies": {
+    "_comment": "Map file relationships and dependencies",
+    ".claude/commands/prd.md": {
+      "uses": [".ai/ARCHITECTURE.json", ".ai/BUSINESS.json", ".ai/FILES.json", ".ai/PATTERNS.md"],
+      "invokes": [".claude/agents/prd-writer.md"],
+      "outputs": ["/tasks/prd-[name].md"],
+      "captures": [".ai/decisions/*.md"]
+    },
+    ".claude/commands/TaskGen.md": {
+      "uses": [".ai/ARCHITECTURE.json", ".ai/FILES.json", ".ai/PATTERNS.md"],
+      "invokes": [".claude/agents/task-writer.md"],
+      "inputs": ["/tasks/prd-[name].md"],
+      "outputs": ["/tasks/tasks-[name].md"]
+    },
+    ".claude/commands/bugs.md": {
+      "uses": [".ai/ARCHITECTURE.json", ".ai/FILES.json", ".ai/PATTERNS.md", ".ai/BUSINESS.json"],
+      "outputs": ["/tasks/tasks-[bug].md", "/tasks/prd-[bug].md"],
+      "captures": [".ai/solutions/*.yaml"]
+    },
+    ".claude/commands/execute.md": {
+      "uses": [".ai/PATTERNS.md", ".ai/FILES.json", ".ai/QUICK.md"],
+      "inputs": ["/tasks/tasks-[name].md"],
+      "captures": [".ai/solutions/*.yaml", ".ai/decisions/*.md", ".ai/DEPRECATIONS.md"]
+    },
+    ".claude/commands/update.md": {
+      "uses": [".ai/QUICK.md"],
+      "invokes": [".claude/agents/update-memory-agent.md"]
+    },
+    ".claude/commands/code-review.md": {
+      "invokes": [".claude/agents/code-review-agent.md"],
+      "captures": [".ai/TECH_DEBT.md"]
+    }
+  },
+  "keyInterfaces": {
+    "_comment": "Document critical interfaces and contracts",
+    "agentHandoff": {
+      "description": "Context passed from commands to agents",
+      "format": "YAML structure with FEATURE_NAME, PROBLEM, MUST_HAVE, etc.",
+      "usedBy": [".claude/commands/prd.md", ".claude/commands/TaskGen.md"]
+    }
+  }
+}

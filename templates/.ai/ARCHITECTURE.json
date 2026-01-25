@@ -1,0 +1,71 @@
+{
+  "meta": {
+    "projectName": "your-project-name",
+    "version": "1.0.0",
+    "lastUpdated": "YYYY-MM-DD",
+    "description": "Architecture patterns, data flows, and component relationships"
+  },
+  "corePatterns": {
+    "_comment": "Document the key architectural patterns used in your project",
+    "_example": {
+      "description": "Example: How services/managers are structured",
+      "keyFiles": ["services/ExampleService.ext"],
+      "constraints": ["Limitation 1", "Limitation 2"],
+      "benefits": ["Benefit 1", "Benefit 2"]
+    }
+  },
+  "layers": {
+    "_comment": "Document your architectural layers (if using layered architecture)",
+    "_example_presentation": {
+      "description": "UI layer",
+      "pattern": "MVVM / MVC / Component-based",
+      "keyFiles": ["components/", "views/"]
+    },
+    "_example_business": {
+      "description": "Business logic layer",
+      "pattern": "Service classes / Managers / Use cases",
+      "keyFiles": ["services/", "managers/", "use-cases/"]
+    },
+    "_example_data": {
+      "description": "Data layer",
+      "pattern": "Repository pattern / DAO",
+      "keyFiles": ["repositories/", "models/"]
+    }
+  },
+  "dataFlows": {
+    "_comment": "Map how data moves through your system",
+    "_example": {
+      "name": "User authentication flow",
+      "steps": [
+        "User submits credentials",
+        "Validate credentials",
+        "Generate token",
+        "Store session",
+        "Return to client"
+      ],
+      "keyFiles": ["services/auth/*.ext", "managers/TokenManager.ext"],
+      "dataModel": "User + AuthToken"
+    }
+  },
+  "integrationPoints": {
+    "_comment": "Document how external systems integrate with your application",
+    "_example_database": {
+      "type": "PostgreSQL / MongoDB / Firebase / etc.",
+      "pattern": "Repository pattern / ORM",
+      "keyFiles": ["repositories/", "models/"]
+    },
+    "_example_externalAPIs": {
+      "apis": ["API name 1", "API name 2"],
+      "pattern": "HTTP client pattern / GraphQL client",
+      "keyFiles": ["clients/ApiClient.ext"]
+    }
+  },
+  "stateManagement": {
+    "_comment": "Document your state management approach",
+    "_example": {
+      "pattern": "Redux / Vuex / Context API / State Manager",
+      "keyFiles": ["store/index.ext", "StateManager.ext"],
+      "stateTypes": ["Application state", "User state", "UI state"]
+    }
+  }
+}

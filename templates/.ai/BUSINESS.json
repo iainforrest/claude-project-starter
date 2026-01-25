@@ -1,0 +1,81 @@
+{
+  "meta": {
+    "projectName": "your-project-name",
+    "version": "1.0.0",
+    "lastUpdated": "YYYY-MM-DD",
+    "description": "Business logic, feature specifications, and product requirements"
+  },
+  "features": {
+    "_comment": "Track all features and their status",
+    "_example": {
+      "status": "complete / in-progress / planned",
+      "version": "v1.0",
+      "description": "Brief feature description",
+      "keyComponents": ["Component1", "Component2", "Component3"]
+    }
+  },
+  "businessRules": {
+    "_comment": "Document key business logic and validation rules",
+    "_example": {
+      "rules": [
+        "Rule 1: Description",
+        "Rule 2: Description",
+        "Rule 3: Description"
+      ],
+      "exceptions": ["Exception case 1"]
+    }
+  },
+  "userFlows": {
+    "_comment": "Map critical user workflows",
+    "_example": {
+      "name": "Example user flow",
+      "steps": [
+        "Step 1",
+        "Step 2",
+        "Step 3",
+        "Step 4"
+      ],
+      "keyScreens": ["Screen1", "Screen2", "Screen3"],
+      "keyFiles": ["Service.ext", "Component.ext"]
+    }
+  },
+  "performanceTargets": {
+    "_comment": "Document performance requirements and measurements",
+    "_example": {
+      "target": "< 200ms",
+      "measured": "150ms average",
+      "critical": true
+    }
+  },
+  "dataModels": {
+    "_comment": "Document key data structures, relationships, and constraints",
+    "_example": {
+      "entities": {
+        "User": {
+          "fields": ["id", "email", "createdAt"],
+          "required": ["email"]
+        },
+        "Order": {
+          "fields": ["id", "userId", "status", "total"],
+          "required": ["userId", "status"]
+        }
+      },
+      "relationships": [
+        "User has many Orders (User.id -> Order.userId)",
+        "Order belongs to User"
+      ],
+      "constraints": [
+        "User.email must be unique",
+        "Order.total must be >= 0"
+      ]
+    }
+  },
+  "security": {
+    "_comment": "Document security requirements and implementation",
+    "_example": {
+      "authentication": "JWT / OAuth / Session-based",
+      "authorization": "Role-based / Permission-based",
+      "dataProtection": "Encryption strategy"
+    }
+  }
+}
