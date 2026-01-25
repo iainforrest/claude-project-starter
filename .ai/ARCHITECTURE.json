@@ -1,12 +1,55 @@
 {
   "meta": {
-    "projectName": "[TO BE FILLED DURING BOOTSTRAP]",
-    "version": "0.1.0",
-    "lastUpdated": "[TO BE FILLED]",
+    "projectName": "claude-project-starter",
+    "version": "3.0.0",
+    "lastUpdated": "2026-01-25",
     "description": "Architecture patterns, data flows, and component relationships"
   },
   "corePatterns": {
     "_comment": "Document the key architectural patterns used in your project",
+    "authorityBasedMemory": {
+      "description": "Single source of truth for each content type with strict routing",
+      "keyFiles": [".ai/QUICK.md", ".ai/decisions/001-use-authority-based-memory.md"],
+      "constraints": [
+        "No content duplication across files",
+        "QUICK.md is router only (no content)",
+        "Each content type has ONE authoritative home"
+      ],
+      "benefits": [
+        "Eliminates stale references",
+        "Token efficiency through grep-first retrieval",
+        "Clear ownership for updates",
+        "Codex validation catches violations"
+      ]
+    },
+    "commandAgentDelegation": {
+      "description": "Commands handle Q&A, agents handle heavy generation work",
+      "keyFiles": [".claude/commands/", ".claude/agents/"],
+      "constraints": [
+        "Commands run in main context (interactive)",
+        "Agents run isolated (autonomous)",
+        "Agents invoked via Task tool only"
+      ],
+      "benefits": [
+        "Better context management",
+        "Heavy work doesn't consume main conversation",
+        "Clear separation of concerns"
+      ]
+    },
+    "automatedCapture": {
+      "description": "Commands automatically capture decisions, solutions, deprecations, tech debt",
+      "keyFiles": [".claude/commands/prd.md", ".claude/commands/bugs.md", ".claude/commands/execute.md", ".claude/commands/code-review.md"],
+      "constraints": [
+        "Capture must not interrupt workflow",
+        "Use YAML for solutions (grep-friendly)",
+        "Use ADR format for decisions"
+      ],
+      "benefits": [
+        "Builds knowledge base automatically",
+        "Grep-first retrieval for faster debugging",
+        "No manual documentation burden"
+      ]
+    },
     "_example": {
       "description": "Example: How services/managers are structured",
       "keyFiles": ["services/ExampleService.ext"],
@@ -34,6 +77,45 @@
   },
   "dataFlows": {
     "_comment": "Map how data moves through your system",
+    "memoryUpdateFlow": {
+      "name": "Memory system update workflow",
+      "steps": [
+        "User invokes /update command",
+        "Update command launches update-memory-agent via Task tool",
+        "Agent reads QUICK.md authority map",
+        "Agent analyzes git diffs (last 10-20 commits)",
+        "Agent routes updates to authoritative files",
+        "Agent applies edits autonomously",
+        "Codex validates authority rules (no duplication)",
+        "Agent invokes /commit to push changes"
+      ],
+      "keyFiles": [
+        ".claude/commands/update.md",
+        ".claude/agents/update-memory-agent.md",
+        ".codex/prompts/code-review.md"
+      ],
+      "dataModel": "Git diffs → Authority-routed edits → Validated memory files"
+    },
+    "codeReviewFlow": {
+      "name": "Code review with automated tech debt capture",
+      "steps": [
+        "User invokes /code-review command",
+        "Command launches code-review-agent via Task tool",
+        "Agent analyzes git diffs using Codex CLI",
+        "CRITICAL/HIGH findings → fix immediately",
+        "MEDIUM/LOW findings → route to TECH_DEBT.md",
+        "Agent updates TECH_DEBT.md with context",
+        "Codex validates no authority violations",
+        "Agent returns review summary"
+      ],
+      "keyFiles": [
+        ".claude/commands/code-review.md",
+        ".claude/agents/code-review-agent.md",
+        ".codex/prompts/code-review.md",
+        ".ai/TECH_DEBT.md"
+      ],
+      "dataModel": "Git diffs → Severity classification → Immediate fixes OR TECH_DEBT.md"
+    },
     "_example": {
       "name": "User authentication flow",
       "steps": [

@@ -45,6 +45,9 @@ Find the right pattern for your task:
 | Authentication | Auth Pattern | patterns/AUTH.md |
 | Logging | Logging Pattern | patterns/INFRASTRUCTURE.md |
 | Agent delegation | Command-Agent Pattern | (below) |
+| Authority routing | Authority-Based Memory | (below) |
+| Automated capture | Knowledge Capture Pattern | (below) |
+| Codex validation | Three-Tier Execution | (below) |
 
 *Table expands as you add patterns. Update when adding new domain files.*
 
@@ -110,6 +113,121 @@ COMPLEXITY: Low/Medium/High
 ```
 
 **Reference**: `.claude/commands/prd.md` → `.claude/agents/prd-writer.md`
+
+---
+
+## Built-in Pattern: Authority-Based Memory
+
+This pattern ensures single source of truth for all content types.
+
+### When to Use
+- Updating memory system
+- Adding new content to .ai/ files
+- Preventing content duplication
+- Routing updates to correct authoritative file
+
+### Authority Map
+```
+Content Type          → Authoritative File
+──────────────────────────────────────────
+System topology       → ARCHITECTURE.json
+File locations        → FILES.json
+Coding patterns       → PATTERNS.md
+Business rules        → BUSINESS.json
+Operations/runbooks   → OPS.md
+Decisions (ADR)       → decisions/*.md
+Solutions/learnings   → solutions/*.yaml
+Deprecations          → DEPRECATIONS.md
+Constraints           → CONSTRAINTS.md
+Tech debt             → TECH_DEBT.md
+Routing only          → QUICK.md (NO content)
+```
+
+### Implementation Checklist
+- [ ] Identify content type using authority map
+- [ ] Check if content already exists in authoritative file
+- [ ] Add content to authoritative file (or update existing)
+- [ ] If needed, add pointer in QUICK.md (not copy)
+- [ ] Validate: no content duplication across files
+
+**Reference**: `.ai/decisions/001-use-authority-based-memory.md`
+
+---
+
+## Built-in Pattern: Automated Knowledge Capture
+
+Commands automatically capture decisions, solutions, deprecations, and tech debt.
+
+### When to Use
+- During /prd → capture architectural decisions
+- During /bugs → capture solutions (YAML)
+- During /execute → capture solutions, decisions, deprecations
+- During /code-review → capture MEDIUM/LOW findings to TECH_DEBT.md
+
+### Capture Formats
+```yaml
+# solutions/*.yaml (grep-friendly)
+problem: "Brief problem description"
+symptoms: ["Observable symptom 1", "Symptom 2"]
+rootCause: "Why this happened"
+solution: "What fixed it"
+preventionSteps: ["How to prevent recurrence"]
+
+# decisions/*.md (ADR format)
+# Use template at .ai/decisions/000-template.md
+
+# TECH_DEBT.md entries
+### [TD-NNN] [Component]: [Brief Description]
+**Severity**: MEDIUM | LOW
+**Location**: `file or glob`
+**Description**: [Details]
+**Why Deferred**: [Reason]
+```
+
+### Implementation Checklist
+- [ ] Identify capture opportunity in command workflow
+- [ ] Choose correct format (YAML for solutions, ADR for decisions)
+- [ ] Capture without interrupting user workflow
+- [ ] Use grep-friendly structure (YAML keys, ADR headings)
+- [ ] Reference captured knowledge in memory files
+
+**Reference**: `.claude/commands/execute.md` (solution capture), `.claude/commands/code-review.md` (tech debt capture)
+
+---
+
+## Built-in Pattern: Three-Tier Execution
+
+Route tasks to appropriate model tier based on complexity.
+
+### When to Use
+- Tier 1 (Opus): Architecture decisions, complex PRDs, multi-agent orchestration
+- Tier 2 (Sonnet): Task execution, bug investigation, code review
+- Tier 3 (Codex): Simple validation, authority rule checks, linting
+
+### Execution Strategy
+```
+Task arrives
+    ↓
+Complexity assessment
+    ↓
+┌─────────────────┬──────────────────┬─────────────────┐
+│ COMPLEX         │ STANDARD         │ SIMPLE          │
+│ Opus 4.5        │ Sonnet 4.5       │ Codex (gpt-5.2) │
+├─────────────────┼──────────────────┼─────────────────┤
+│ - Architecture  │ - Implementation │ - Validation    │
+│ - PRD creation  │ - Bug fixes      │ - Linting       │
+│ - Orchestration │ - Code review    │ - Authority chk │
+└─────────────────┴──────────────────┴─────────────────┘
+```
+
+### Implementation Checklist
+- [ ] Assess task complexity (lines of code, decision points, context needed)
+- [ ] Route to appropriate tier
+- [ ] Use Codex for validation/simple tasks (faster, cheaper)
+- [ ] Escalate to Sonnet if Codex insufficient
+- [ ] Reserve Opus for complex orchestration
+
+**Reference**: `.claude/commands/code-review.md` (uses Codex), `.claude/commands/update.md` (uses Codex validation)
 
 ---
 

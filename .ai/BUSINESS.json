@@ -1,12 +1,46 @@
 {
   "meta": {
-    "projectName": "[TO BE FILLED DURING BOOTSTRAP]",
-    "version": "0.1.0",
-    "lastUpdated": "[TO BE FILLED]",
+    "projectName": "claude-project-starter",
+    "version": "3.0.0",
+    "lastUpdated": "2026-01-25",
     "description": "Business logic, feature specifications, and product requirements"
   },
   "features": {
     "_comment": "Track all features and their status",
+    "authorityBasedMemorySystem": {
+      "status": "complete",
+      "version": "v3.0.0",
+      "description": "Single source of truth memory system with automated capture",
+      "keyComponents": [
+        "QUICK.md router with authority map",
+        "OPS.md, CONSTRAINTS.md, DEPRECATIONS.md, TECH_DEBT.md authoritative files",
+        "decisions/ and solutions/ directories",
+        "Codex validation integration",
+        "Automated capture in commands"
+      ]
+    },
+    "codexIntegration": {
+      "status": "complete",
+      "version": "v3.0.0",
+      "description": "Codex CLI integration for code review and validation",
+      "keyComponents": [
+        "Three-tier execution (Opus → Sonnet → Codex)",
+        ".codex/prompts/code-review.md",
+        "Authority rule validation",
+        "Automated tech debt capture"
+      ]
+    },
+    "automatedKnowledgeCapture": {
+      "status": "complete",
+      "version": "v3.0.0",
+      "description": "Commands automatically capture decisions, solutions, deprecations, tech debt",
+      "keyComponents": [
+        "/prd → decisions/*.md",
+        "/bugs → solutions/*.yaml",
+        "/execute → solutions/*.yaml, decisions/*.md, DEPRECATIONS.md",
+        "/code-review → TECH_DEBT.md"
+      ]
+    },
     "_example": {
       "status": "complete / in-progress / planned",
       "version": "v1.0",

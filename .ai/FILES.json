@@ -1,8 +1,8 @@
 {
   "meta": {
     "projectName": "claude-project-starter",
-    "lastUpdated": "2025-12-07",
-    "totalFiles": 15,
+    "lastUpdated": "2026-01-25",
+    "totalFiles": 22,
     "description": "Smart file index with cross-references and quick navigation",
     "lineNumberPolicy": "Use globs or directories instead of file:line references."
   },
@@ -11,22 +11,23 @@
     "commandWorkflow": {
       "primary": [
         ".claude/commands/prd.md",
-        ".claude/commands/tasks.md",
+        ".claude/commands/TaskGen.md",
         ".claude/commands/execute.md",
         ".claude/commands/bugs.md"
       ],
       "support": [
         ".claude/commands/commit.md",
         ".claude/commands/update.md",
-        ".claude/commands/feature.md"
-      ],
-      "documentation": [".claude/WORKFLOW.md"]
+        ".claude/commands/feature.md",
+        ".claude/commands/code-review.md"
+      ]
     },
     "agents": {
       "primary": [
         ".claude/agents/prd-writer.md",
         ".claude/agents/task-writer.md",
-        ".claude/agents/update-memory-agent.md"
+        ".claude/agents/update-memory-agent.md",
+        ".claude/agents/code-review-agent.md"
       ],
       "support": [
         ".claude/agents/cto-technical-advisor.md",
@@ -35,18 +36,30 @@
       ]
     },
     "memorySystem": {
-      "primary": [
+      "authoritative": [
         ".ai/ARCHITECTURE.json",
         ".ai/BUSINESS.json",
         ".ai/FILES.json",
-        ".ai/PATTERNS.md"
+        ".ai/PATTERNS.md",
+        ".ai/OPS.md",
+        ".ai/CONSTRAINTS.md",
+        ".ai/DEPRECATIONS.md",
+        ".ai/TECH_DEBT.md"
       ],
-      "support": [
-        ".ai/QUICK.md",
+      "routing": [".ai/QUICK.md"],
+      "metadata": [
+        ".ai/README.md",
         ".ai/TODO.md",
-        ".ai/SPRINT_UPDATE.md",
-        ".ai/README.md"
+        ".ai/SPRINT_UPDATE.md"
+      ],
+      "structured": [
+        ".ai/decisions/",
+        ".ai/solutions/",
+        ".ai/patterns/"
       ]
+    },
+    "codexIntegration": {
+      "prompts": [".codex/prompts/code-review.md"]
     }
   },
   "byLayer": {
@@ -69,9 +82,10 @@
     ".claude/commands/prd.md": {
       "uses": [".ai/ARCHITECTURE.json", ".ai/BUSINESS.json", ".ai/FILES.json", ".ai/PATTERNS.md"],
       "invokes": [".claude/agents/prd-writer.md"],
-      "outputs": ["/tasks/prd-[name].md"]
+      "outputs": ["/tasks/prd-[name].md"],
+      "captures": [".ai/decisions/*.md"]
     },
-    ".claude/commands/tasks.md": {
+    ".claude/commands/TaskGen.md": {
       "uses": [".ai/ARCHITECTURE.json", ".ai/FILES.json", ".ai/PATTERNS.md"],
       "invokes": [".claude/agents/task-writer.md"],
       "inputs": ["/tasks/prd-[name].md"],
@@ -79,11 +93,35 @@
     },
     ".claude/commands/bugs.md": {
       "uses": [".ai/ARCHITECTURE.json", ".ai/FILES.json", ".ai/PATTERNS.md", ".ai/BUSINESS.json"],
-      "outputs": ["/tasks/tasks-[bug].md", "/tasks/prd-[bug].md"]
+      "outputs": ["/tasks/tasks-[bug].md", "/tasks/prd-[bug].md"],
+      "captures": [".ai/solutions/*.yaml"]
     },
     ".claude/commands/execute.md": {
       "uses": [".ai/PATTERNS.md", ".ai/FILES.json", ".ai/QUICK.md"],
-      "inputs": ["/tasks/tasks-[name].md"]
+      "inputs": ["/tasks/tasks-[name].md"],
+      "captures": [".ai/solutions/*.yaml", ".ai/decisions/*.md", ".ai/DEPRECATIONS.md"]
+    },
+    ".claude/commands/update.md": {
+      "uses": [".ai/QUICK.md"],
+      "invokes": [".claude/agents/update-memory-agent.md"],
+      "validates": [".codex/prompts/code-review.md"]
+    },
+    ".claude/commands/code-review.md": {
+      "invokes": [".claude/agents/code-review-agent.md"],
+      "validates": [".codex/prompts/code-review.md"],
+      "captures": [".ai/TECH_DEBT.md"]
+    },
+    ".claude/agents/update-memory-agent.md": {
+      "uses": [".ai/QUICK.md"],
+      "updates": [".ai/ARCHITECTURE.json", ".ai/BUSINESS.json", ".ai/FILES.json", ".ai/PATTERNS.md", ".ai/OPS.md", ".ai/CONSTRAINTS.md", ".ai/DEPRECATIONS.md", ".ai/TECH_DEBT.md"]
+    },
+    ".claude/agents/code-review-agent.md": {
+      "captures": {
+        "CRITICAL": "fix immediately",
+        "HIGH": "fix immediately",
+        "MEDIUM": ".ai/TECH_DEBT.md",
+        "LOW": ".ai/TECH_DEBT.md"
+      }
     }
   },
   "keyInterfaces": {
