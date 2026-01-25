@@ -156,7 +156,21 @@ When a `domain_skill` is provided, this section activates specialist mode:
 
 **OUTPUT FORMAT:**
 
-Your output must be structured for task generation. Use this exact format:
+Your output must be structured for task generation AND tech debt tracking. Use this exact format:
+
+**CRITICAL and HIGH findings**: Generate fix tasks (must be addressed before sprint close)
+**MEDIUM and LOW findings**: Add to `.ai/TECH_DEBT.md` if not immediately fixed during review
+
+When adding to TECH_DEBT.md, use the template format:
+- **ID**: TD-XXX (sequential, check existing entries)
+- **Severity**: MEDIUM or LOW
+- **Location**: File path or stable glob pattern
+- **Description**: Clear explanation of the issue
+- **Why Deferred**: Reason for not fixing immediately
+- **Impact**: What this affects or could affect
+- **Suggested Fix**: Recommended approach
+- **Added**: YYYY-MM-DD
+- **Source**: CR-YYYY-MM-DD (this code review date)
 
 ```markdown
 ## Code Review Summary
@@ -267,6 +281,16 @@ The following tasks should be created and actioned before sprint close:
 
 ---
 
+## Tech Debt Additions
+
+Items added to TECH_DEBT.md this review:
+- [TD-001] [Location]: [Issue] - [Severity]
+- [TD-002] [Location]: [Issue] - [Severity]
+
+*This section documents MEDIUM and LOW findings that were deferred rather than fixed immediately. Each entry has been added to `.ai/TECH_DEBT.md` with full context for future resolution.*
+
+---
+
 ## Patterns Observed
 
 **Good Patterns Worth Noting**:
@@ -282,6 +306,9 @@ The following tasks should be created and actioned before sprint close:
 If any findings reveal gaps in `.ai/` documentation:
 - [ ] PATTERNS.md: [What pattern should be added/clarified]
 - [ ] ARCHITECTURE.json: [What constraint should be documented]
+
+**Pattern Extraction Trigger:**
+If `.ai/solutions/` has 3+ entries with the same tag, consider extracting the common approach to `PATTERNS.md` as a reusable pattern. This creates a feedback loop where repeatedly solved problems become documented patterns.
 ```
 
 **REVIEW METHODOLOGY:**
