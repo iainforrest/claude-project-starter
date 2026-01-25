@@ -18,6 +18,8 @@ Pull the latest generic commands and agents from The Fat Controller repository.
 | `.claude/agents/*.md` | `.claude/settings.local.json` (machine-specific) |
 | `.claude/skills/*.md` | |
 | `.claude/WORKFLOW.md` | |
+| `templates/.ai/*` (clean starter templates) | |
+| `templates/tasks/.gitkeep` | |
 
 ## Steps
 
@@ -50,6 +52,8 @@ Compare these directories:
 - `.claude/agents/`
 - `.claude/skills/`
 - `.claude/WORKFLOW.md` (if exists)
+- `templates/.ai/` (all template files and subdirectories)
+- `templates/tasks/.gitkeep`
 
 For each file, determine:
 - **New**: Exists in starter but not locally
@@ -83,7 +87,9 @@ Ask the user:
 
 ### 5. Apply changes
 
-Copy approved files from temp directory to this project's `.claude/` directory.
+Copy approved files from temp directory:
+- `.claude/` files to this project's `.claude/` directory
+- `templates/` files to this project's `templates/` directory (create if needed)
 
 ### 6. Cleanup
 

@@ -26,6 +26,7 @@ AUTHORITY_MAP:
   deprecations: DEPRECATIONS.md           # Deprecated modules, migration paths
   constraints: CONSTRAINTS.md             # Platform limits, non-goals, technical constraints
   tech_debt: TECH_DEBT.md                 # Unfixed code review findings, known issues
+  changelog: CHANGELOG.md                 # Release notes, version history (auto-updated)
   routing: QUICK.md                       # ROUTER ONLY - authority map + pointers, NO content
 ```
 
@@ -91,6 +92,7 @@ Ask: "Which file is authoritative for this content type?"
 7. `.ai/CONSTRAINTS.md` - Platform limitations, non-goals
 8. `.ai/DEPRECATIONS.md` - Deprecated modules and migration paths
 9. `.ai/TECH_DEBT.md` - Unfixed code review findings
+10. `.ai/CHANGELOG.md` - Release notes and version history
 
 **Directories:**
 - `.ai/decisions/` - Architecture Decision Records (ADR)
@@ -161,6 +163,15 @@ Compare git diffs against each memory file to find gaps:
 - Build commands changed? Update the build commands section only
 - Slash commands added? Update slash command reference
 
+**For CHANGELOG.md (ALWAYS update):**
+- Categorize each change from git diffs into: Added, Changed, Fixed, Deprecated, Removed, Security
+- Add entries under `[Unreleased]` section
+- Entry format: `- Brief description of change`
+- Group related changes together
+- Most significant changes first in each category
+- Be concise but descriptive (one line per change)
+- Skip trivial changes (typo fixes, formatting) unless they affect behavior
+
 ### Phase 3: Context Supplementation (OPTIONAL, ONLY IF NEEDED)
 
 **Only reference parent conversation if:**
@@ -211,6 +222,11 @@ For each memory file that needs updates:
    QUICK.md:
    - Add [new development command]
    - Update file references
+
+   CHANGELOG.md:
+   - Added: [new feature descriptions]
+   - Changed: [modification descriptions]
+   - Fixed: [bug fix descriptions]
 
    Total changes: X files updated
    Line count: XXXX → YYYY (+Z lines, within target)
