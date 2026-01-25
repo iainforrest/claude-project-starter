@@ -33,6 +33,101 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [1.0.0]
+
+### Added
+- Initial Claude Project Starter with AI memory system
+- PRD generation v3.0 chain architecture and decision frameworks
+- PRD generation v3.1 unified prompt improvements
+- Prompt analysis framework for task review
+
+### Removed
+- Prompt analysis framework file
+
+---
+
+## [2.0.0]
+
+### Added
+- v2.0 upgrade package with slash commands and specialized agents
+- Mandatory code documentation standards in the execute command
+- Context-efficient memory system architecture
+- Sync commands for starter kit updates
+- Dual installation paths for new vs existing projects
+- Explore agent integration for context-efficient codebase analysis
+- Code review agent and `/review` command
+- Step 5 "Future Proof" guidance in AI Assistant instructions
+- EXPLORE_CONTEXT propagation through agent handoffs
+- npx installable setup with interactive installer
+
+### Changed
+- Sync system simplified to use generic commands/agents
+- `/tasks` renamed to `/TaskGen`
+- Feature command delegates task generation to task-writer agent
+- `/review` renamed to `/code-review` to avoid Claude conflict
+
+---
+
+## [2.3.0]
+
+### Added
+- Parallel task execution and domain skills in the execute command
+
+---
+
+## [3.0.0]
+
+### Added
+- `.gitignore` for development artifacts
+
+### Changed
+- Project renamed to The Fat Controller v3.0
+- Sync commands renamed from cps to fc
+
+---
+
+## [3.0.1]
+
+### Added
+- Skills directory included in pull-fc and push-fc sync
+
+---
+
+## [3.0.2]
+
+### Removed
+- Legacy pull-cps/push-cps via migration in pull-fc
+
+---
+
+## [3.0.3]
+
+### Fixed
+- Critical guardrails to prevent orchestrator takeover in execute
+
+---
+
+## [3.0.4]
+
+### Fixed
+- Guardrails for task delegation and post-execution checks in execute
+
+---
+
+## [3.0.5]
+
+### Fixed
+- Mandatory code review and memory update tasks in task-writer XML template
+
+---
+
+## [3.0.6]
+
+### Changed
+- Updated .gitignore patterns for new structure
+
+---
+
 ## Version History
 
 _Previous releases will be documented below as versions are tagged._
