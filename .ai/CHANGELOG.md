@@ -9,10 +9,21 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added
+
+### Changed
+
+### Fixed
+
+---
+
+## [3.1.1] - 2026-01-25
+
+### Added
 - Changelog auto-generation during `/update` command
 - Template separation system: `templates/.ai/` contains clean starter files
 - `templates/tasks/` directory structure for task organization
 - CHANGELOG.md to authority map and memory navigation
+- Historical changelog entries from git commit history (1.0.0 - 3.0.6)
 
 ### Changed
 - Model selection now uses gpt-5.2-codex with reasoning effort levels instead of model switching
@@ -20,16 +31,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - Complexity 3: Sonnet (unchanged)
   - Complexity 4-5: gpt-5.2-codex with xhigh reasoning effort
 - `/pull-fc` command now syncs `templates/.ai/` and `templates/tasks/` from fat-controller
-- Project version bumped to 3.1.0 to reflect template separation and model selection updates
 - Update-memory-agent now includes CHANGELOG.md in authority-based routing
-
-### Fixed
-
-### Deprecated
-
-### Removed
-
-### Security
 
 ---
 
