@@ -378,6 +378,29 @@ Would you like me to:
 
 ---
 
+## Decision Capture
+
+**After PRD generation is complete**, prompt the user to capture any major architectural decisions:
+
+```
+Were any major architectural decisions made during PRD creation?
+
+If yes, I can create an ADR (Architecture Decision Record) in .ai/decisions/ directory with:
+- Decision rationale
+- Alternatives considered
+- Consequences and trade-offs
+
+This captures decisions at the moment they're made, not retroactively.
+```
+
+**If user confirms decisions were made:**
+1. Ask for the decision details
+2. Create ADR file in `.ai/decisions/NNN-short-title.md`
+3. Follow template from `.ai/decisions/000-template.md`
+4. Include: Context, Decision, Alternatives, Consequences
+
+---
+
 ## Anti-Patterns to Avoid
 
 **DON'T:**

@@ -512,4 +512,51 @@ The agent reads and analyzes:
 
 ---
 
+## Deprecation Detection
+
+**During implementation phase**, check if this feature deprecates existing functionality:
+
+```
+Does this feature deprecate or replace any existing functionality?
+
+If yes, I should add an entry to .ai/DEPRECATIONS.md with:
+- What is being deprecated
+- Migration path for users
+- Deprecation date
+- Affected components
+- Removal date (if known)
+```
+
+**If deprecation is detected:**
+1. Add entry to `.ai/DEPRECATIONS.md`
+2. Include clear migration instructions
+3. Document timeline for removal
+4. Note which components are affected
+
+---
+
+## Solution Capture
+
+**After feature implementation**, if non-trivial patterns or approaches were discovered:
+
+```
+Were any interesting implementation patterns or solutions discovered during this feature?
+
+If yes, I can save the approach to .ai/solutions/YYYY-MM-DD-brief-description.yaml with:
+- Problem solved
+- Context and constraints
+- Solution approach
+- Tags (for searchability)
+
+This builds a reusable solution library for future similar features.
+```
+
+**If solution is worth capturing:**
+1. Create solution file in `.ai/solutions/`
+2. Use YAML template from `.ai/solutions/_template.yaml`
+3. Include searchable tags: component, pattern, problem-type
+4. Link to related solutions if applicable
+
+---
+
 **Remember:** Your goal is to understand the feature, leverage existing patterns, and generate implementation-ready output (tasks or PRD). Be thorough in analysis, honest in complexity assessment, and efficient in output generation.

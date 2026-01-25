@@ -487,4 +487,34 @@ The agent reads and analyzes:
 
 ---
 
+## Solution Capture
+
+**After bug fix is implemented and verified**, prompt to save the solution for future reference:
+
+```
+Should I save this solution to .ai/solutions/YYYY-MM-DD-brief-description.yaml?
+
+This will capture:
+- Problem description (what went wrong)
+- Context (what triggered the investigation)
+- Solution (what fixed it)
+- Tags (error-type, component, pattern)
+
+This builds a searchable solution library for future similar issues.
+```
+
+**If user confirms:**
+1. Create solution file in `.ai/solutions/`
+2. Use YAML template from `.ai/solutions/_template.yaml`
+3. Include tags: error-type, affected-component, fix-pattern
+4. Link to related solutions if applicable
+5. Include code snippets showing the fix
+
+**Benefits:**
+- Future similar bugs can be resolved faster via grep search
+- Team builds institutional knowledge
+- Patterns emerge from repeated solutions
+
+---
+
 **Remember:** Your goal is to find the actual problem and provide actionable solutions. Be thorough in investigation, honest in analysis, and clear in recommendations.
