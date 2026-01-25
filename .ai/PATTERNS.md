@@ -200,9 +200,9 @@ preventionSteps: ["How to prevent recurrence"]
 Route tasks to appropriate model tier based on complexity.
 
 ### When to Use
-- Tier 1 (Opus): Architecture decisions, complex PRDs, multi-agent orchestration
-- Tier 2 (Sonnet): Task execution, bug investigation, code review
-- Tier 3 (Codex): Simple validation, authority rule checks, linting
+- Tier 1 (Codex Max gpt-5.1-codex-max): Complex tasks (4-5), deep reasoning
+- Tier 2 (Sonnet): Moderate tasks (3), balanced cost/capability
+- Tier 3 (Codex gpt-5.2-codex): Simple tasks (1-2), saves Claude tokens
 
 ### Execution Strategy
 ```
@@ -210,24 +210,25 @@ Task arrives
     ↓
 Complexity assessment
     ↓
-┌─────────────────┬──────────────────┬─────────────────┐
-│ COMPLEX         │ STANDARD         │ SIMPLE          │
-│ Opus 4.5        │ Sonnet 4.5       │ Codex (gpt-5.2) │
-├─────────────────┼──────────────────┼─────────────────┤
-│ - Architecture  │ - Implementation │ - Validation    │
-│ - PRD creation  │ - Bug fixes      │ - Linting       │
-│ - Orchestration │ - Code review    │ - Authority chk │
-└─────────────────┴──────────────────┴─────────────────┘
+┌─────────────────────┬──────────────────┬───────────────────────┐
+│ COMPLEX (4-5)       │ STANDARD (3)     │ SIMPLE (1-2)          │
+│ Codex Max           │ Sonnet 4.5       │ Codex (gpt-5.2-codex) │
+│ (gpt-5.1-codex-max) │                  │                       │
+├─────────────────────┼──────────────────┼───────────────────────┤
+│ - Architecture      │ - Implementation │ - Validation          │
+│ - Complex refactor  │ - Bug fixes      │ - Simple edits        │
+│ - System-wide tasks │ - Code review    │ - Config changes      │
+└─────────────────────┴──────────────────┴───────────────────────┘
 ```
 
 ### Implementation Checklist
 - [ ] Assess task complexity (lines of code, decision points, context needed)
 - [ ] Route to appropriate tier
-- [ ] Use Codex for validation/simple tasks (faster, cheaper)
-- [ ] Escalate to Sonnet if Codex insufficient
-- [ ] Reserve Opus for complex orchestration
+- [ ] Use Codex for simple tasks (1-2) via Bash
+- [ ] Use Sonnet for moderate tasks (3) via Task tool
+- [ ] Use Codex Max for complex tasks (4-5) via Bash with `-m gpt-5.1-codex-max`
 
-**Reference**: `.claude/commands/code-review.md` (uses Codex), `.claude/commands/update.md` (uses Codex validation)
+**Reference**: `.claude/commands/execute.md` (model selection), `.claude/commands/code-review.md` (uses Codex)
 
 ---
 

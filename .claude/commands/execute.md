@@ -44,7 +44,7 @@ For EVERY parent task, spawn execution based on complexity:
 ```
 Task(
   subagent_type: "execution-agent",
-  model: "sonnet",  // or "opus" if complexity >= 4
+  model: "sonnet",  // For complexity 3 only; use Codex for 1-2, Codex Max for 4-5
   prompt: """
 ---
 parent_task:
@@ -428,8 +428,8 @@ Select the appropriate model based on parent task complexity.
 ```
 selectModel(complexity):
   IF complexity >= 4:
-    RETURN "opus"
-  ELSE IF complexity >= 2.5:
+    RETURN "codex-max"
+  ELSE IF complexity == 3:
     RETURN "sonnet"
   ELSE:
     RETURN "codex"
@@ -439,11 +439,11 @@ selectModel(complexity):
 
 | Complexity | Model | Rationale |
 |------------|-------|-----------|
-| 1/5 | **codex** | Simple task, Codex capable, saves Claude tokens |
-| 2/5 | **codex** | Standard task, Codex capable, saves Claude tokens |
+| 1/5 | **codex** (gpt-5.2-codex) | Simple task, Codex capable, saves Claude tokens |
+| 2/5 | **codex** (gpt-5.2-codex) | Standard task, Codex capable, saves Claude tokens |
 | 3/5 | sonnet | Moderate task, needs Claude reasoning |
-| 4/5 | **opus** | Complex task, needs stronger reasoning |
-| 5/5 | **opus** | System-wide task, needs strongest model |
+| 4/5 | **codex-max** (gpt-5.1-codex-max) | Complex task, needs deep reasoning |
+| 5/5 | **codex-max** (gpt-5.1-codex-max) | System-wide task, needs strongest model |
 
 ### Logging
 
@@ -453,16 +453,16 @@ Parent Task {id} (complexity {n}/5) → using {model} via {method}
 ```
 
 Examples:
-- `Parent Task 1.0 (complexity 2/5) → using codex via Bash`
+- `Parent Task 1.0 (complexity 2/5) → using codex (gpt-5.2-codex) via Bash`
 - `Parent Task 2.0 (complexity 3/5) → using sonnet via Task tool`
-- `Parent Task 3.0 (complexity 4/5) → using opus via Task tool`
+- `Parent Task 3.0 (complexity 4/5) → using codex-max (gpt-5.1-codex-max) via Bash`
 
 ### Cost Rationale
 
-Opus is approximately 10x more expensive than Sonnet. Codex uses separate token allocation. The three-tier routing ensures:
-- Codex handles simple tasks (1-2), saving Claude tokens
-- Sonnet handles moderate tasks (2.5-3.5), balancing cost and capability
-- Opus is reserved for complex reasoning (4+) where it justifies the cost
+Codex uses separate OpenAI token allocation, freeing Claude tokens for other work. The three-tier routing ensures:
+- Codex (gpt-5.2-codex) handles simple tasks (1-2), saving Claude tokens
+- Sonnet handles moderate tasks (3), balancing cost and capability
+- Codex Max (gpt-5.1-codex-max) handles complex tasks (4-5), providing deep reasoning
 
 ### Spawning by Model Type
 
@@ -499,28 +499,64 @@ EOF
 )"
 ```
 
-**For Sonnet/Opus (complexity 2.5+):** Use Task tool
+**For Codex Max (complexity 4-5):** Use Bash with `codex -m gpt-5.1-codex-max exec`
+
+```bash
+codex -m gpt-5.1-codex-max exec --full-auto -- "$(cat <<'EOF'
+---
+parent_task:
+  id: "3.0"
+  title: "Refactor authentication system"
+  complexity: 4
+  verify: "npm test -- --grep auth"
+subtasks:
+  - id: "3.1"
+    description: "Update auth middleware"
+    files: "src/middleware/auth.ts"
+state_md: |
+  # Execution State
+  ## Cross-Task Learnings
+  (any learnings from previous tasks)
+explore_context: |
+  (content from EXPLORE_CONTEXT.json)
+feature_name: "auth-refactor"
+task_file: "/tasks/auth-refactor/task.xml"
+domain_skill: |
+  (content from .claude/skills/domain-backend.md or relevant domain)
+---
+Execute this parent task following the execution-agent patterns.
+Read .claude/agents/execution-agent.md for the full execution protocol.
+Create atomic commit when complete.
+Return structured YAML summary with status, commit SHA, and learnings.
+EOF
+)"
+```
+
+**For Sonnet (complexity 3):** Use Task tool
 
 ```
 Use Task tool with:
   - subagent_type: "execution-agent"
-  - model: "sonnet" or "opus"  ← Dynamic based on complexity
+  - model: "sonnet"
   - prompt: YAML handoff content
 ```
 
-### Task Tool Model Parameter (Sonnet/Opus)
+### Task Tool Model Parameter (Sonnet)
 
-The Task tool accepts a `model` parameter to specify which model should execute the spawned agent:
+The Task tool accepts a `model` parameter to specify sonnet for complexity 3 tasks.
 
 **Fallback Behavior:**
 - If model parameter is not supported: Log warning, use default model
-- If specified model unavailable: Fall back to sonnet
+- If sonnet unavailable: Fall back to Codex
 - Always log which model is actually being used
 
 ### Codex Execution Notes
 
-When spawning via Codex:
+When spawning via Codex (either gpt-5.2-codex or gpt-5.1-codex-max):
 - Use `--full-auto` for autonomous execution with workspace write access
+- Use `--` separator before prompts that start with `-` or `---`
+- For Codex Max: `codex -m gpt-5.1-codex-max exec --full-auto -- "..."`
+- For standard Codex: `codex exec --full-auto -- "..."`
 - The prompt must be self-contained (Codex doesn't inherit conversation context)
 - Include the domain skill content directly in the prompt
 - Codex will read the execution-agent.md file for the full protocol
@@ -901,7 +937,7 @@ After Wave 1 with 3 parallel tasks:
 ### Parent Task 3.0: Setup Infrastructure
 
 **Commit:** ghi789
-**Model:** opus
+**Model:** codex-max (gpt-5.1-codex-max)
 **Domain:** infrastructure
 
 #### Patterns Applied
@@ -1025,9 +1061,9 @@ handleWaveFailures(wave_results, task_file):
 
 bumpModel(complexity):
   IF complexity < 4:
-    RETURN "opus"  # Bump to stronger model
+    RETURN "codex-max"  # Bump to stronger model (gpt-5.1-codex-max)
   ELSE:
-    RETURN "opus"  # Already opus, keep it
+    RETURN "codex-max"  # Already codex-max, keep it
 ```
 
 ### User Prompts
@@ -1042,7 +1078,7 @@ Output:
   Step 5/8 : RUN npm ci
   npm ERR! Could not resolve dependency
 
-🔄 Retrying with opus model and error context...
+🔄 Retrying with codex-max model and error context...
 ```
 
 **After Retry Fails:**
@@ -1276,7 +1312,7 @@ _Cross-task learnings will be recorded below as parent tasks complete._
 
 **Completed:** 2026-01-12T11:30:00Z
 **Commit:** def456ghi789
-**Model Used:** opus
+**Model Used:** codex-max (gpt-5.1-codex-max)
 
 ### Patterns Applied
 - Manager pattern for SessionManager
