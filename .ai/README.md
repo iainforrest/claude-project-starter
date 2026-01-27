@@ -14,6 +14,39 @@ This system is designed to:
 - Scale gracefully to mono-repos when needed
 - Provide instant access without re-analyzing the codebase
 
+## CLAUDE.md vs .ai/ Integration
+
+**CLAUDE.md** and the `.ai/` folder serve different purposes:
+
+| File | Purpose | Target Size |
+|------|---------|-------------|
+| `CLAUDE.md` | Project identity + memory router | 50-80 lines |
+| `.ai/` folder | Authoritative project knowledge | ~3,000 lines |
+
+**CLAUDE.md should contain ONLY:**
+- Project identity (1-2 sentences)
+- Tech stack one-liner
+- Memory system pointer table (routes to .ai/ files)
+- Slash commands reference
+- Universal rules (2-3 max, only if they affect every task)
+
+**CLAUDE.md should NOT contain:**
+- Build/test/deploy commands (use OPS.md)
+- Architecture details (use ARCHITECTURE.json)
+- Code patterns (use PATTERNS.md)
+- Constraints/limitations (use CONSTRAINTS.md)
+- File locations (use FILES.json)
+
+**Why this matters:**
+- CLAUDE.md is read on every Claude Code session
+- Lean CLAUDE.md = faster startup, less noise
+- Content in .ai/ files is updated by `/update` command
+- Content in CLAUDE.md requires manual maintenance
+
+**Migration:** If your CLAUDE.md exceeds 100 lines, see `.ai/solutions/claude-md-migration.yaml` for a step-by-step guide to slim it down.
+
+**Health Check:** The `/update` command includes a CLAUDE.md health check that warns about bloat and duplication.
+
 ## Quick Navigation
 
 | Working On | Files to Load | Est. Tokens |

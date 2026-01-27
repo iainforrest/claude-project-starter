@@ -1,0 +1,120 @@
+# CLAUDE.md Migration Guide
+# Use this checklist when slimming bloated CLAUDE.md files
+
+id: claude-md-migration
+title: "Migrate bloated CLAUDE.md to lean template"
+created: 2026-01-26
+tags: [claude-md, migration, memory-system]
+
+problem: |
+  CLAUDE.md files accumulate content that belongs in .ai/ files,
+  causing duplication and staleness. Over time they grow to 200-400
+  lines when they should be 50-80 lines.
+
+symptoms:
+  - "CLAUDE.md exceeds 100 lines"
+  - "Build commands duplicated between CLAUDE.md and OPS.md"
+  - "Architecture details in CLAUDE.md that also exist in ARCHITECTURE.json"
+  - "Patterns in CLAUDE.md that also exist in PATTERNS.md"
+  - "CLAUDE.md requires manual updates after changes"
+
+rootCause: |
+  /init creates CLAUDE.md with project-specific content, but there's
+  no integration with /update to keep it current. Users add content
+  directly to CLAUDE.md instead of the authoritative .ai/ files.
+
+solution: |
+  Transform CLAUDE.md into identity + router (50-80 lines).
+  Move all content to authoritative .ai/ files.
+
+migrationSteps:
+  - name: "1. Audit current CLAUDE.md"
+    actions:
+      - "Count lines: wc -l CLAUDE.md"
+      - "Identify build commands (belong in OPS.md)"
+      - "Identify architecture details (belong in ARCHITECTURE.json)"
+      - "Identify patterns/templates (belong in PATTERNS.md)"
+      - "Identify constraints (belong in CONSTRAINTS.md)"
+      - "Identify file locations (belong in FILES.json)"
+
+  - name: "2. Check .ai/ for existing content"
+    actions:
+      - "Read OPS.md - does it already have the build commands?"
+      - "Read ARCHITECTURE.json - does it have the architecture?"
+      - "Read PATTERNS.md - does it have the patterns?"
+      - "Read CONSTRAINTS.md - does it have the constraints?"
+      - "Only migrate content NOT already present"
+
+  - name: "3. Migrate unique content to .ai/"
+    actions:
+      - "Move build/test/deploy commands to OPS.md"
+      - "Move architecture details to ARCHITECTURE.json"
+      - "Move code patterns to PATTERNS.md or patterns/ folder"
+      - "Move constraints/limitations to CONSTRAINTS.md"
+      - "Move file locations to FILES.json"
+      - "Do NOT create duplicates - add to existing sections"
+
+  - name: "4. Replace CLAUDE.md with lean template"
+    actions:
+      - "Copy templates/CLAUDE.md to project root"
+      - "Fill project identity (1-2 sentences max)"
+      - "Fill tech stack one-liner"
+      - "Add 2-3 universal rules IF they affect every task"
+      - "Most rules belong in CONSTRAINTS.md, not here"
+
+  - name: "5. Validate"
+    actions:
+      - "Line count < 80"
+      - "No build commands in CLAUDE.md"
+      - "No architecture details in CLAUDE.md"
+      - "No patterns in CLAUDE.md"
+      - "Memory system pointer table present"
+      - "Slash commands table present"
+
+contentMapping:
+  fromClaudeMd: "Build commands"
+  toFile: "OPS.md"
+  section: "Build & Development"
+
+  fromClaudeMd: "Test commands"
+  toFile: "OPS.md"
+  section: "Testing"
+
+  fromClaudeMd: "Deploy procedures"
+  toFile: "OPS.md"
+  section: "Deployment"
+
+  fromClaudeMd: "Architecture diagrams"
+  toFile: "ARCHITECTURE.json"
+  section: "components or dataFlows"
+
+  fromClaudeMd: "Code patterns"
+  toFile: "PATTERNS.md"
+  section: "patterns/ folder"
+
+  fromClaudeMd: "Constraints/limitations"
+  toFile: "CONSTRAINTS.md"
+  section: "Appropriate category"
+
+  fromClaudeMd: "File locations"
+  toFile: "FILES.json"
+  section: "Appropriate layer"
+
+targetLineCount:
+  minimum: 40
+  ideal: 50-60
+  maximum: 80
+  warning: 100
+
+preventionSteps:
+  - "Run /update regularly - it validates CLAUDE.md health"
+  - "Add new content to .ai/ files, not CLAUDE.md"
+  - "CLAUDE.md should only contain identity and routing"
+
+relatedFiles:
+  - "templates/CLAUDE.md"
+  - ".ai/OPS.md"
+  - ".ai/ARCHITECTURE.json"
+  - ".ai/PATTERNS.md"
+  - ".ai/CONSTRAINTS.md"
+  - ".ai/FILES.json"

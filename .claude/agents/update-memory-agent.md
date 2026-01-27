@@ -293,14 +293,53 @@ No authority or structure violations detected.
 ```
 
 **Handling Results:**
-- **PASS**: Continue to Phase 6 (Verification) and commit
+- **PASS**: Continue to Phase 5.6 (CLAUDE.md Health Check)
 - **FAIL**: Fix all violations before proceeding
   1. Apply the required fixes using Edit tool
   2. Re-run Codex review to confirm fixes
-  3. Only proceed to commit when review passes
+  3. Only proceed when review passes
 
 **Why This Step Exists:**
 Catches accidental authority violations before they enter the codebase. Enforces the single-source-of-truth principle that makes the memory system maintainable.
+
+### Phase 5.6: CLAUDE.md Health Check
+
+**Validate CLAUDE.md stays lean and doesn't duplicate .ai/ content.**
+
+Check the root CLAUDE.md file (if it exists) for:
+
+1. **Line count** - Should be < 100 lines (ideal: 50-80)
+2. **Content duplication** - Should NOT contain content that belongs in .ai/ files:
+   - Build/test/deploy commands (belong in OPS.md)
+   - Architecture details (belong in ARCHITECTURE.json)
+   - Code patterns (belong in PATTERNS.md)
+   - Constraints/limitations (belong in CONSTRAINTS.md)
+   - File locations (belong in FILES.json)
+3. **Memory system pointer** - Should have table pointing to .ai/ files
+4. **Slash commands table** - Should list available commands
+
+**Output format:**
+```
+## CLAUDE.md Health Check
+
+Line count: [X] lines [OK/WARNING: exceeds 100 lines]
+
+Duplication scan:
+- [OK/WARNING] Build commands: [none found / found commands that belong in OPS.md]
+- [OK/WARNING] Architecture: [none found / found details that belong in ARCHITECTURE.json]
+- [OK/WARNING] Patterns: [none found / found patterns that belong in PATTERNS.md]
+- [OK/WARNING] Constraints: [none found / found constraints that belong in CONSTRAINTS.md]
+
+Memory pointer table: [Present/Missing]
+Slash commands table: [Present/Missing]
+
+Status: [HEALTHY / NEEDS ATTENTION]
+Recommendation: [None / See .ai/solutions/claude-md-migration.yaml for migration guide]
+```
+
+**Key Decision:** Report issues but do NOT auto-edit CLAUDE.md. This keeps CLAUDE.md stable and intentional. The user can follow the migration guide if they want to slim it down.
+
+**If CLAUDE.md doesn't exist:** Skip this check, output "CLAUDE.md: Not present (skipped)"
 
 ### Phase 6: Commit and Verification
 
