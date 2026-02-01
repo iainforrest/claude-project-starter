@@ -263,7 +263,7 @@ Single-model findings should show their source and lower confidence:
 
 ### Step 6: Auto-Fix Option (CRITICAL/HIGH)
 
-If CRITICAL or HIGH findings exist, offer to auto-fix:
+If CRITICAL or HIGH findings exist in merged results (dual-model) or review output (codex-only), offer to auto-fix:
 
 ```
 Found X CRITICAL and Y HIGH issues. Would you like me to auto-fix these?
@@ -273,13 +273,17 @@ Found X CRITICAL and Y HIGH issues. Would you like me to auto-fix these?
 
 **If user approves auto-fix:**
 
-Extract the task list from the review output and run Codex in full-auto mode:
+Extract CRITICAL and HIGH findings:
+- **Dual-model mode**: Read from `/tmp/code-review-merged.json`
+- **Codex-only mode**: Read from `/tmp/codex-review-output.txt`
+
+Then run Codex in full-auto mode:
 
 ```bash
 codex exec --full-auto "Fix the following code review issues. Be precise and only change what's needed.
 
 ISSUES TO FIX:
-[Paste CRITICAL and HIGH findings from review]
+[Paste CRITICAL and HIGH findings from merged results]
 
 Read the relevant files, make the fixes, and verify they work.
 Do NOT make any changes beyond what's needed to fix these specific issues."
@@ -290,7 +294,106 @@ Do NOT make any changes beyond what's needed to fix these specific issues."
 2. Offer to re-run the review to verify fixes
 3. If issues remain, present them for manual review
 
-### Step 7: Wrap Up
+### Step 7: Triage MEDIUM/LOW Findings
+
+After CRITICAL/HIGH issues are fixed (or if none exist), triage remaining MEDIUM and LOW findings.
+
+**Skip this step if:**
+- User passed `--no-triage` flag
+- No MEDIUM or LOW findings exist
+
+**Batch Mode Detection:**
+
+If more than 5 MEDIUM/LOW findings exist, offer batch options first:
+
+```
+Found 12 MEDIUM/LOW findings. Would you like to:
+1. Triage each individually
+2. Add all to tech debt (TECH_DEBT.md)
+3. Skip all non-critical findings
+```
+
+**Individual Triage:**
+
+For each MEDIUM or LOW finding, present to user:
+
+```
+[CR-005] Code Quality: Magic number in timeout calculation
+Severity: MEDIUM | Source: Claude only | Confidence: Single-model
+Location: src/services/retry.ts:45
+
+Issue: Hardcoded timeout value 30000 should be a named constant
+
+Why it matters: Reduces code readability and makes future changes harder
+
+Recommended fix: Extract to TIMEOUT_MS constant at file top
+
+Options:
+1. Fix now - Address this before proceeding
+2. Tech debt - Add to TECH_DEBT.md for later
+3. Skip - Not worth tracking
+
+Your choice (1/2/3)?
+```
+
+**Based on user response:**
+
+- **1 (Fix now)**: Add to `/tmp/code-review-fixes.json` for batch fixing
+- **2 (Tech debt)**: Add to `/tmp/tech-debt-additions.json`
+- **3 (Skip)**: Do not track, continue to next finding
+
+**After triage completes:**
+
+If any findings were marked "Fix now":
+1. Extract all deferred fixes from `/tmp/code-review-fixes.json`
+2. Run Codex auto-fix with these findings:
+   ```bash
+   codex exec --full-auto "Fix the following code review issues...
+   [Paste findings marked for immediate fix]
+   ..."
+   ```
+3. Show what was changed: `git diff`
+4. Offer to re-run review if significant changes
+
+If any findings were marked "Tech debt":
+- Proceed to Step 8 to update TECH_DEBT.md
+
+### Step 8: Update TECH_DEBT.md
+
+Only run this step if findings were added to `/tmp/tech-debt-additions.json` during triage.
+
+**Process:**
+
+1. Read current `.ai/TECH_DEBT.md`
+2. Find highest `TD-XXX` number in the file
+3. For each tech debt item from `/tmp/tech-debt-additions.json`:
+   - Assign next sequential `TD-XXX` ID
+   - Format using the TECH_DEBT.md template
+   - Include source attribution: `Source: CR-YYYY-MM-DD (Claude only | Codex only | Both)`
+   - Add `Added: YYYY-MM-DD` timestamp
+4. Append entries to appropriate severity section (MEDIUM or LOW)
+5. Update the summary table at the top of TECH_DEBT.md
+
+**Example Entry:**
+
+```markdown
+#### [TD-015] retry.ts: Magic number in timeout
+
+**Severity**: MEDIUM
+**Location**: `src/services/retry.ts:45`
+**Description**: Hardcoded timeout value 30000 should be a named constant
+**Why Deferred**: Low impact, cosmetic improvement
+**Impact**: Reduces code readability
+**Suggested Fix**: Extract to TIMEOUT_MS constant at file top
+**Added**: 2026-02-02
+**Source**: CR-2026-02-02 (Claude only)
+```
+
+**After updating TECH_DEBT.md:**
+- Confirm: "Added X items to tech debt"
+- Show the new TD-XXX IDs assigned
+
+### Step 9: Wrap Up
 
 After review (and optional fixes):
 - If all CRITICAL/HIGH resolved: "Ready for `/update` and `/commit`"
