@@ -1,10 +1,15 @@
 ---
-description: Run thorough code review on recent changes using Codex
+description: Run thorough code review on recent changes using Claude and Codex in parallel
 ---
 
-# Code Review Command (Codex-Powered)
+# Code Review Command (Dual-Model)
 
-**Objective:** Run a comprehensive code review using OpenAI Codex CLI, outputting structured findings with optional auto-fix for critical issues.
+**Objective:** Run comprehensive code review using both Claude (Opus) and OpenAI Codex in parallel, merging findings for maximum coverage with deduplication.
+
+## Review Modes
+
+- **Single Model (Codex)**: Use `--codex-only` for fast Codex-only review
+- **Dual Model (Default)**: Claude + Codex in parallel, findings merged
 
 ## When to Use
 
@@ -14,6 +19,15 @@ description: Run thorough code review on recent changes using Codex
 - **On-demand**: Anytime you want fresh eyes on recent work
 
 ## Execution Flow
+
+### Mode Selection
+
+If `--codex-only` flag is present:
+- Skip parallel model spawning
+- Run original Codex-only flow (Step 3)
+- Output is not JSON-merged
+
+Default: Dual-model parallel review
 
 ### Step 1: Determine Review Scope
 
@@ -29,7 +43,72 @@ git status --porcelain
 
 If there are uncommitted changes, review those. Otherwise, ask what to review.
 
-### Step 2: Run Codex Review
+### Step 2: Parallel Model Review (Dual-Model Mode)
+
+Skip this step when `--codex-only` is set.
+
+Spawn both models in parallel. Each reviews independently.
+
+First, prepare the diff based on scope:
+
+**For uncommitted changes (including untracked files):**
+```bash
+git add -N .  # Stage untracked for diff visibility
+git diff > /tmp/git-diff.txt
+git diff --cached >> /tmp/git-diff.txt
+git reset HEAD -- . 2>/dev/null || true  # Reset intent-to-add
+```
+
+**For branch comparison:**
+```bash
+git diff main...HEAD > /tmp/git-diff.txt
+```
+
+**For specific commit:**
+```bash
+git show <commit> > /tmp/git-diff.txt
+```
+
+**Claude (Opus) Review:** Task tool with code-review-agent
+
+```
+Task(
+  subagent_type: "general-purpose",
+  model: "opus",
+  prompt: """
+  Read .claude/agents/code-review-agent.md for your full protocol.
+
+  Output your findings in JSON format as specified in the agent file.
+
+  THE CHANGES TO REVIEW:
+  {diff content from /tmp/git-diff.txt}
+  """
+)
+```
+
+Write Claude output to `/tmp/code-review-claude.json`.
+
+**Codex Review:** Bash with codex exec
+
+```bash
+codex exec --full-auto "$(cat .claude/agents/code-review-agent.md)
+
+Output your findings in JSON format as specified in the JSON Output Schema section.
+
+THE CHANGES TO REVIEW:
+$(cat /tmp/git-diff.txt)
+" 2>&1 | tee /tmp/code-review-codex.json
+```
+
+**Codex Failure Handling:**
+If Codex fails (non-zero exit, empty output, rate limit):
+1. Log: "Codex failed. Proceeding with Claude-only review."
+2. Continue with Claude findings only
+3. Mark all findings as source: "claude"
+
+### Step 3: Run Codex Review (Codex-only Mode)
+
+Only run this step when `--codex-only` is set (legacy flow).
 
 **Option A: Quick Review (Codex Built-in)**
 
@@ -82,12 +161,13 @@ $(cat /tmp/git-diff.txt)
 - Output is captured to `/tmp/codex-review-output.txt`
 - Use Option A for quick checks, Option B for thorough pre-merge reviews
 
-### Step 3: Present Findings
+### Step 4: Present Findings
 
-After Codex completes:
-1. Read the output from `/tmp/codex-review-output.txt`
-2. Extract the summary section with finding counts (CRITICAL, HIGH, MEDIUM, LOW)
-3. Present findings to the user in a clear summary
+After review completes:
+1. For dual-model: use `/tmp/code-review-claude.json` and `/tmp/code-review-codex.json` as inputs for merge before presenting
+2. For codex-only: read the output from `/tmp/codex-review-output.txt`
+3. Extract the summary section with finding counts (CRITICAL, HIGH, MEDIUM, LOW)
+4. Present findings to the user in a clear summary
 
 **Summary format:**
 ```
@@ -102,7 +182,7 @@ After Codex completes:
 [Show findings grouped by severity]
 ```
 
-### Step 4: Auto-Fix Option (CRITICAL/HIGH)
+### Step 5: Auto-Fix Option (CRITICAL/HIGH)
 
 If CRITICAL or HIGH findings exist, offer to auto-fix:
 
@@ -131,7 +211,7 @@ Do NOT make any changes beyond what's needed to fix these specific issues."
 2. Offer to re-run the review to verify fixes
 3. If issues remain, present them for manual review
 
-### Step 5: Wrap Up
+### Step 6: Wrap Up
 
 After review (and optional fixes):
 - If all CRITICAL/HIGH resolved: "Ready for `/update` and `/commit`"
