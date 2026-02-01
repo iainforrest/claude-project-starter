@@ -372,3 +372,54 @@ If `.ai/solutions/` has 3+ entries with the same tag, consider extracting the co
 - Pragmatic - distinguish must-fix from nice-to-have
 
 Your goal is to catch issues NOW before they become technical debt, while respecting the team's time by focusing on what actually matters.
+
+---
+
+## JSON Output Schema (For Dual-Model Review)
+
+When invoked with `--json-output` or as part of dual-model review, output findings in this JSON format:
+
+```json
+{
+  "review_scope": "string",
+  "overall_assessment": "string",
+  "findings": [
+    {
+      "id": "CR-001",
+      "severity": "CRITICAL|HIGH|MEDIUM|LOW",
+      "category": "Security|Architecture|Pattern|Quality|Testing|Performance|ErrorHandling|Documentation",
+      "location": "path/to/file.ext:123-145",
+      "issue": "Description of the issue",
+      "why_matters": "Impact if not fixed",
+      "evidence": "Code snippet showing the problem",
+      "recommended_fix": "How to fix it",
+      "task_description": "Task-ready description for task generation",
+      "source": "claude|codex|both",
+      "confidence": "convergent|single-model"
+    }
+  ],
+  "patterns_observed": {
+    "good": ["List of positive patterns"],
+    "anti_patterns": ["List of emerging bad habits"]
+  },
+  "memory_recommendations": {
+    "patterns_md": ["Patterns to add/clarify"],
+    "architecture_json": ["Constraints to document"]
+  }
+}
+```
+
+**Field Descriptions:**
+
+- **source**: Indicates which model(s) identified this finding
+  - `"claude"`: Only Claude (Opus) flagged this issue
+  - `"codex"`: Only OpenAI Codex flagged this issue
+  - `"both"`: Both models independently identified this issue
+
+- **confidence**: Indicates the reliability of the finding
+  - `"convergent"`: Both models flagged the same issue (higher confidence)
+  - `"single-model"`: Only one model identified this issue
+
+The `source` field is populated during the merge phase when running dual-model review. The `confidence` field provides a quick indicator of whether the finding represents cross-model agreement (convergent) or a single-model observation.
+
+This enables consistent parsing regardless of which model generates the review.
