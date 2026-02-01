@@ -58,14 +58,75 @@ Investigation is about **understanding before committing**. Unlike `/feature` or
 
 ## Investigation Process
 
-### Phase 1: Scope Clarification (Adaptive)
+### Phase 0: Project Context Scan (Haiku Agent) — MANDATORY FIRST STEP
+
+**Before asking ANY clarifying questions, understand the project context.**
+
+This phase ensures you don't ask basic questions that the memory files could answer. Use a lightweight haiku agent to quickly scan all memory files and extract context relevant to the investigation question.
+
+**Use the Task tool with `subagent_type=Explore` and `model=haiku`:**
+
+```
+Quick project context scan for investigation question:
+"[USER'S INVESTIGATION QUESTION]"
+
+THOROUGHNESS: quick
+
+## Task
+Scan the AI memory files to extract context RELEVANT to this specific question.
+Return a focused summary that will help ask smarter clarifying questions.
+
+## Files to Scan
+1. `.ai/BUSINESS.json` - What does this project do? Key features? How does it work?
+2. `.ai/QUICK.md` - Tech stack, key commands, file locations
+3. `.ai/ARCHITECTURE.json` - System design, data flows, integrations
+4. `.ai/PATTERNS.md` - Implementation patterns used
+
+## Return Format (max 300 words)
+**Project Overview:**
+[1-2 sentences on what this project is/does]
+
+**Relevant to Question:**
+- [Fact from memory files that relates to the investigation question]
+- [Another relevant fact]
+- [Key constraint or context that matters]
+
+**Tech Stack:** [Brief list]
+
+**Key Components Involved:** [Components that might relate to the question]
+
+**Questions the Memory Files ALREADY Answer:**
+- [Question we don't need to ask because memory files answer it]
+
+**Gaps - Things to Clarify:**
+- [Question we should ask that memory files don't answer]
+```
+
+**After haiku returns:** Store as `PROJECT_CONTEXT`. Use this to skip basic questions and ask smarter ones.
+
+**Why This Matters:**
+- Prevents asking "How does your service work?" when BUSINESS.json explains it
+- Clarifying questions become specific and informed
+- User feels like the AI understands their project
+
+---
+
+### Phase 1: Scope Clarification (Informed by Project Context)
+
+**Use PROJECT_CONTEXT to ask smarter questions. Skip anything the memory files already answered.**
 
 **Start light (1-2 questions), go deeper only if idea is ambiguous.**
 
-**Initial Assessment Questions:**
-- "What problem are you trying to solve with this?"
-- "Any constraints I should know about (timeline, tech stack, team capacity)?"
+**Initial Assessment Questions (choose based on PROJECT_CONTEXT):**
+- "What problem are you trying to solve with this?" *(if not obvious from context)*
+- "Any constraints I should know about (timeline, tech stack, team capacity)?" *(tech stack may already be known)*
 - "How confident are you this is the right direction vs exploring alternatives?"
+
+**Questions to SKIP if PROJECT_CONTEXT answers them:**
+- How the service/app works (covered in BUSINESS.json)
+- What tech stack is used (covered in QUICK.md)
+- How components integrate (covered in ARCHITECTURE.json)
+- Current implementation patterns (covered in PATTERNS.md)
 
 **When to Ask More (up to 4-6 total):**
 - Idea is very broad ("make the app better")
@@ -75,7 +136,7 @@ Investigation is about **understanding before committing**. Unlike `/feature` or
 
 **When to Proceed with Fewer:**
 - Idea is specific ("add WebSocket support for live updates")
-- Context is sufficient
+- PROJECT_CONTEXT provides sufficient understanding
 - User has clearly thought it through
 
 **Stopping Criteria:**
@@ -332,8 +393,9 @@ recommendation: [proceed/hold/more-research/not-recommended]
 
 | Phase | Tool/Agent | Purpose |
 |-------|-----------|---------|
-| Phase 1 | AskUserQuestion | Scope clarification |
-| Phase 2 | Task (Explore) | Codebase & memory analysis |
+| Phase 0 | Task (Explore, haiku) | Quick project context scan |
+| Phase 1 | AskUserQuestion | Informed scope clarification |
+| Phase 2 | Task (Explore) | Deep codebase & memory analysis |
 | Phase 3 | Task (research-agent) | Web research |
 | Phase 3b | Context7 MCP | Library documentation |
 | Phase 4 | Direct synthesis | Combine findings |
@@ -346,6 +408,7 @@ recommendation: [proceed/hold/more-research/not-recommended]
 - Context7 queries can run in parallel for multiple libraries
 
 **Must be sequential:**
+- Phase 0 (context scan) MUST complete before Phase 1 (clarification)
 - Clarification (Phase 1) must complete before deep investigation
 - Synthesis (Phase 4) requires all prior phases complete
 
@@ -354,6 +417,8 @@ recommendation: [proceed/hold/more-research/not-recommended]
 ## Anti-Patterns to Avoid
 
 **DON'T:**
+- ❌ Skip Phase 0 - NEVER ask clarifying questions without project context first
+- ❌ Ask basic questions that memory files answer (e.g., "how does your service work?")
 - ❌ Automatically generate tasks or PRD after investigation
 - ❌ Skip web research when external patterns would help
 - ❌ Oversimplify feasibility ("should be easy")
@@ -362,6 +427,8 @@ recommendation: [proceed/hold/more-research/not-recommended]
 - ❌ Investigate indefinitely without synthesizing
 
 **DO:**
+- ✅ Always run Phase 0 haiku scan before asking questions
+- ✅ Use PROJECT_CONTEXT to ask informed, specific questions
 - ✅ Present findings neutrally
 - ✅ Include honest feasibility assessment
 - ✅ Offer multiple approach options when they exist
@@ -374,6 +441,8 @@ recommendation: [proceed/hold/more-research/not-recommended]
 ## Quality Checklist
 
 Before presenting investigation:
+- [ ] **Phase 0 completed** - Haiku agent scanned memory files, PROJECT_CONTEXT captured
+- [ ] **Informed clarification** - Questions used PROJECT_CONTEXT, didn't ask obvious things
 - [ ] **Scope understood** - Clear on what user wants to learn
 - [ ] **Codebase analyzed** - Explore agent completed, EXPLORE_CONTEXT captured
 - [ ] **Web research done** - Research agent completed, findings integrated
@@ -390,12 +459,20 @@ Before presenting investigation:
 
 **User:** `/investigate "Could we add AI-powered search to the app?"`
 
-**Phase 1 (Quick Clarification):**
-> "Quick clarification - are you thinking about AI for the search UI (smart suggestions, natural language queries) or for the backend (semantic search, embeddings)? Or exploring both?"
+**Phase 0 (Project Context Scan - Haiku):**
+- Scans BUSINESS.json: "E-commerce platform selling outdoor gear, ~50k products"
+- Scans ARCHITECTURE.json: "Kotlin backend, PostgreSQL, current search uses basic LIKE queries"
+- Scans QUICK.md: "SearchService.kt handles all search logic"
+- Returns PROJECT_CONTEXT: "E-commerce app with 50k products, basic SQL search, Kotlin backend"
+
+**Phase 1 (Informed Clarification):**
+> "I see you have an e-commerce platform with ~50k products and basic SQL search in SearchService.kt. For AI-powered search, are you thinking about the search UI (smart suggestions, natural language queries like 'waterproof hiking boots under $100') or the backend (semantic search, embeddings to find similar products)? Or exploring both?"
+
+*Note: Didn't ask "what does your app do?" because Phase 0 already answered that.*
 
 **User:** "Both - want to understand what's possible"
 
-**Phase 2 (Explore Agent):**
+**Phase 2 (Explore Agent - Deep Dive):**
 - Searches codebase for existing search implementation
 - Reads ARCHITECTURE.json for data patterns
 - Finds: Current search is basic text matching in SearchService.kt:45
