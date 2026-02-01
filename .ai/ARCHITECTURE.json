@@ -2,7 +2,7 @@
   "meta": {
     "projectName": "claude-project-starter",
     "version": "3.1.2",
-    "lastUpdated": "2026-01-29",
+    "lastUpdated": "2026-02-02",
     "description": "Architecture patterns, data flows, and component relationships"
   },
   "corePatterns": {
@@ -112,6 +112,23 @@
         "Structured output with actionable recommendations"
       ]
     },
+    "dualModelCodeReview": {
+      "description": "Parallel Claude and Codex code review with finding merge and deduplication",
+      "keyFiles": [".claude/commands/code-review.md", ".claude/agents/code-review-agent.md"],
+      "constraints": [
+        "Both models output standardized JSON schema",
+        "Deduplication uses hash(severity + category + location + first_50_chars_of_issue)",
+        "Codex failure falls back to Claude-only mode",
+        "Triage loop skips if --no-triage flag or fewer than 1 MEDIUM/LOW finding"
+      ],
+      "benefits": [
+        "Maximizes finding coverage via dual perspectives",
+        "Convergent findings have higher confidence (both models agree)",
+        "Single-model findings surface unique insights",
+        "User triage reduces noise (skip irrelevant findings)",
+        "Source attribution in TECH_DEBT.md tracks which model flagged issue"
+      ]
+    },
     "_example": {
       "description": "Example: How services/managers are structured",
       "keyFiles": ["services/ExampleService.ext"],
@@ -159,16 +176,18 @@
       "dataModel": "Git diffs → Authority-routed edits → Validated memory files"
     },
     "codeReviewFlow": {
-      "name": "Code review with automated tech debt capture",
+      "name": "Dual-model code review with parallel execution and automated tech debt capture",
       "steps": [
         "User invokes /code-review command",
-        "Command launches code-review-agent via Task tool",
-        "Agent analyzes git diffs using Codex CLI",
-        "CRITICAL/HIGH findings → fix immediately",
-        "MEDIUM/LOW findings → route to TECH_DEBT.md",
-        "Agent updates TECH_DEBT.md with context",
-        "Codex validates no authority violations",
-        "Agent returns review summary"
+        "Command spawns Claude (Opus) and Codex in parallel (default mode)",
+        "Each model reviews git diffs independently and outputs JSON",
+        "Findings merged with deduplication (hash-based matching)",
+        "Convergent findings marked as source: both, confidence: convergent",
+        "Single-model findings marked as source: claude|codex, confidence: single-model",
+        "CRITICAL/HIGH findings → auto-fix with user approval",
+        "MEDIUM/LOW findings → user triage loop (fix now, tech debt, skip)",
+        "Deferred findings appended to TECH_DEBT.md with source attribution",
+        "Command returns merged review summary with model breakdown"
       ],
       "keyFiles": [
         ".claude/commands/code-review.md",
@@ -176,7 +195,7 @@
         ".codex/prompts/code-review.md",
         ".ai/TECH_DEBT.md"
       ],
-      "dataModel": "Git diffs → Severity classification → Immediate fixes OR TECH_DEBT.md"
+      "dataModel": "Git diffs → Parallel JSON review (Claude + Codex) → Merge/deduplicate → Severity classification → Auto-fix OR triage → TECH_DEBT.md"
     },
     "debateFlow": {
       "name": "Multi-model debate for complex decision analysis",

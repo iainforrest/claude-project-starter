@@ -1,8 +1,8 @@
 {
   "meta": {
     "projectName": "claude-project-starter",
-    "version": "3.1.2",
-    "lastUpdated": "2026-01-29",
+    "version": "3.1.3",
+    "lastUpdated": "2026-02-02",
     "description": "Business logic, feature specifications, and product requirements"
   },
   "features": {
@@ -21,24 +21,27 @@
     },
     "codexIntegration": {
       "status": "complete",
-      "version": "v3.0.0",
-      "description": "Codex CLI integration for code review and validation",
+      "version": "v3.1.3",
+      "description": "Codex CLI integration for code review, validation, and dual-model orchestration",
       "keyComponents": [
-        "Three-tier execution (Opus → Sonnet → Codex)",
+        "Three-tier execution (Codex xhigh → Sonnet → Codex medium)",
         ".codex/prompts/code-review.md",
         "Authority rule validation",
-        "Automated tech debt capture"
+        "Automated tech debt capture",
+        "Dual-model code review (Claude + Codex parallel)",
+        "Finding merge and deduplication",
+        "User triage loop for MEDIUM/LOW findings"
       ]
     },
     "automatedKnowledgeCapture": {
       "status": "complete",
-      "version": "v3.0.0",
-      "description": "Commands automatically capture decisions, solutions, deprecations, tech debt",
+      "version": "v3.1.3",
+      "description": "Commands automatically capture decisions, solutions, deprecations, tech debt with model attribution",
       "keyComponents": [
         "/prd → decisions/*.md",
         "/bugs → solutions/*.yaml",
         "/execute → solutions/*.yaml, decisions/*.md, DEPRECATIONS.md",
-        "/code-review → TECH_DEBT.md"
+        "/code-review → TECH_DEBT.md with source attribution (Claude only|Codex only|Both)"
       ]
     },
     "templateSeparation": {
@@ -85,6 +88,21 @@
         "Parallel Round 1 (independent positions), sequential Rounds 2-3 (cross-examination)",
         "Synthesis phase produces consensus, divergences, and actionable recommendations",
         "Outputs to debates/ directory with brief.md, state.md, debate.md"
+      ]
+    },
+    "dualModelCodeReview": {
+      "status": "complete",
+      "version": "v3.1.3",
+      "description": "Parallel Claude and Codex code review with finding merge, deduplication, and user triage",
+      "keyComponents": [
+        "Parallel model spawning (Claude Opus via Task, Codex via Bash)",
+        "Standardized JSON output schema for both models",
+        "Hash-based finding deduplication",
+        "Convergent vs single-model confidence tagging",
+        "User triage loop for MEDIUM/LOW findings",
+        "Source attribution in TECH_DEBT.md",
+        "Fallback to Claude-only on Codex failure",
+        "--codex-only flag for legacy single-model mode"
       ]
     },
     "_example": {

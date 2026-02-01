@@ -9,6 +9,27 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- Dual-model code review with parallel Claude (Opus) and Codex execution
+- Finding merge and deduplication algorithm (hash-based matching)
+- Convergent finding indicators (source: both, confidence: convergent)
+- Single-model finding attribution (source: claude|codex, confidence: single-model)
+- User triage loop for MEDIUM/LOW findings with 3 options (fix now, tech debt, skip)
+- Source attribution in TECH_DEBT.md entries (Claude only|Codex only|Both)
+- JSON output schema for code-review-agent standardized across models
+- --codex-only flag for legacy single-model code review mode
+- Codex failure fallback to Claude-only mode
+
+### Changed
+- /code-review command now defaults to dual-model mode (Claude + Codex parallel)
+- Code review agent outputs standardized JSON for consistent merging
+- TECH_DEBT.md template updated with Source field for model attribution
+- Task-writer code review checkpoint updated to reference dual-model orchestration
+
+---
+
+## [3.1.2] - 2026-01-29
+
+### Added
 - Downstream effects analysis in /bugs, /feature, and /prd commands
 - /debate command for multi-model decision analysis with Claude + Codex
 - debate-agent.md for structured 3-round debate protocol

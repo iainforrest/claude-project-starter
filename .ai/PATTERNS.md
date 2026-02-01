@@ -48,6 +48,7 @@ Find the right pattern for your task:
 | Authority routing | Authority-Based Memory | (below) |
 | Automated capture | Knowledge Capture Pattern | (below) |
 | Codex validation | Three-Tier Execution | (below) |
+| Dual-model code review | Parallel Model Orchestration | (below) |
 | Downstream effects analysis | Downstream Effects Pattern | (below) |
 | Multi-model debate | Debate Orchestration Pattern | (below) |
 
@@ -331,6 +332,118 @@ debates/{topic-slug}/
 - **State file corruption**: Reconstruct from memory
 
 **Reference**: `.claude/commands/debate.md`, `.claude/agents/debate-agent.md`
+
+---
+
+## Built-in Pattern: Parallel Model Orchestration
+
+This pattern enables parallel execution of multiple AI models with finding merge and deduplication.
+
+### When to Use
+- Code review requiring maximum coverage (catch more issues via diverse perspectives)
+- Analysis benefiting from model diversity (different strengths surface different insights)
+- Quality assurance where convergent findings indicate high confidence
+- Situations where single-model blind spots could miss critical issues
+
+### Architecture Structure
+```
+Orchestrator (code-review.md)
+    ↓
+Parallel Spawn
+    ├─ Claude (Opus) via Task tool → JSON output
+    └─ Codex via Bash → JSON output
+    ↓
+Merge Phase
+    ├─ Deduplicate findings (hash-based)
+    ├─ Tag convergent findings (both models)
+    └─ Tag single-model findings (claude|codex)
+    ↓
+Output
+    └─ Merged findings with confidence indicators
+```
+
+### JSON Schema (Standardized Output)
+```json
+{
+  "findings": [
+    {
+      "id": "CR-001",
+      "severity": "CRITICAL|HIGH|MEDIUM|LOW",
+      "category": "Security|Architecture|Pattern|Quality|Testing|Performance|ErrorHandling|Documentation",
+      "location": "path/to/file.ext:123-145",
+      "issue": "Description of the issue",
+      "why_matters": "Impact if not fixed",
+      "evidence": "Code snippet showing the problem",
+      "recommended_fix": "How to fix it",
+      "task_description": "Task-ready description",
+      "source": "claude|codex|both",
+      "confidence": "convergent|single-model"
+    }
+  ]
+}
+```
+
+### Deduplication Algorithm
+```python
+def finding_hash(finding):
+    """Hash findings for deduplication"""
+    location = normalize(finding["location"])  # file:line-range
+    issue_start = normalize(finding["issue"][:50])
+    return hash(
+        finding["severity"] +
+        finding["category"] +
+        location +
+        issue_start
+    )
+
+def normalize(text):
+    """Lowercase and remove whitespace"""
+    return text.lower().replace(" ", "")
+```
+
+**Merge Rules:**
+1. Same hash in both outputs → keep one, mark `source: "both"`, `confidence: "convergent"`
+2. Hash only in Claude output → mark `source: "claude"`, `confidence: "single-model"`
+3. Hash only in Codex output → mark `source: "codex"`, `confidence: "single-model"`
+4. Similar but not identical (same file:line, different severity) → keep both, mark as related
+
+### Implementation Checklist
+- [ ] Define standardized JSON output schema for all models
+- [ ] Implement parallel spawning (Task tool for Claude, Bash for Codex)
+- [ ] Write temp files for each model's output
+- [ ] Implement deduplication hash function
+- [ ] Merge findings and tag with source/confidence
+- [ ] Handle model failure gracefully (fall back to single model)
+- [ ] Present findings with convergent indicators
+
+### Error Handling
+- **Codex unavailable**: Fall back to Claude-only mode, mark all findings `source: "claude"`
+- **Claude failure**: Fall back to Codex-only mode (rare, Task tool is reliable)
+- **Both fail**: Exit with error and suggest manual review
+- **Parse error**: Log raw output, skip that model's findings
+
+### User Triage Integration
+
+After merge, route findings by severity:
+- **CRITICAL/HIGH**: Offer auto-fix immediately
+- **MEDIUM/LOW**: User triage loop (fix now, tech debt, skip)
+
+**Triage Loop Pattern:**
+```
+For each MEDIUM/LOW finding:
+  Present: severity, source, confidence, location, issue, fix
+  Ask: "1. Fix now | 2. Tech debt | 3. Skip"
+  Based on response:
+    - Fix now → add to /tmp/code-review-fixes.json
+    - Tech debt → add to /tmp/tech-debt-additions.json
+    - Skip → continue to next finding
+```
+
+After triage:
+1. Batch-fix all "fix now" findings via Codex
+2. Append all "tech debt" findings to TECH_DEBT.md with source attribution
+
+**Reference**: `.claude/commands/code-review.md`, `.claude/agents/code-review-agent.md`
 
 ---
 

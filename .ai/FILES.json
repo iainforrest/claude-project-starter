@@ -1,7 +1,7 @@
 {
   "meta": {
     "projectName": "claude-project-starter",
-    "lastUpdated": "2026-01-29",
+    "lastUpdated": "2026-02-02",
     "totalFiles": 35,
     "description": "Smart file index with cross-references and quick navigation",
     "lineNumberPolicy": "Use globs or directories instead of file:line references."
@@ -145,7 +145,10 @@
     ".claude/commands/code-review.md": {
       "invokes": [".claude/agents/code-review-agent.md"],
       "validates": [".codex/prompts/code-review.md"],
-      "captures": [".ai/TECH_DEBT.md"]
+      "captures": [".ai/TECH_DEBT.md"],
+      "modes": ["dual-model (default)", "codex-only (--codex-only flag)"],
+      "parallelExecution": "Claude (Task tool) + Codex (Bash) spawn simultaneously",
+      "tempFiles": ["/tmp/code-review-claude.json", "/tmp/code-review-codex.json", "/tmp/code-review-merged.json", "/tmp/tech-debt-additions.json"]
     },
     ".claude/agents/update-memory-agent.md": {
       "uses": [".ai/QUICK.md"],
@@ -155,9 +158,11 @@
       "captures": {
         "CRITICAL": "fix immediately",
         "HIGH": "fix immediately",
-        "MEDIUM": ".ai/TECH_DEBT.md",
-        "LOW": ".ai/TECH_DEBT.md"
-      }
+        "MEDIUM": "user triage → .ai/TECH_DEBT.md or auto-fix",
+        "LOW": "user triage → .ai/TECH_DEBT.md or skip"
+      },
+      "jsonSchema": "Standardized output format for dual-model review",
+      "fields": ["id", "severity", "category", "location", "issue", "why_matters", "evidence", "recommended_fix", "task_description", "source", "confidence"]
     }
   },
   "keyInterfaces": {
