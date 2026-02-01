@@ -1,8 +1,8 @@
 {
   "meta": {
     "projectName": "claude-project-starter",
-    "version": "3.1.0",
-    "lastUpdated": "2026-01-25",
+    "version": "3.1.2",
+    "lastUpdated": "2026-01-29",
     "description": "Business logic, feature specifications, and product requirements"
   },
   "features": {
@@ -61,6 +61,30 @@
         "Sonnet for complexity 3",
         "Codex (gpt-5.2-codex, xhigh) for complexity 4-5",
         "Reasoning effort controlled via -c flag, not model switching"
+      ]
+    },
+    "downstreamEffectsAnalysis": {
+      "status": "complete",
+      "version": "v3.1.2",
+      "description": "Commands analyze ripple effects of changes before implementation",
+      "keyComponents": [
+        "/bugs command maps what breaks when fixing root cause",
+        "/feature command identifies consumers/dependents of changed files/APIs",
+        "/prd command includes downstream effects in exploration",
+        "Downstream effects include file:line, impact, and likelihood (HIGH/MEDIUM/LOW)",
+        "Helps prevent unintended consequences of code changes"
+      ]
+    },
+    "debateOrchestration": {
+      "status": "complete",
+      "version": "v3.1.2",
+      "description": "Multi-model debate system for holistic decision analysis",
+      "keyComponents": [
+        "/debate command orchestrates Claude + Codex analysis",
+        "3-round structured debate with cross-examination",
+        "Parallel Round 1 (independent positions), sequential Rounds 2-3 (cross-examination)",
+        "Synthesis phase produces consensus, divergences, and actionable recommendations",
+        "Outputs to debates/ directory with brief.md, state.md, debate.md"
       ]
     },
     "_example": {

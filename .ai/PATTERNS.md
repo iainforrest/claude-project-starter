@@ -48,6 +48,8 @@ Find the right pattern for your task:
 | Authority routing | Authority-Based Memory | (below) |
 | Automated capture | Knowledge Capture Pattern | (below) |
 | Codex validation | Three-Tier Execution | (below) |
+| Downstream effects analysis | Downstream Effects Pattern | (below) |
+| Multi-model debate | Debate Orchestration Pattern | (below) |
 
 *Table expands as you add patterns. Update when adding new domain files.*
 
@@ -127,21 +129,8 @@ This pattern ensures single source of truth for all content types.
 - Routing updates to correct authoritative file
 
 ### Authority Map
-```
-Content Type          → Authoritative File
-──────────────────────────────────────────
-System topology       → ARCHITECTURE.json
-File locations        → FILES.json
-Coding patterns       → PATTERNS.md
-Business rules        → BUSINESS.json
-Operations/runbooks   → OPS.md
-Decisions (ADR)       → decisions/*.md
-Solutions/learnings   → solutions/*.yaml
-Deprecations          → DEPRECATIONS.md
-Constraints           → CONSTRAINTS.md
-Tech debt             → TECH_DEBT.md
-Routing only          → QUICK.md (NO content)
-```
+
+**See QUICK.md** for the complete Authority Map table showing which file owns each content type.
 
 ### Implementation Checklist
 - [ ] Identify content type using authority map
@@ -229,6 +218,119 @@ Complexity assessment
 - [ ] Use Codex (xhigh) for complex tasks (4-5) via Bash with `codex -c 'model_reasoning_effort="xhigh"' exec --full-auto`
 
 **Reference**: `.claude/commands/execute.md` (model selection), `.claude/commands/code-review.md` (uses Codex)
+
+---
+
+## Built-in Pattern: Downstream Effects Analysis
+
+This pattern ensures changes are evaluated for ripple effects before implementation.
+
+### When to Use
+- During bug investigation (what breaks when we fix this?)
+- During feature exploration (what depends on the code we're changing?)
+- During PRD creation (what systems are affected by this feature?)
+- Before any significant refactoring
+
+### Analysis Structure
+```yaml
+downstream_effects:
+  - file: "path/to/file.ext:line"
+    impact: "What breaks if this changes"
+    likelihood: "HIGH / MEDIUM / LOW"
+  - file: "path/to/consumer.ext:line"
+    impact: "Consumers/dependents affected"
+    likelihood: "HIGH / MEDIUM / LOW"
+```
+
+### Questions to Ask
+1. **Who consumes this API/function/data?** - Search for imports and references
+2. **What tests cover this code?** - Check test files for dependencies
+3. **What features depend on current behavior?** - Review related user flows
+4. **What breaks if we change the contract?** - Consider interface changes
+5. **What needs updating if we modify this?** - Documentation, configs, related code
+
+### Implementation Checklist
+- [ ] Search codebase for references to changed code
+- [ ] Identify direct consumers (imports, function calls)
+- [ ] Identify indirect consumers (data dependencies, shared state)
+- [ ] Assess likelihood of breakage (HIGH/MEDIUM/LOW)
+- [ ] Document effects in exploration context
+- [ ] Include in fix options or implementation plan
+
+**Reference**: `.claude/commands/bugs.md`, `.claude/commands/feature.md`, `.claude/commands/prd.md`
+
+---
+
+## Built-in Pattern: Debate Orchestration
+
+Multi-model debate system for holistic analysis of complex decisions.
+
+### When to Use
+- Complex architectural decisions with multiple valid approaches
+- Feature prioritization requiring different perspectives
+- Risk assessment needing comprehensive coverage
+- Technical strategy planning
+- Any decision where "it depends" is the honest answer
+
+### Debate Structure
+```
+Phase 1: Input + Context
+  ├─ Parse topic and create debate directory
+  ├─ Load project context from .ai/ if available
+  └─ Optionally run Explore agent for codebase context
+
+Phase 2: Clarify (1 round)
+  ├─ Ask 2-4 questions about decision, constraints, success criteria
+  └─ Write brief.md and lock it
+
+Phase 3: Agent Array
+  ├─ Analyst A: Claude (Task tool, Sonnet)
+  └─ Analyst B: Codex (Bash, codex exec --full-auto)
+
+Phase 4: Round 1 (Parallel)
+  ├─ Both agents analyze independently
+  └─ Write state.md with Round 1 responses
+
+Phase 5: Rounds 2-3 (Sequential Cross-Examination)
+  ├─ Each agent sees all previous responses
+  ├─ Concede valid points, challenge disagreements
+  └─ Add new evidence and refine positions
+
+Phase 6: Synthesis (Orchestrator)
+  ├─ Consensus points
+  ├─ Key divergences
+  ├─ Recommendation
+  ├─ Validation steps
+  └─ Action plan
+
+Phase 7: Output
+  └─ Assemble debate.md with all sections
+```
+
+### Output Files
+```
+debates/{topic-slug}/
+  ├─ brief.md          # Decision context and constraints
+  ├─ state.md          # All rounds with agent responses
+  └─ debate.md         # Complete debate with synthesis
+```
+
+### Implementation Checklist
+- [ ] Parse topic and generate slug
+- [ ] Clarify decision with user (mandatory)
+- [ ] Spawn agents in parallel for Round 1
+- [ ] Append all responses to state.md
+- [ ] Run cross-examination rounds sequentially
+- [ ] Synthesize findings (orchestrator, not agents)
+- [ ] Assemble final debate.md
+- [ ] Handle Codex failures (fallback to Claude-haiku)
+
+### Error Handling
+- **Codex unavailable**: Fall back to Claude-haiku as Analyst B
+- **Agent timeout**: Ask user to continue or retry
+- **State file corruption**: Reconstruct from memory
+
+**Reference**: `.claude/commands/debate.md`, `.claude/agents/debate-agent.md`
 
 ---
 

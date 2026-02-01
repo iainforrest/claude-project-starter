@@ -1,8 +1,8 @@
 {
   "meta": {
     "projectName": "claude-project-starter",
-    "lastUpdated": "2026-01-25",
-    "totalFiles": 33,
+    "lastUpdated": "2026-01-29",
+    "totalFiles": 35,
     "description": "Smart file index with cross-references and quick navigation",
     "lineNumberPolicy": "Use globs or directories instead of file:line references."
   },
@@ -19,7 +19,9 @@
         ".claude/commands/commit.md",
         ".claude/commands/update.md",
         ".claude/commands/feature.md",
-        ".claude/commands/code-review.md"
+        ".claude/commands/code-review.md",
+        ".claude/commands/debate.md",
+        ".claude/commands/drift-report.md"
       ]
     },
     "agents": {
@@ -32,7 +34,8 @@
       "support": [
         ".claude/agents/cto-technical-advisor.md",
         ".claude/agents/security-auditor.md",
-        ".claude/agents/ui-ux-expert.md"
+        ".claude/agents/ui-ux-expert.md",
+        ".claude/agents/debate-agent.md"
       ]
     },
     "memorySystem": {
@@ -132,6 +135,12 @@
     ".claude/commands/pull-fc.md": {
       "syncs": [".claude/commands/", ".claude/agents/", ".claude/skills/", "templates/.ai/", "templates/tasks/"],
       "excludes": [".ai/", ".claude/settings.local.json"]
+    },
+    ".claude/commands/debate.md": {
+      "uses": [".ai/QUICK.md", ".ai/ARCHITECTURE.json", ".ai/PATTERNS.md"],
+      "invokes": [".claude/agents/debate-agent.md"],
+      "outputs": ["debates/{topic-slug}/brief.md", "debates/{topic-slug}/state.md", "debates/{topic-slug}/debate.md"],
+      "externalTools": ["codex"]
     },
     ".claude/commands/code-review.md": {
       "invokes": [".claude/agents/code-review-agent.md"],

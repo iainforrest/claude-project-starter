@@ -67,19 +67,7 @@ This system is designed to:
 
 **Core Principle**: Each piece of knowledge has ONE authoritative home. No duplication across files.
 
-| Content Type | Authoritative File | Why Here |
-|--------------|-------------------|----------|
-| **Commands** (build, test, deploy) | OPS.md | Operational procedures |
-| **File locations** | FILES.json | File index |
-| **Debugging steps** | OPS.md | Operational runbooks |
-| **Architecture patterns** | ARCHITECTURE.json | System structure |
-| **Business rules** | BUSINESS.json | Domain knowledge |
-| **Code templates** | patterns/*.md | Implementation patterns |
-| **Limitations** | CONSTRAINTS.md | What we can't do |
-| **Deprecated APIs** | DEPRECATIONS.md | Migration tracking |
-| **Deferred issues** | TECH_DEBT.md | Known unfixed problems |
-| **Design decisions** | decisions/*.md | ADR records |
-| **Past solutions** | solutions/*.yaml | Solved problems |
+**See QUICK.md** for the complete Authority Map table showing which file owns each content type.
 
 **Navigation**: Use QUICK.md as your router to find where specific content lives.
 

@@ -1,8 +1,8 @@
 {
   "meta": {
     "projectName": "claude-project-starter",
-    "version": "3.1.0",
-    "lastUpdated": "2026-01-25",
+    "version": "3.1.2",
+    "lastUpdated": "2026-01-29",
     "description": "Architecture patterns, data flows, and component relationships"
   },
   "corePatterns": {
@@ -79,6 +79,39 @@
         "Deep reasoning for complex tasks without model switching"
       ]
     },
+    "downstreamEffectsAnalysis": {
+      "description": "Commands analyze ripple effects before implementation",
+      "keyFiles": [".claude/commands/bugs.md", ".claude/commands/feature.md", ".claude/commands/prd.md"],
+      "constraints": [
+        "Must identify file:line of affected code",
+        "Must assess likelihood (HIGH/MEDIUM/LOW)",
+        "Integrated into exploration protocols",
+        "Included in EXPLORE_CONTEXT handoff"
+      ],
+      "benefits": [
+        "Prevents unintended consequences",
+        "Identifies tests needing updates",
+        "Maps consumers and dependents",
+        "Informs risk assessment for fixes"
+      ]
+    },
+    "debateOrchestration": {
+      "description": "Multi-model debate for holistic decision analysis",
+      "keyFiles": [".claude/commands/debate.md", ".claude/agents/debate-agent.md"],
+      "constraints": [
+        "3-round structured format (opening, cross-exam, cross-exam)",
+        "Mandatory clarification phase before debate starts",
+        "Parallel Round 1, sequential Rounds 2-3",
+        "Orchestrator synthesizes, does not analyze",
+        "Codex fallback to Claude-haiku on failure"
+      ],
+      "benefits": [
+        "Multiple perspectives on complex decisions",
+        "Natural model differences create thoroughness",
+        "Cross-examination surfaces blind spots",
+        "Structured output with actionable recommendations"
+      ]
+    },
     "_example": {
       "description": "Example: How services/managers are structured",
       "keyFiles": ["services/ExampleService.ext"],
@@ -144,6 +177,29 @@
         ".ai/TECH_DEBT.md"
       ],
       "dataModel": "Git diffs → Severity classification → Immediate fixes OR TECH_DEBT.md"
+    },
+    "debateFlow": {
+      "name": "Multi-model debate for complex decision analysis",
+      "steps": [
+        "User invokes /debate [topic] command",
+        "Command creates debates/{topic-slug}/ directory",
+        "Optionally loads .ai/ context for project-related topics",
+        "Clarification phase: ask 2-4 questions, lock brief.md",
+        "Round 1 (parallel): Spawn Claude + Codex agents independently",
+        "Write state.md with Round 1 responses",
+        "Rounds 2-3 (sequential): Cross-examination with full history",
+        "Append each round to state.md",
+        "Synthesis phase: Orchestrator produces recommendations",
+        "Assemble debate.md with all sections"
+      ],
+      "keyFiles": [
+        ".claude/commands/debate.md",
+        ".claude/agents/debate-agent.md",
+        "debates/{topic-slug}/brief.md",
+        "debates/{topic-slug}/state.md",
+        "debates/{topic-slug}/debate.md"
+      ],
+      "dataModel": "Topic → Brief → 3 rounds (independent + cross-exam) → Synthesis → Actionable recommendations"
     },
     "_example": {
       "name": "User authentication flow",

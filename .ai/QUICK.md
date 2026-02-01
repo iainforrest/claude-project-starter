@@ -27,10 +27,10 @@
 
 ## Quick Start
 
-**Commands**: See `.claude/commands/` for available slash commands (`/prd`, `/execute`, `/update`, etc.)
+**Commands**: See commandWorkflow section in file index for available slash commands
 
-**Operations**: See OPS.md for build/test/debug commands and runbooks
+**Operations**: See operations file for build/test/debug commands and runbooks
 
-**File Structure**: See FILES.json for complete file index and locations
+**File Structure**: See file index for complete file map and locations
 
 **How to Use**: Start with the authority map above to route content to the correct file

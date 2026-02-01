@@ -9,10 +9,15 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- Downstream effects analysis in /bugs, /feature, and /prd commands
+- /debate command for multi-model decision analysis with Claude + Codex
+- debate-agent.md for structured 3-round debate protocol
+- debates/ directory output structure (brief.md, state.md, debate.md)
 
 ### Changed
-
-### Fixed
+- Exploration protocols now include "Map Downstream Effects" step
+- Agent return formats extended with downstream_effects array
+- Return format word limits increased to accommodate downstream effects sections
 
 ---
 
