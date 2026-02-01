@@ -54,7 +54,7 @@ This file captures:
 
 **Added**: [YYYY-MM-DD]
 
-**Source**: [CR-YYYY-MM-DD or other source reference]
+**Source**: [CR-YYYY-MM-DD] [Claude only|Codex only|Both]
 
 **Related**: [Links to ADRs, issues, or other tech debt items]
 
@@ -78,7 +78,7 @@ This file captures:
 
 **Added**: [YYYY-MM-DD]
 
-**Source**: [CR-YYYY-MM-DD]
+**Source**: [CR-YYYY-MM-DD] [Claude only|Codex only|Both]
 
 ---
 
@@ -196,7 +196,7 @@ This file captures:
 
 **Added**: YYYY-MM-DD
 
-**Source**: [CR-YYYY-MM-DD or other reference]
+**Source**: [CR-YYYY-MM-DD] [Claude only|Codex only|Both]
 
 **Related**: [Links to related items/ADRs]
 ```
