@@ -135,8 +135,9 @@ EXPLORE_CONTEXT: |
     </files>
     <subtasks>
       <subtask id="[N-1].1" complexity="2" status="pending">
-        <description>Run code review agent on all changes</description>
-        <details>Use Task tool with subagent_type='code-review-agent'.
+        <description>Checkpoint placeholder for orchestrated code review</description>
+        <details>This is a checkpoint placeholder. The orchestrator invokes Skill(skill="code-review") to run the review.
+Dual-model review (Claude + Codex in parallel) is the default.
 Address all CRITICAL and HIGH findings before proceeding.
 Re-run code review if significant fixes were made.
 GATE: Only proceed to memory update when code review passes.</details>
