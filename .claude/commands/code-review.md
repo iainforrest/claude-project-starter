@@ -24,7 +24,7 @@ description: Run thorough code review on recent changes using Claude and Codex i
 
 If `--codex-only` flag is present:
 - Skip parallel model spawning
-- Run original Codex-only flow (Step 3)
+- Run original Codex-only flow (Step 4)
 - Output is not JSON-merged
 
 Default: Dual-model parallel review
@@ -106,7 +106,63 @@ If Codex fails (non-zero exit, empty output, rate limit):
 2. Continue with Claude findings only
 3. Mark all findings as source: "claude"
 
-### Step 3: Run Codex Review (Codex-only Mode)
+### Step 3: Merge Findings (Dual-Model Mode)
+
+Skip this step when `--codex-only` is set.
+
+After both models complete, merge their findings.
+
+**Inputs:** `/tmp/code-review-claude.json` and `/tmp/code-review-codex.json`
+
+**Deduplication Algorithm:**
+
+For each finding, compute a hash using:
+```
+hash = hash(normalize(severity + category + location + first_50_chars_of_issue))
+```
+
+Notes:
+- `location` is the file path + line range (for example: `src/file.ts:12-24`)
+- `normalize()` lowercases and removes whitespace for consistent matching
+- `first_50_chars_of_issue` comes from the start of the `issue` text
+
+**Merge Rules:**
+1. If the same hash appears in both model outputs:
+   - Keep one finding
+   - Set `source: "both"`
+   - Set `confidence: "convergent"`
+   - Prefer the more detailed issue description (longer text)
+
+2. If the hash appears in only one model output:
+   - Keep the finding
+   - Set `source: "claude"` or `source: "codex"`
+   - Set `confidence: "single-model"`
+
+3. Similar but not identical findings (same file:line, different severity):
+   - Keep both findings
+   - Mark them as related (for example: `related: true`)
+   - Note the severity mismatch in the summary
+
+**Output:** Write merged findings to `/tmp/code-review-merged.json`
+
+**Summary Display:**
+```
+## Dual-Model Code Review Complete
+
+**Findings by Model:**
+- Convergent (both models): X
+- Claude only: Y
+- Codex only: Z
+- Total unique: X+Y+Z
+
+**Findings by Severity:**
+- CRITICAL: X
+- HIGH: X
+- MEDIUM: X
+- LOW: X
+```
+
+### Step 4: Run Codex Review (Codex-only Mode)
 
 Only run this step when `--codex-only` is set (legacy flow).
 
@@ -161,19 +217,26 @@ $(cat /tmp/git-diff.txt)
 - Output is captured to `/tmp/codex-review-output.txt`
 - Use Option A for quick checks, Option B for thorough pre-merge reviews
 
-### Step 4: Present Findings
+### Step 5: Present Findings
 
 After review completes:
-1. For dual-model: use `/tmp/code-review-claude.json` and `/tmp/code-review-codex.json` as inputs for merge before presenting
+1. For dual-model: read merged results from `/tmp/code-review-merged.json`
 2. For codex-only: read the output from `/tmp/codex-review-output.txt`
-3. Extract the summary section with finding counts (CRITICAL, HIGH, MEDIUM, LOW)
+3. Extract the summary section with model and severity counts
 4. Present findings to the user in a clear summary
+
+For codex-only mode, omit model breakdown and convergent tags; all findings are single-model (Codex).
 
 **Summary format:**
 ```
 ## Code Review Complete
 
-**Findings:**
+**Findings by Model:**
+- Convergent (both models): X
+- Claude only: Y
+- Codex only: Z
+
+**Findings by Severity:**
 - CRITICAL: X
 - HIGH: X
 - MEDIUM: X
@@ -182,7 +245,23 @@ After review completes:
 [Show findings grouped by severity]
 ```
 
-### Step 5: Auto-Fix Option (CRITICAL/HIGH)
+**Convergent Finding Indicator:**
+
+When presenting findings, mark convergent ones specially:
+
+```
+### [CR-001] Security: SQL Injection Risk [CONVERGENT]
+**Severity**: CRITICAL
+**Source**: Both models
+**Confidence**: High
+...
+```
+
+Single-model findings should show their source and lower confidence:
+- **Source**: Claude or Codex
+- **Confidence**: Single-model
+
+### Step 6: Auto-Fix Option (CRITICAL/HIGH)
 
 If CRITICAL or HIGH findings exist, offer to auto-fix:
 
@@ -211,7 +290,7 @@ Do NOT make any changes beyond what's needed to fix these specific issues."
 2. Offer to re-run the review to verify fixes
 3. If issues remain, present them for manual review
 
-### Step 6: Wrap Up
+### Step 7: Wrap Up
 
 After review (and optional fixes):
 - If all CRITICAL/HIGH resolved: "Ready for `/update` and `/commit`"
