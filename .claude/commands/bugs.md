@@ -102,10 +102,11 @@ THOROUGHNESS: very thorough
 1. **Locate Symptom:** Find UI/handler code, entry point where bug triggers
 2. **Trace Data Flow:** Follow UI → business logic → data layer
 3. **Find Root Cause:** Check edge cases, error handling, logic flaws, race conditions
-4. **Check Related Code:** Compare with similar working features, check tests, recent changes
-5. **Assess Impact:** Who affected, data risk, workarounds available
+4. **Map Downstream Effects of Fix:** What else depends on current behavior? What tests need updating?
+5. **Check Related Code:** Compare with similar working features, check tests, recent changes
+6. **Assess Impact:** Who affected, data risk, workarounds available
 
-## Return Format (max 700 words)
+## Return Format (max 800 words)
 **Root Cause:**
 - Location: [file:line]
 - Problem: [clear explanation]
@@ -121,6 +122,11 @@ THOROUGHNESS: very thorough
 // Problematic code at [file:line]
 [code snippet]
 ```
+
+**Downstream Effects of Fix:**
+- [file:line] - [what else might break when we change this] - [likelihood: HIGH/MEDIUM/LOW]
+- [file:line] - [other consumers of this code/data] - [likelihood: HIGH/MEDIUM/LOW]
+[Map ripple effects - what tests need updating? What else depends on current behavior?]
 
 **Fix Options:**
 1. [Quick Fix]: File [file:line], Change [what], Effort [hours], Risk [level]
@@ -398,6 +404,7 @@ Before presenting findings:
 - [ ] **Root cause identified** - using EXPLORE_CONTEXT.root_cause
 - [ ] **Can explain WHY** - understand the logic flaw from Explore
 - [ ] **Impact assessed** - using EXPLORE_CONTEXT.impact
+- [ ] **Downstream effects mapped** - know what else might break when we fix this
 - [ ] **Reproduction understood** - know when/how it happens
 - [ ] **Multiple options** - using EXPLORE_CONTEXT.fix_options as base
 - [ ] **Trade-offs honest** - pros AND cons for each option

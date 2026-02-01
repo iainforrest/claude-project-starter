@@ -304,19 +304,24 @@ Customize verify commands based on task scope:
 ## Complexity in XML
 
 Complexity ratings drive model selection in the orchestrator:
-- **Complexity 1-3**: Executed with Sonnet (cost efficient)
-- **Complexity 4-5**: Executed with Opus (complex reasoning)
+- **Complexity 1-2**: Executed with Codex (gpt-5.2-codex, medium reasoning) - saves Claude tokens
+- **Complexity 3**: Executed with Sonnet (moderate reasoning)
+- **Complexity 4-5**: Executed with Codex (gpt-5.2-codex, xhigh reasoning) - deep reasoning
 
 ### XML Complexity Attributes
 
 ```xml
 <!-- Parent task complexity determines model selection -->
-<parent_task id="1.0" complexity="3">
+<parent_task id="1.0" complexity="2">
+  <!-- Codex (medium) will execute this task -->
+</parent_task>
+
+<parent_task id="2.0" complexity="3">
   <!-- Sonnet will execute this task -->
 </parent_task>
 
-<parent_task id="2.0" complexity="4">
-  <!-- Opus will execute this task -->
+<parent_task id="3.0" complexity="4">
+  <!-- Codex (xhigh) will execute this task -->
 </parent_task>
 
 <!-- Subtask complexity is informational -->
@@ -759,7 +764,7 @@ Task file saved to /tasks/[feature-name]/task.xml
 Summary:
 - Total tasks: [X parent tasks, Y subtasks]
 - Complexity distribution: [breakdown by complexity level]
-- Model selection: Sonnet x[N], Opus x[M] (based on complexity)
+- Model selection: Codex x[N], Sonnet x[M], Codex-xhigh x[P] (based on complexity)
 - Key files affected: [list main files]
 
 BREAKING CHANGE: Tasks are now in XML format.

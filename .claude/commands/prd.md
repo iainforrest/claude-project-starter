@@ -163,13 +163,15 @@ THOROUGHNESS: very thorough
 2. Identify the primary architectural pattern this would follow
 3. List 5-10 most relevant files with line numbers
 4. Note integration constraints or dependencies
-5. Identify red flags (breaking changes, security, complexity)
+5. Map downstream effects (who consumes these files/APIs/data? What breaks if we change them?)
+6. Identify red flags (breaking changes, security, complexity)
 
-## Return Format (max 400 words)
+## Return Format (max 500 words)
 **Similar Features:** [feature at file:line - relevance]
 **Applicable Pattern:** [pattern name from PATTERNS.md]
 **Key Files:** [file:line - purpose]
 **Integration Points:** [system - how it connects]
+**Downstream Effects:** [file:line - what breaks if X changes - likelihood HIGH/MEDIUM/LOW]
 **Red Flags:** [issue - why it matters]
 **Suggested Questions:** [questions to ask user based on findings]
 ```
@@ -208,6 +210,9 @@ After the Explore agent returns, persist the context for use by the execute orch
   ],
   "integration_points": [
     {"system": "name", "connection": "description"}
+  ],
+  "downstream_effects": [
+    {"file": "path:line", "impact": "what breaks if changed", "likelihood": "HIGH/MEDIUM/LOW"}
   ],
   "red_flags": [
     {"issue": "description", "severity": "HIGH/MEDIUM/LOW"}

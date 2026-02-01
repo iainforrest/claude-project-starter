@@ -100,10 +100,11 @@ THOROUGHNESS: very thorough
 1. **Find Similar Features:** Search existing functionality, read implementations completely
 2. **Map Integration Points:** Which managers/services/UI need updates?
 3. **Identify Implementation Files:** Exact files with line numbers and extension points
-4. **Check Constraints:** Performance targets, architectural constraints, security
-5. **Assess Complexity:** Count affected components, estimate effort
+4. **Map Downstream Effects:** Who consumes these files/APIs/data? What breaks if we change them?
+5. **Check Constraints:** Performance targets, architectural constraints, security
+6. **Assess Complexity:** Count affected components, estimate effort
 
-## Return Format (max 600 words)
+## Return Format (max 700 words)
 **Feature Classification:**
 - Complexity Score: [1-10]
 - Effort Estimate: [hours]
@@ -121,6 +122,11 @@ THOROUGHNESS: very thorough
 1. [file:line] - [what changes] - [pattern to follow]
 2. [file:line] - [what changes] - [pattern to follow]
 [5-10 files total]
+
+**Downstream Effects:**
+- [file:line] - [what breaks if this changes] - [likelihood: HIGH/MEDIUM/LOW]
+- [file:line] - [consumers/dependents affected] - [likelihood: HIGH/MEDIUM/LOW]
+[Map ripple effects - who else touches these files/APIs/data?]
 
 **Decision Recommendation:** [Tasks directly / PRD first] - [rationale]
 ```
@@ -151,6 +157,9 @@ After the Explore agent returns, persist the context:
   "applicable_patterns": [...],
   "key_files": [...],
   "integration_points": [...],
+  "downstream_effects": [
+    {"file": "path:line", "impact": "what breaks if changed", "likelihood": "HIGH/MEDIUM/LOW"}
+  ],
   "red_flags": [...]
 }
 ```
@@ -181,6 +190,11 @@ If > 50KB, truncate `similar_features` and `key_files` to 10 entries each.
 - **Reference:** [EXPLORE_CONTEXT.similar_feature]
 - **Location:** [EXPLORE_CONTEXT.similar_feature_file]
 - **Reusable Patterns:** [What can be copied/adapted]
+
+**Downstream Effects (from EXPLORE_CONTEXT):**
+- [file:line] - [what might break] - [likelihood]
+- [file:line] - [consumers affected] - [likelihood]
+*These are files/tests/features that depend on the code we're changing.*
 
 **Implementation Scope:**
 - **Business Layer:** [New/modified services from EXPLORE_CONTEXT]
@@ -358,6 +372,7 @@ Before presenting design:
 - [ ] **EXPLORE_CONTEXT reviewed** - understood agent's findings
 - [ ] **Pattern identified** - using pattern from EXPLORE_CONTEXT
 - [ ] **Integration mapped** - using integration points from EXPLORE_CONTEXT
+- [ ] **Downstream effects mapped** - know what else might break from EXPLORE_CONTEXT
 - [ ] **Complexity validated** - confirmed EXPLORE_CONTEXT.complexity_score
 - [ ] **Approach designed** - clear implementation strategy using Explore findings
 - [ ] **Decision made** - tasks vs PRD based on complexity
