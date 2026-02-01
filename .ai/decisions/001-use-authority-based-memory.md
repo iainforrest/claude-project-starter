@@ -30,18 +30,7 @@ We will implement an authority-based memory system where:
 3. Content duplication is forbidden - other files use pointers/references
 4. The Codex CLI validates authority rules during memory updates
 
-**Authority Map**:
-- System topology → ARCHITECTURE.json
-- File locations → FILES.json
-- Coding patterns → PATTERNS.md
-- Business rules/data models → BUSINESS.json
-- Operations/runbooks → OPS.md
-- Architecture decisions → decisions/*.md
-- Solutions/learnings → solutions/*.yaml
-- Deprecations → DEPRECATIONS.md
-- Constraints → CONSTRAINTS.md
-- Tech debt → TECH_DEBT.md
-- Routing → QUICK.md (pointers only, no content)
+**Authority Map**: See QUICK.md for the complete authority map table defining which file owns each content type.
 
 ---
 
