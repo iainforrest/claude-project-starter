@@ -383,7 +383,187 @@ Would you like me to:
 
 ---
 
-## Decision Capture
+## Phase 5: Memory Reconciliation
+
+**After the prd-writer agent returns and before presenting options to the user**, reconcile the explore-context with the final PRD content.
+
+### Why This Phase Exists
+
+During PRD discovery through interactive questioning (Rounds 1-7), the scope often evolves significantly from what the Explore agent initially discovered:
+
+- **New integration points** are identified that weren't in the original exploration
+- **Key files** change as implementation details emerge
+- **Red flags** are discovered through user clarification
+- **Patterns** may shift based on user preferences or constraints
+- **Feature scope** narrows or expands based on must-haves vs nice-to-haves
+
+The original `explore-context.json` captured the **initial architectural landscape**. Phase 5 updates it to reflect the **final agreed scope** from the PRD, ensuring downstream agents (TaskGen, execute) work with accurate context.
+
+### When to Trigger
+
+**Trigger immediately after prd-writer returns**, before presenting Post-Agent Response options to the user.
+
+### Reconciliation Process
+
+**Step 1: Load both contexts**
+
+```bash
+# Load original exploration context
+ORIGINAL_CONTEXT = read /tasks/{feature-name}/explore-context.json
+
+# Load final PRD
+FINAL_PRD = read /tasks/{feature-name}/prd.md
+```
+
+**Step 2: Compare and identify changes**
+
+Compare these fields between ORIGINAL_CONTEXT and FINAL_PRD:
+
+| Field | Original Source | Final Source | Action |
+|-------|----------------|--------------|--------|
+| `feature_name` | ORIGINAL_CONTEXT | PRD header | Preserve (should match) |
+| `similar_features` | ORIGINAL_CONTEXT | - | Preserve (still valid) |
+| `applicable_patterns` | ORIGINAL_CONTEXT | PRD "Architecture Pattern" | Update if PRD changed approach |
+| `key_files` | ORIGINAL_CONTEXT.key_files | PRD "Key Files" section | **Update** - PRD is authoritative |
+| `integration_points` | ORIGINAL_CONTEXT.integration_points | PRD "Integration Points" | **Update** - PRD is authoritative |
+| `downstream_effects` | ORIGINAL_CONTEXT.downstream_effects | - | Preserve and augment (if PRD adds new risks) |
+| `red_flags` | ORIGINAL_CONTEXT.red_flags | PRD "Red Flags & Risks" | **Update** - PRD is authoritative |
+
+**Step 3: Detect scope changes**
+
+For each comparison, track:
+- **Added**: Items in PRD but not in original context
+- **Removed**: Items in original context but not in PRD
+- **Modified**: Items that changed between exploration and PRD
+
+**Step 4: Regenerate explore-context.json**
+
+Update the file with reconciled content:
+
+```json
+{
+  "feature_name": "[from PRD FEATURE_NAME]",
+  "generated_at": "[original timestamp]",
+  "reconciled_at": "[current timestamp - ISO 8601]",
+  "file_location": "/tasks/{feature-name}/explore-context.json",
+
+  "similar_features": [
+    "[preserved from original - these don't change]"
+  ],
+
+  "applicable_patterns": [
+    "[updated from PRD 'Architecture Pattern' section]",
+    "[if PRD chose different pattern than original, use PRD's choice]"
+  ],
+
+  "key_files": [
+    "[updated from PRD 'Key Files & Documentation' section]",
+    "[these are the files PRD identified as relevant]"
+  ],
+
+  "integration_points": [
+    "[updated from PRD 'Integration Points' section]",
+    "[final integration points after user clarification]"
+  ],
+
+  "downstream_effects": [
+    "[preserved from original]",
+    "[augmented with any new effects from PRD 'Red Flags & Risks']"
+  ],
+
+  "red_flags": [
+    "[updated from PRD 'Red Flags & Risks' section]",
+    "[final risks after user clarification]"
+  ],
+
+  "reconciliation_notes": {
+    "reconciled_at": "[ISO 8601 timestamp]",
+    "prd_file": "/tasks/{feature-name}/prd.md",
+    "scope_changes": {
+      "key_files": {
+        "added": ["[files added during PRD]"],
+        "removed": ["[files removed during PRD]"]
+      },
+      "integration_points": {
+        "added": ["[integrations added during PRD]"],
+        "removed": ["[integrations removed during PRD]"]
+      },
+      "red_flags": {
+        "added": ["[risks identified during PRD]"],
+        "removed": ["[risks resolved during PRD]"]
+      },
+      "patterns": {
+        "changed": "[true/false - did pattern approach change?]",
+        "from": "[original pattern if changed]",
+        "to": "[new pattern if changed]"
+      }
+    },
+    "summary": "[Brief 1-2 sentence summary of what changed during PRD]"
+  }
+}
+```
+
+**Step 5: Memory File Update Trigger (Using Authority Map)**
+
+After reconciling explore-context.json, determine if any `.ai/` memory files need updates:
+
+| Condition | Memory File | Update Action |
+|-----------|-------------|---------------|
+| PRD identifies **new patterns** not documented in PATTERNS.md | `.ai/PATTERNS.md` | Queue pattern addition via update-memory-agent |
+| PRD identifies **red flags** or **tech debt** | `.ai/TECH_DEBT.md` | Queue tech debt capture |
+| PRD identifies **new constraints** (platform limits, non-goals) | `.ai/CONSTRAINTS.md` | Queue constraint addition |
+| PRD documents **architectural decision** | `.ai/decisions/NNN-title.md` | Prompt user in Phase 6 (Decision Capture) |
+
+**Memory Update Implementation:**
+
+If memory updates are needed, invoke the update-memory-agent:
+
+```
+Use Task tool with subagent_type=update-memory-agent:
+
+"Based on the PRD at /tasks/{feature-name}/prd.md, update the memory system:
+
+PATTERNS.md:
+- Add [new pattern identified in PRD]
+
+TECH_DEBT.md:
+- Add red flags from PRD Red Flags section (severity: MEDIUM/LOW)
+
+CONSTRAINTS.md:
+- Add [new constraints from PRD]
+
+Use the authority map to ensure correct file placement."
+```
+
+**When to Skip Memory Update:**
+- If PRD content is already covered by existing memory files
+- If no new architectural patterns were discovered
+- If red flags are temporary/project-specific (not systemic)
+
+**Step 6: Validation**
+
+Verify the updated explore-context.json:
+- [ ] Parses as valid JSON
+- [ ] All required fields present
+- [ ] reconciliation_notes.scope_changes accurately reflects differences
+- [ ] File size < 50KB (truncate if needed following original rules)
+
+### Skip Conditions
+
+**Skip reconciliation if:**
+1. **explore-context.json doesn't exist** - Shouldn't happen in normal flow, but handle gracefully (create from PRD if possible)
+2. **No meaningful scope changes** - If PRD scope is identical to original exploration (rare but possible for very simple features)
+3. **User explicitly requests skip** - Add optional flag `--skip-reconciliation`
+
+For condition 1, log warning but continue. For conditions 2-3, skip regeneration but still check for memory file updates.
+
+### Output to User
+
+After reconciliation completes (or is skipped), proceed to Post-Agent Response with reconciliation summary included.
+
+---
+
+## Phase 6: Decision Capture
 
 **After PRD generation is complete**, prompt the user to capture any major architectural decisions:
 
