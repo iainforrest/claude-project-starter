@@ -369,16 +369,32 @@ Generate the PRD document using this context. Use EXPLORE_CONTEXT for architectu
 
 ## Post-Agent Response
 
-After the prd-writer agent returns, present options to the user:
+After the prd-writer agent returns, **automatically run Memory Reconciliation** (Phase 5), then present the reconciliation summary and options to the user:
 
 ```
 PRD saved to /tasks/[feature-name]/prd.md
 
-Would you like me to:
+Memory reconciliation complete (automatic).
+
+Memory Reconciliation Summary:
+- explore-context.json: [updated | unchanged | created]
+- PATTERNS.md: [updated | unchanged]
+- TECH_DEBT.md: [updated | unchanged]
+- CONSTRAINTS.md: [updated | unchanged]
+
+Scope changes from discovery → final PRD:
+- Added: [items added]
+- Removed: [items removed]
+- Modified: [items modified]
+
+Files updated:
+- [list files changed during reconciliation, or "None"]
+
+What would you like me to do next:
 1. Review the PRD with you
 2. Generate implementation tasks (/TaskGen [feature-name])
 3. Make changes to the PRD
-4. Update memory system with new patterns
+4. Update memory system with new patterns (manual follow-up if needed)
 ```
 
 ---
@@ -560,6 +576,27 @@ For condition 1, log warning but continue. For conditions 2-3, skip regeneration
 ### Output to User
 
 After reconciliation completes (or is skipped), proceed to Post-Agent Response with reconciliation summary included.
+
+**Memory Reconciliation Summary format:**
+
+```
+Memory Reconciliation Summary:
+- explore-context.json: [updated | unchanged | created | skipped]
+- PATTERNS.md: [updated | unchanged]
+- TECH_DEBT.md: [updated | unchanged]
+- CONSTRAINTS.md: [updated | unchanged]
+
+Scope changes from discovery → final PRD:
+- Added:
+  - [item 1]
+  - [item 2]
+- Removed:
+  - [item 1]
+  - [item 2]
+- Modified:
+  - [item 1]
+  - [item 2]
+```
 
 ---
 
