@@ -367,38 +367,6 @@ Generate the PRD document using this context. Use EXPLORE_CONTEXT for architectu
 
 ---
 
-## Post-Agent Response
-
-After the prd-writer agent returns, **automatically run Memory Reconciliation** (Phase 5), then present the reconciliation summary and options to the user:
-
-```
-PRD saved to /tasks/[feature-name]/prd.md
-
-Memory reconciliation complete (automatic).
-
-Memory Reconciliation Summary:
-- explore-context.json: [updated | unchanged | created]
-- PATTERNS.md: [updated | unchanged]
-- TECH_DEBT.md: [updated | unchanged]
-- CONSTRAINTS.md: [updated | unchanged]
-
-Scope changes from discovery → final PRD:
-- Added: [items added]
-- Removed: [items removed]
-- Modified: [items modified]
-
-Files updated:
-- [list files changed during reconciliation, or "None"]
-
-What would you like me to do next:
-1. Review the PRD with you
-2. Generate implementation tasks (/TaskGen [feature-name])
-3. Make changes to the PRD
-4. Update memory system with new patterns (manual follow-up if needed)
-```
-
----
-
 ## Phase 5: Memory Reconciliation
 
 **After the prd-writer agent returns and before presenting options to the user**, reconcile the explore-context with the final PRD content.
@@ -464,32 +432,29 @@ Update the file with reconciled content:
   "file_location": "/tasks/{feature-name}/explore-context.json",
 
   "similar_features": [
-    "[preserved from original - these don't change]"
+    {"name": "[preserved from original]", "file": "[path:line]", "relevance": "[why relevant]"}
   ],
 
   "applicable_patterns": [
-    "[updated from PRD 'Architecture Pattern' section]",
-    "[if PRD chose different pattern than original, use PRD's choice]"
+    {"pattern": "[updated from PRD 'Architecture Pattern' section]", "file": "[patterns/DOMAIN.md]", "usage": "[how applied]"}
   ],
 
   "key_files": [
-    "[updated from PRD 'Key Files & Documentation' section]",
-    "[these are the files PRD identified as relevant]"
+    {"path": "[file:line]", "purpose": "[updated from PRD 'Key Files & Documentation' section]"}
   ],
 
   "integration_points": [
-    "[updated from PRD 'Integration Points' section]",
-    "[final integration points after user clarification]"
+    {"system": "[system name]", "connection": "[updated from PRD 'Integration Points' section]"}
   ],
 
   "downstream_effects": [
-    "[preserved from original]",
-    "[augmented with any new effects from PRD 'Red Flags & Risks']"
+    {"file": "[path:line]", "impact": "[preserved from original]", "likelihood": "[HIGH/MEDIUM/LOW]"},
+    {"file": "[path:line]", "impact": "[augmented with any new effects from PRD 'Red Flags & Risks']", "likelihood": "[HIGH/MEDIUM/LOW]"}
   ],
 
   "red_flags": [
-    "[updated from PRD 'Red Flags & Risks' section]",
-    "[final risks after user clarification]"
+    {"issue": "[updated from PRD 'Red Flags & Risks' section]", "severity": "[HIGH/MEDIUM/LOW]"},
+    {"issue": "[final risks after user clarification]", "severity": "[HIGH/MEDIUM/LOW]"}
   ],
 
   "reconciliation_notes": {
@@ -523,6 +488,8 @@ Update the file with reconciled content:
 
 After reconciling explore-context.json, determine if any `.ai/` memory files need updates:
 
+Following AUTHORITY_MAP routing (see update-memory-agent.md):
+
 | Condition | Memory File | Update Action |
 |-----------|-------------|---------------|
 | PRD identifies **new patterns** not documented in PATTERNS.md | `.ai/PATTERNS.md` | Queue pattern addition via update-memory-agent |
@@ -537,7 +504,7 @@ If memory updates are needed, invoke the update-memory-agent:
 ```
 Use Task tool with subagent_type=update-memory-agent:
 
-"Based on the PRD at /tasks/{feature-name}/prd.md, update the memory system:
+"Based on the PRD at /tasks/{feature-name}/prd.md, update the memory system following the AUTHORITY_MAP routing rules (see update-memory-agent.md):
 
 PATTERNS.md:
 - Add [new pattern identified in PRD]
@@ -563,6 +530,7 @@ Verify the updated explore-context.json:
 - [ ] All required fields present
 - [ ] reconciliation_notes.scope_changes accurately reflects differences
 - [ ] File size < 50KB (truncate if needed following original rules)
+- [ ] Apply truncation priority per initial save rules (lines 224-231) if limit exceeded
 
 ### Skip Conditions
 
@@ -570,8 +538,9 @@ Verify the updated explore-context.json:
 1. **explore-context.json doesn't exist** - Shouldn't happen in normal flow, but handle gracefully (create from PRD if possible)
 2. **No meaningful scope changes** - If PRD scope is identical to original exploration (rare but possible for very simple features)
 3. **User explicitly requests skip** - Add optional flag `--skip-reconciliation`
+4. **explore-context.json parse failure** - If file exists but contains invalid JSON, log warning and recreate from PRD content
 
-For condition 1, log warning but continue. For conditions 2-3, skip regeneration but still check for memory file updates.
+For condition 1, log warning but continue. For conditions 2-3, skip regeneration but still check for memory file updates. For condition 4, log warning and recreate from PRD content.
 
 ### Output to User
 
@@ -596,6 +565,38 @@ Scope changes from discovery → final PRD:
 - Modified:
   - [item 1]
   - [item 2]
+```
+
+---
+
+## Post-Agent Response
+
+After the prd-writer agent returns, **automatically run Memory Reconciliation** (Phase 5), then present the reconciliation summary and options to the user:
+
+```
+PRD saved to /tasks/[feature-name]/prd.md
+
+Memory reconciliation complete (automatic).
+
+Memory Reconciliation Summary:
+- explore-context.json: [updated | unchanged | created]
+- PATTERNS.md: [updated | unchanged]
+- TECH_DEBT.md: [updated | unchanged]
+- CONSTRAINTS.md: [updated | unchanged]
+
+Scope changes from discovery → final PRD:
+- Added: [items added]
+- Removed: [items removed]
+- Modified: [items modified]
+
+Files updated:
+- [list files changed during reconciliation, or "None"]
+
+What would you like me to do next:
+1. Review the PRD with you
+2. Generate implementation tasks (/TaskGen [feature-name])
+3. Make changes to the PRD
+4. Update memory system with new patterns (manual follow-up if needed)
 ```
 
 ---
