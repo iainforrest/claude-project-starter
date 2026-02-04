@@ -38,47 +38,69 @@ This file captures:
 
 ### MEDIUM Severity
 
-#### [TD-001] [Component/File]: [Brief Description]
-
-**Severity**: MEDIUM
-
-**Location**: `[file path or glob pattern]`
-
-**Description**: [Detailed explanation of the issue]
-
-**Why Deferred**: [Reason for not fixing immediately]
-
-**Impact**: [What problems this causes or could cause]
-
-**Suggested Fix**: [Recommended approach to resolve]
-
-**Added**: [YYYY-MM-DD]
-
-**Source**: [CR-YYYY-MM-DD] [Claude only|Codex only|Both]
-
-**Related**: [Links to ADRs, issues, or other tech debt items]
+_No MEDIUM items currently tracked._
 
 ---
 
 ### LOW Severity
 
-#### [TD-002] [Component/File]: [Brief Description]
+#### [TD-001] prd.md: Checkbox format for automated validation
 
 **Severity**: LOW
 
-**Location**: `[file path or glob pattern]`
+**Location**: `.claude/commands/prd.md` (Phase 5 validation section)
 
-**Description**: [Detailed explanation]
+**Description**: Validation step uses markdown checkboxes for automated validation steps instead of describing as code logic. Other automated phases describe validation as numbered steps with failure behaviors.
 
-**Why Deferred**: [Reason]
+**Why Deferred**: Cosmetic issue. Current checkbox format is actually more scannable and readable.
 
-**Impact**: [Minimal impact description]
+**Impact**: Minor documentation style inconsistency.
 
-**Suggested Fix**: [Approach]
+**Suggested Fix**: Convert checkboxes to numbered automated check descriptions with explicit failure handling.
 
-**Added**: [YYYY-MM-DD]
+**Added**: 2026-02-04
 
-**Source**: [CR-YYYY-MM-DD] [Claude only|Codex only|Both]
+**Source**: CR-2026-02-04 (Both)
+
+---
+
+#### [TD-002] prd.md: Pseudo-code uses wrong block type
+
+**Severity**: LOW
+
+**Location**: `.claude/commands/prd.md` (Phase 5 reconciliation steps)
+
+**Description**: Uses ```bash code blocks for pseudo-code that isn't valid bash syntax (e.g., "ORIGINAL_CONTEXT = read /tasks/...").
+
+**Why Deferred**: Purely cosmetic. Anyone reading understands this is pseudocode. The syntax highlighting improves readability.
+
+**Impact**: Minimal - no functional impact.
+
+**Suggested Fix**: Change to ```yaml or unlabeled code blocks for pseudo-code.
+
+**Added**: 2026-02-04
+
+**Source**: CR-2026-02-04 (Codex only)
+
+---
+
+#### [TD-003] prd.md: Post-Agent Response option change unexplained
+
+**Severity**: LOW
+
+**Location**: `.claude/commands/prd.md` (Post-Agent Response section)
+
+**Description**: Option 4 in Post-Agent Response may have changed from previous versions without documenting the reason. Phase 6 covers ADR capture separately.
+
+**Why Deferred**: Historical context issue. Current options are functional.
+
+**Impact**: Minimal - users may wonder about option changes if familiar with older version.
+
+**Suggested Fix**: Add comment explaining option rationale or restore as option 5 if needed.
+
+**Added**: 2026-02-04
+
+**Source**: CR-2026-02-04 (Claude only)
 
 ---
 
@@ -124,10 +146,9 @@ This file captures:
 
 | ID | Type | Severity | Component | Added | Status |
 |----|------|----------|-----------|-------|--------|
-| TD-001 | Issue | MEDIUM | [component] | [date] | Open |
-| TD-002 | Issue | LOW | [component] | [date] | Open |
-| RO-001 | Refactor | - | [component] | [date] | Open |
-| DOC-001 | Docs | - | [component] | [date] | Open |
+| TD-001 | Issue | LOW | prd.md | 2026-02-04 | Open |
+| TD-002 | Issue | LOW | prd.md | 2026-02-04 | Open |
+| TD-003 | Issue | LOW | prd.md | 2026-02-04 | Open |
 
 ---
 

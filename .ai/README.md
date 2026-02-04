@@ -236,47 +236,9 @@ See **MONOREPO_GUIDE.md** for:
 
 ## File Structure
 
-### Single-App (Default)
+**For detailed file listings:** See FILES.json for authoritative file paths and organization.
 
-```
-.ai/
-├── README.md           # This file
-├── QUICK.md            # Quick reference (START HERE)
-├── ARCHITECTURE.json   # Architecture patterns
-├── BUSINESS.json       # Business logic
-├── FILES.json          # File index
-├── PATTERNS.md         # Pattern index
-├── patterns/           # Domain-specific patterns
-│   └── _TEMPLATE.md    # Template for new domains
-├── TODO.md             # Task tracking
-├── SPRINT_UPDATE.md    # Update process
-├── OPS.md              # Runbooks and operations
-├── CONSTRAINTS.md      # Platform limitations
-├── DEPRECATIONS.md     # Deprecation tracking
-├── TECH_DEBT.md        # Unfixed code review findings
-├── decisions/          # Architecture Decision Records (ADRs)
-│   └── 000-template.md # ADR template
-└── solutions/          # Solution capture (grep-friendly)
-    └── _template.yaml  # Solution template
-```
-
-### Mono-Repo (When Scaled)
-
-```
-.ai/
-├── README.md           # This file
-├── QUICK.md            # Monorepo navigation
-├── MONOREPO.json       # Workspace architecture
-├── app1/               # App-specific memory
-│   ├── QUICK.md
-│   ├── ARCHITECTURE.json
-│   ├── BUSINESS.json
-│   ├── FILES.json
-│   ├── PATTERNS.md
-│   └── TODO.md
-└── app2/               # Another app's memory
-    └── ...
-```
+**For mono-repo structure guidance:** See MONOREPO_GUIDE.md for when and how to scale the memory system for multi-app projects.
 
 ---
 
